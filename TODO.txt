@@ -1,0 +1,5 @@
+TODO: Experiment with different approach to world tile spawning
+	Current Approach: Choose a random tile that fits best for that section
+		The problem with this is, it can get pretty samey and its hard to control the "characteristics" of a level.
+	
+	New Approach: Start with a flat tile, and for each of its neighbors, choose what terrain shape it will be: flat, ramp up, ramp down, ramp up 2x, ramp down 2x, wall, low wall, high wall. For each of those scenarios, choose a different set of tile classes that fit that type, then go through the normal spawning procedure with that customized set of tile classes
