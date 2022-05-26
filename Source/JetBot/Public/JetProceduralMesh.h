@@ -14,6 +14,9 @@ class JETBOT_API AJetProceduralMesh : public AActor
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Mesh")
+	int32 LandscapeSize = 4;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Mesh")
 	TArray<FVector> Vertices;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Mesh")
@@ -27,6 +30,15 @@ public:
 
 	void CreateMesh();
 	
+	UFUNCTION(BlueprintCallable, Category="Procedural Mesh")
+	void CreateLandscape(int32 InSize);
+
+	TArray<FVector> CreateLandscapeVertexArray(const int32 InSize);
+	
+	TArray<FVector2D> CreateLandscapeUVArray(const int32 InSize);
+
+	TArray<int32> CreateLandscapeTriangleArray(const int32 InSize);
+
 public:	
 	// Sets default values for this actor's properties
 	AJetProceduralMesh();
