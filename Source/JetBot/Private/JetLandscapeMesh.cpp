@@ -1,55 +1,14 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "JetProceduralMesh.h"
-PRAGMA_DISABLE_OPTIMIZATION
-AJetProceduralMesh::AJetProceduralMesh()
+#include "JetLandscapeMesh.h"
+
+AJetLandscapeMesh::AJetLandscapeMesh()
 {
-	ProcMesh = CreateDefaultSubobject<UProceduralMeshComponent>("ProcMesh");
-	RootComponent = ProcMesh;
-
-	//Default values
-
-	Vertices.Add(FVector(0, 0, 0));
-	Vertices.Add(FVector(100, 0, 0));
-	Vertices.Add(FVector(0, 100, 0));
-	Vertices.Add(FVector(100, 100, 0));
-
-	UVs.Add(FVector2D(0, 0));
-	UVs.Add(FVector2D(0, 1));
-	UVs.Add(FVector2D(1, 0));
-	UVs.Add(FVector2D(1, 1));
-
-	//Triangle1
-	Triangles.Add(0);
-	Triangles.Add(1);
-	Triangles.Add(2);
-
-	//Triangle2
-	Triangles.Add(2);
-	Triangles.Add(1);
-	Triangles.Add(3);
-
+	//
 }
 
-void AJetProceduralMesh::CreateMesh()
-{
-
-	ProcMesh->CreateMeshSection(0, Vertices, Triangles, TArray<FVector>(), UVs, TArray<FColor>(), TArray<FProcMeshTangent>(), true);
-
-	for (UMaterialInterface* Mat : Materials)
-	{
-		int32 i = 0;
-
-		ProcMesh->SetMaterial(i, Mat);
-
-		i++;
-	}
-}
-
-
-
-void AJetProceduralMesh::CreateLandscape(int32 InSize)
+void AJetLandscapeMesh::CreateLandscape(int32 InSize)
 {
 	Vertices = CreateLandscapeVertexArray(InSize);
 
@@ -58,7 +17,7 @@ void AJetProceduralMesh::CreateLandscape(int32 InSize)
 	Triangles = CreateLandscapeTriangleArray(InSize);
 }
 
-TArray<FVector> AJetProceduralMesh::CreateLandscapeVertexArray(const int32 InSize)
+TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArray(const int32 InSize)
 {
 	int32 VertexNum = (InSize + 1) * (InSize + 1);
 
@@ -75,8 +34,8 @@ TArray<FVector> AJetProceduralMesh::CreateLandscapeVertexArray(const int32 InSiz
 		OutVertexArray.Add(FVector(x * TileSize, y * TileSize, RandInt));
 
 		x++;
-		
-		if (x >= InSize+1)
+
+		if (x >= InSize + 1)
 		{
 			x = 0;
 			y++;
@@ -86,7 +45,7 @@ TArray<FVector> AJetProceduralMesh::CreateLandscapeVertexArray(const int32 InSiz
 	return OutVertexArray;
 }
 
-TArray<FVector2D> AJetProceduralMesh::CreateLandscapeUVArray(const int32 InSize)
+TArray<FVector2D> AJetLandscapeMesh::CreateLandscapeUVArray(const int32 InSize)
 {
 	int32 VertexNum = (InSize + 1) * (InSize + 1);
 
@@ -111,7 +70,7 @@ TArray<FVector2D> AJetProceduralMesh::CreateLandscapeUVArray(const int32 InSize)
 	return OutUVArray;
 }
 
-TArray<int32> AJetProceduralMesh::CreateLandscapeTriangleArray(const int32 InSize)
+TArray<int32> AJetLandscapeMesh::CreateLandscapeTriangleArray(const int32 InSize)
 {
 
 	int32 VertexNum = (InSize + 1) * (InSize + 1);
@@ -156,14 +115,14 @@ TArray<int32> AJetProceduralMesh::CreateLandscapeTriangleArray(const int32 InSiz
 			CurrentTriangles.Add(i);
 			CurrentTriangles.Add(i + InSize + 1);
 			CurrentTriangles.Add(i + InSize + 2);
-			
+
 			/*
 			*	/|
 			*/
 			CurrentTriangles.Add(i);
 			CurrentTriangles.Add(i + InSize + 2);
 			CurrentTriangles.Add(i + 1);
-			
+
 		}
 		else
 		{
@@ -173,14 +132,14 @@ TArray<int32> AJetProceduralMesh::CreateLandscapeTriangleArray(const int32 InSiz
 			CurrentTriangles.Add(i);
 			CurrentTriangles.Add(i + InSize + 1);
 			CurrentTriangles.Add(i + 1);
-			
+
 			/*
 			*	\|
 			*/
 			CurrentTriangles.Add(i + InSize + 2);
 			CurrentTriangles.Add(i + 1);
 			CurrentTriangles.Add(i + InSize + 1);
-			
+
 		}
 
 		bReverseTriangles = !bReverseTriangles;
@@ -191,31 +150,8 @@ TArray<int32> AJetProceduralMesh::CreateLandscapeTriangleArray(const int32 InSiz
 	return OutTriangleArray;
 }
 
-void AJetProceduralMesh::AddLandscapeFeature(const FVector2D InFeatureLocation, TArray<FVector> InFeatureVertexArray)
+void AJetLandscapeMesh::BeginPlay()
 {
-	for (FVector Vertex : InFeatureVertexArray)
-	{
-		FVector2D Vertex2D = FVector2D(Vertex.X, Vertex.Y);
-
-		int32 VertexIndex = GetVertexIndex(InFeatureLocation+Vertex2D, LandscapeSize);
-
-		Vertices[VertexIndex].Z = Vertex.Z;
-	}
-}
-
-int32 AJetProceduralMesh::GetVertexIndex(const FVector2D InVertexLocation, const int32 InSize)
-{
-	int32 OutVertexIndex = InVertexLocation.X + (InVertexLocation.Y * (InSize + 1));
-
-
-	return OutVertexIndex;
-}
-
-// Called when the game starts or when spawned
-void AJetProceduralMesh::BeginPlay()
-{
-	Super::BeginPlay();
-
 	TArray<FVector> FeatureArray;
 
 	FeatureArray.Add(FVector(0, 0, 0));
@@ -223,20 +159,31 @@ void AJetProceduralMesh::BeginPlay()
 	FeatureArray.Add(FVector(1, 0, 0));
 	FeatureArray.Add(FVector(1, 1, 0));
 
-
 	CreateLandscape(LandscapeSize);
 
 	AddLandscapeFeature(FVector2D(0, 0), FeatureArray);
 
 	AddLandscapeFeature(FVector2D(2, 2), FeatureArray);
 
-	CreateMesh();
+	Super::BeginPlay();
 }
 
-// Called every frame
-void AJetProceduralMesh::Tick(float DeltaTime)
+void AJetLandscapeMesh::AddLandscapeFeature(const FVector2D InFeatureLocation, TArray<FVector> InFeatureVertexArray)
 {
-	Super::Tick(DeltaTime);
+	for (FVector Vertex : InFeatureVertexArray)
+	{
+		FVector2D Vertex2D = FVector2D(Vertex.X, Vertex.Y);
 
+		int32 VertexIndex = GetVertexIndex(InFeatureLocation + Vertex2D, LandscapeSize);
+
+		Vertices[VertexIndex].Z = Vertex.Z;
+	}
 }
-PRAGMA_ENABLE_OPTIMIZATION
+
+int32 AJetLandscapeMesh::GetVertexIndex(const FVector2D InVertexLocation, const int32 InSize)
+{
+	int32 OutVertexIndex = InVertexLocation.X + (InVertexLocation.Y * (InSize + 1));
+
+
+	return OutVertexIndex;
+}
