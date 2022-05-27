@@ -17,6 +17,12 @@ public:
 	int32 LandscapeSize = 4;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Mesh")
+	int32 HeightVariation = 50;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Mesh")
+	int32 TileSize = 100;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Mesh")
 	TArray<FVector> Vertices;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Mesh")

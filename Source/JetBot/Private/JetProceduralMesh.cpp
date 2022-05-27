@@ -69,7 +69,8 @@ TArray<FVector> AJetProceduralMesh::CreateLandscapeVertexArray(const int32 InSiz
 
 	for (int32 i = 0; i < VertexNum; i++)
 	{
-		OutVertexArray.Add(FVector(x * 100, y * 100, 0));
+		int32 RandInt = FMath::RandRange(-HeightVariation, HeightVariation);
+		OutVertexArray.Add(FVector(x * TileSize, y * TileSize, RandInt));
 
 		x++;
 		
