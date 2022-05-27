@@ -45,6 +45,10 @@ public:
 
 	TArray<int32> CreateLandscapeTriangleArray(const int32 InSize);
 
+	void AddLandscapeFeature(const FVector2D InFeatureLocation, TArray<FVector> InFeatureVertexArray);
+
+	int32 GetVertexIndex(const FVector2D InVertexLocation, const int32 InSize);
+
 public:	
 	// Sets default values for this actor's properties
 	AJetProceduralMesh();
