@@ -116,10 +116,16 @@ TArray<int32> AJetCuboidMesh::CreateCuboidTriangleArray_Bottom(const TArray<FVec
 
 	for (const FVector& Vertex : InVertices)
 	{
+		if (Vertex.Z > 0)
+		{
+			break;
+		}
+
 		int32 iMod = i % ((int32)InDimensions.X + 1);
 
 		if (iMod >= XDim)
 		{
+			i++;
 			continue;
 		}
 
@@ -134,10 +140,6 @@ TArray<int32> AJetCuboidMesh::CreateCuboidTriangleArray_Bottom(const TArray<FVec
 		CurrentTriangles.Add(i + 1);
 
 		OutTriangleArray.Append(CurrentTriangles);
-		if (Vertex.Z > 0)
-		{
-			break;
-		}
 
 		i++;
 	}
