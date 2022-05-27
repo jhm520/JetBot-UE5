@@ -3,7 +3,7 @@
 
 #include "JetProcMesh.h"
 
-PRAGMA_DISABLE_OPTIMIZATION
+
 AJetProcMesh::AJetProcMesh()
 {
 	ProcMesh = CreateDefaultSubobject<UProceduralMeshComponent>("ProcMesh");
@@ -62,4 +62,4 @@ void AJetProcMesh::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 }
-PRAGMA_ENABLE_OPTIMIZATION
+
