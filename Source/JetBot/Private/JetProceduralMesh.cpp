@@ -98,7 +98,7 @@ TArray<FVector2D> AJetProceduralMesh::CreateLandscapeUVArray(const int32 InSize)
 
 		x++;
 
-		if (x >= InSize)
+		if (x >= InSize + 1)
 		{
 			x = 0;
 			y++;
@@ -120,19 +120,25 @@ TArray<int32> AJetProceduralMesh::CreateLandscapeTriangleArray(const int32 InSiz
 
 	bool bReverseTriangles = false;
 
+	bool bReversed = false;
+
 	bool bEven = (InSize % 2) == 0;
 
 	for (int32 i = 0; i < VertexNum; i++)
 	{
-		if (i % InSize >= InSize - 1)
+		int32 iMod = i % (InSize + 1);
+		if (iMod >= InSize)
 		{
-			if (!bEven)
+			if (!bEven && !bReversed)
 			{
 				bReverseTriangles = !bReverseTriangles;
+				bReversed = true;
 			}
 
 			continue;
 		}
+
+		bReversed = false;
 
 		TArray<int32> CurrentTriangles;
 
@@ -140,21 +146,25 @@ TArray<int32> AJetProceduralMesh::CreateLandscapeTriangleArray(const int32 InSiz
 		{
 			CurrentTriangles.Add(i);
 			CurrentTriangles.Add(i + InSize + 1);
-			CurrentTriangles.Add(i + InSize);
+			CurrentTriangles.Add(i + InSize + 2);
+			
 
 			CurrentTriangles.Add(i);
+			CurrentTriangles.Add(i + InSize + 2);
 			CurrentTriangles.Add(i + 1);
-			CurrentTriangles.Add(i + InSize + 1);
+			
 		}
 		else
 		{
 			CurrentTriangles.Add(i);
-			CurrentTriangles.Add(i + 1);
-			CurrentTriangles.Add(i + InSize);
-
 			CurrentTriangles.Add(i + InSize + 1);
-			CurrentTriangles.Add(i + InSize);
 			CurrentTriangles.Add(i + 1);
+			
+
+			CurrentTriangles.Add(i + InSize + 2);
+			CurrentTriangles.Add(i + 1);
+			CurrentTriangles.Add(i + InSize + 1);
+			
 		}
 
 		bReverseTriangles = !bReverseTriangles;

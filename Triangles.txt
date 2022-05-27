@@ -1,0 +1,30 @@
+1-5-4   1-3-4
+1-3-5	4-5-3
+2-7-3	2-6-3
+2-6-7	3-7-6
+
+Define an "n x n" landscape
+
+# of vertices = (n+1)^2
+
+From any given vertex, add (n+1) to get the vertex in the x direction, add 1 to get the vertex in the y direction.
+
+Each square's triangle orientation should be mirrored along the adjacent axis of the last square
+
+|\|/|\|/|
+|/|\|/|\|
+|\|/|\|/|
+|/|\|/|\|
+
+Ex. A 4x4 landscape square
+
+1. Build the vertex array
+2. Build the UV array
+3. Build the triangle array in the same order as the vertex array
+
+Triangle orientations at a given 0 vertex index (i):
+
+For this configuration |/|: |/ = (i,i+n+1,i+n), /| = (i,i+1,i+n+1)
+
+For this configuration |\|: |\ = (i, i+1, i+n), \| = (i+n+1, i+n, i+1)
+
