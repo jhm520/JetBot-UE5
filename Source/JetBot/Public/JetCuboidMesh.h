@@ -32,11 +32,18 @@ public:
 
 	static TArray<FVector2D> CreateCuboidUVArray_Bottom(const TArray<FVector>& InVertices, const FVector& InDimensions, int32 InTileSize);
 
+	static TArray<FVector2D> CreateCuboidUVArray_Left(const TArray<FVector>& InVertices, const FVector& InDimensions, int32 InTileSize);
+
+
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Procedural Mesh")
 	static TArray<int32> CreateCuboidTriangleArray(const TArray<FVector>& InVertices, const FVector& InDimensions, int32 InTileSize);
 
 	static TArray<int32> CreateCuboidTriangleArray_Bottom(const TArray<FVector>& InVertices, const FVector& InDimensions, int32 InTileSize);
 
+	static TArray<int32> CreateCuboidTriangleArray_Left(const TArray<FVector>& InVertices, const FVector& InDimensions, int32 InTileSize);
+
+	//InVertexLocation is a vector of the cartesian coordinates. Returns the index
+	int32 GetVertexIndex(const TArray<FVector>& InVertices, const FVector InVertexLocation, const FVector& InDimensions);
 protected:
 	virtual void BeginPlay() override;
 	
