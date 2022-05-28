@@ -43,7 +43,9 @@ public:
 	static TArray<int32> CreateCuboidTriangleArray_Left(const TArray<FVector>& InVertices, const FVector& InDimensions, int32 InTileSize);
 
 	//InVertexLocation is a vector of the cartesian coordinates. Returns the index
-	int32 GetVertexIndex(const TArray<FVector>& InVertices, const FVector InVertexLocation, const FVector& InDimensions);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Procedural Mesh")
+	static int32 GetCuboidVertexIndex(const TArray<FVector>& InVertices, const FVector& InVertexLocation, const FVector& InDimensions);
+
 protected:
 	virtual void BeginPlay() override;
 	

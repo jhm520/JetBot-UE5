@@ -130,7 +130,7 @@ TArray<int32> AJetCuboidMesh::CreateCuboidTriangleArray(const TArray<FVector>& I
 	TArray<int32> OutTriangleArray;
 
 	OutTriangleArray.Append(CreateCuboidTriangleArray_Bottom(InVertices, InDimensions, InTileSize));
-	OutTriangleArray.Append(CreateCuboidTriangleArray_Left(InVertices, InDimensions, InTileSize));
+	//OutTriangleArray.Append(CreateCuboidTriangleArray_Left(InVertices, InDimensions, InTileSize));
 
 	return OutTriangleArray;
 }
@@ -239,54 +239,98 @@ TArray<int32> AJetCuboidMesh::CreateCuboidTriangleArray_Left(const TArray<FVecto
 	return OutTriangleArray;
 }
 
-int32 AJetCuboidMesh::GetVertexIndex(const TArray<FVector>& InVertices, const FVector InVertexLocation, const FVector& InDimensions)
+int32 AJetCuboidMesh::GetCuboidVertexIndex(const TArray<FVector>& InVertices, const FVector& InVertexLocation, const FVector& InDimensions)
 {
-	//bottom
-	if (InVertexLocation.Z == 0)
+	FVector AdjVertexLocation = InVertexLocation;
+
+	if (AdjVertexLocation.X > InDimensions.X)
 	{
-		return (InVertexLocation.Y * (InDimensions.X + 1)) + InVertexLocation.X;
+		AdjVertexLocation.X = InDimensions.X;
+	}
+	else if (AdjVertexLocation.X < 0)
+	{
+		AdjVertexLocation.X = 0;
+	}
+
+	if (AdjVertexLocation.Y > InDimensions.Y)
+	{
+		AdjVertexLocation.Y = InDimensions.Y;
+	}
+	else if (AdjVertexLocation.Y < 0)
+	{
+		AdjVertexLocation.Y = 0;
+	}
+
+	if (AdjVertexLocation.Z > InDimensions.Z)
+	{
+		AdjVertexLocation.Z = InDimensions.Z;
+	}
+	else if (AdjVertexLocation.Z < 0)
+	{
+		AdjVertexLocation.Z = 0;
+	}
+
+	//bottom
+	if (AdjVertexLocation.Z == 0)
+	{
+		return (AdjVertexLocation.Y * (InDimensions.X + 1)) + AdjVertexLocation.X;
 	}
 	//top
-	else if (InVertexLocation.Z >= InDimensions.Z + 1)
+	else if (AdjVertexLocation.Z >= InDimensions.Z)
 	{
-		int32 Mod = InVertices.Num() - 1 - (InVertexLocation.X + 1) * (InVertexLocation.Y + 1);
-		return Mod + ((InVertexLocation.Y * (InDimensions.X + 1)) + InVertexLocation.X);
+		int32 Mod = InVertices.Num() - ((InDimensions.X + 1) * (InDimensions.Y + 1));
+		return Mod + ((AdjVertexLocation.Y * (InDimensions.X + 1)) + AdjVertexLocation.X);
 	}
 	//left
-	else if (InVertexLocation.Y == 0)
+	else if (AdjVertexLocation.Y == 0)
 	{
-		int32 Mod = ((InVertexLocation.Y * (InDimensions.X + 1)) + InVertexLocation.X);
-		int32 ModTwo = (InVertexLocation.Z - 1) * (((InDimensions.X + 1) * 2) + ((InDimensions.Y - 2) * 2));
-		int32 ModThree = InVertexLocation.X;
+		int32 BottomMod = ((InDimensions.Y + 1) * (InDimensions.X + 1));
+		int32 PerimeterMod = ((InDimensions.X + 1) * 2) + ((InDimensions.Y - 1) * 2);
 
-		return Mod + ModTwo + ModThree;
+		int32 ModTwo = (AdjVertexLocation.Z - 1) * PerimeterMod;
+		int32 ModThree = AdjVertexLocation.X;
+
+		return BottomMod + ModTwo + ModThree;
 	}
 	//right
-	else if (InVertexLocation.Y >= InDimensions.Y + 1)
+	else if (AdjVertexLocation.Y >= InDimensions.Y)
 	{
-		int32 Mod = ((InVertexLocation.Y * (InDimensions.X + 1)) + InVertexLocation.X);
-		int32 ModTwo = ((InVertexLocation.Z) * (((InDimensions.X + 1) * 2) + ((InDimensions.Y - 2) * 2))) - (InDimensions.X + 1);
-		int32 ModThree = InVertexLocation.X;
+		int32 BottomMod = ((InDimensions.Y + 1) * (InDimensions.X + 1));
 
-		return Mod + ModTwo + ModThree;
+		//int32 Mod = ((AdjVertexLocation.Y * (InDimensions.X + 1)) + AdjVertexLocation.X);
+		int32 PerimeterMod = ((InDimensions.X + 1) * 2) + ((InDimensions.Y - 1) * 2);
+
+		int32 ModTwo = ((AdjVertexLocation.Z) * PerimeterMod) - (InDimensions.X - 1);
+		int32 ModThree = AdjVertexLocation.X;
+
+		return BottomMod + ModTwo + ModThree;
 
 	}
 	//front
-	else if (InVertexLocation.X == 0)
+	else if (AdjVertexLocation.X == 0)
 	{
-		int32 Mod = ((InVertexLocation.Y * (InDimensions.X + 1)) + InVertexLocation.X);
-		int32 ModTwo = (InVertexLocation.Z * ((InDimensions.X + 1) + ((InVertexLocation.Y - 1) * 2)));
+		int32 BottomMod = ((InDimensions.Y + 1) * (InDimensions.X + 1));
+		int32 PerimeterMod = ((InDimensions.X + 1) * 2) + ((InDimensions.Y - 1) * 2);
 
-		return Mod + ModTwo;
+		int32 ModTwo = ((AdjVertexLocation.Z - 1) * PerimeterMod);
+
+		int32 YMod = ((AdjVertexLocation.Y - 1) * 2) + (InDimensions.X + 1);
+
+
+		return BottomMod + ModTwo + YMod;
 
 	}
-	else if (InVertexLocation.X >= (InDimensions.X + 1))
+	else if (AdjVertexLocation.X >= (InDimensions.X))
 	{
-		int32 Mod = ((InVertexLocation.Y * (InDimensions.X + 1)) + InVertexLocation.X);
-		int32 ModTwo = (InVertexLocation.Z * ((InDimensions.X + 1) + ((InVertexLocation.Y - 1) * 2)));
-		int32 ModThree = 1;
+		int32 BottomMod = ((InDimensions.Y + 1) * (InDimensions.X + 1));
+		int32 PerimeterMod = ((InDimensions.X + 1) * 2) + ((InDimensions.Y - 1) * 2);
 
-		return Mod + ModTwo + ModThree;
+		int32 ModTwo = ((AdjVertexLocation.Z - 1) * PerimeterMod);
+
+		int32 YMod = ((AdjVertexLocation.Y - 1) * 2) + (InDimensions.X + 1);
+
+
+		return BottomMod + ModTwo + YMod + 1;
 	}
 
 	return 0;
