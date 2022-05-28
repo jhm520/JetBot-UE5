@@ -121,9 +121,11 @@ TArray<int32> AJetCuboidMesh::CreateCuboidTriangleArray_Bottom(const TArray<FVec
 			break;
 		}
 
-		int32 iMod = i % ((int32)InDimensions.X + 1);
+		int32 ixMod = i % ((int32)InDimensions.X + 1);
 
-		if (iMod >= XDim)
+		int32 iyMod = i / ((int32)InDimensions.Y + 2);
+
+		if (ixMod >= XDim || iyMod >= YDim)
 		{
 			i++;
 			continue;
@@ -132,12 +134,14 @@ TArray<int32> AJetCuboidMesh::CreateCuboidTriangleArray_Bottom(const TArray<FVec
 		TArray<int32> CurrentTriangles;
 		
 		CurrentTriangles.Add(i);
-		CurrentTriangles.Add(i + XDim + 1);
 		CurrentTriangles.Add(i + XDim + 2);
+		CurrentTriangles.Add(i + XDim + 1);
+		
 
 		CurrentTriangles.Add(i);
-		CurrentTriangles.Add(i + XDim + 2);
 		CurrentTriangles.Add(i + 1);
+		CurrentTriangles.Add(i + XDim + 2);
+		
 
 		OutTriangleArray.Append(CurrentTriangles);
 
