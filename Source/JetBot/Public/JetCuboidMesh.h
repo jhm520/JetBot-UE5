@@ -25,7 +25,7 @@ public:
 	void CreateCuboid(const FVector& InDimensions, int32 InTileSize);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Procedural Mesh")
-	static TArray<FVector> CreateCuboidVertexArray(const FVector& InDimensions, int32 InTileSize);
+	TArray<FVector> CreateCuboidVertexArray(const FVector& InDimensions, int32 InTileSize);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Procedural Mesh")
 	static TArray<FVector2D> CreateCuboidUVArray(const TArray<FVector>& InVertices, const FVector& InDimensions, int32 InTileSize);
@@ -44,7 +44,15 @@ public:
 
 	//InVertexLocation is a vector of the cartesian coordinates. Returns the index
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Procedural Mesh")
-	static int32 GetCuboidVertexIndex(const TArray<FVector>& InVertices, const FVector& InVertexLocation, const FVector& InDimensions);
+	static int32 GetCuboidVertexIndex_Old(const TArray<FVector>& InVertices, const FVector& InVertexLocation, const FVector& InDimensions);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Procedural Mesh")
+	int32 GetCuboidVertexIndex(const FVector& InVertexLocation);
+
+
+	//a map from cartesian coordinates to vertex index
+	UPROPERTY(BlueprintReadOnly, Category = "Procedural Mesh")
+	TMap<FVector, int> VertexIndexMap;
 
 protected:
 	virtual void BeginPlay() override;

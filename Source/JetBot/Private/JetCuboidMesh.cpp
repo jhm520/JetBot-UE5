@@ -23,6 +23,8 @@ TArray<FVector> AJetCuboidMesh::CreateCuboidVertexArray(const FVector& InDimensi
 	int32 y = 0;
 	int32 z = 0;
 
+	int32 i = 0;
+
 	while (z < ZDim + 1)
 	{
 		while (y < YDim + 1)
@@ -34,6 +36,8 @@ TArray<FVector> AJetCuboidMesh::CreateCuboidVertexArray(const FVector& InDimensi
 				if (bIsValidCuboidVertex)
 				{
 					OutVertexArray.Add(FVector(x * InTileSize, y * InTileSize, z * InTileSize));
+					VertexIndexMap.Add(FVector(x, y, z), i);
+					i++;
 				}
 
 				x++;
@@ -239,7 +243,7 @@ TArray<int32> AJetCuboidMesh::CreateCuboidTriangleArray_Left(const TArray<FVecto
 	return OutTriangleArray;
 }
 
-int32 AJetCuboidMesh::GetCuboidVertexIndex(const TArray<FVector>& InVertices, const FVector& InVertexLocation, const FVector& InDimensions)
+int32 AJetCuboidMesh::GetCuboidVertexIndex_Old(const TArray<FVector>& InVertices, const FVector& InVertexLocation, const FVector& InDimensions)
 {
 	FVector AdjVertexLocation = InVertexLocation;
 
@@ -334,6 +338,49 @@ int32 AJetCuboidMesh::GetCuboidVertexIndex(const TArray<FVector>& InVertices, co
 	}
 
 	return 0;
+}
+
+int32 AJetCuboidMesh::GetCuboidVertexIndex(const FVector& InVertexLocation)
+{
+	FVector AdjVertexLocation = InVertexLocation;
+
+	if (AdjVertexLocation.X > Dimensions.X)
+	{
+		AdjVertexLocation.X = Dimensions.X;
+	}
+	else if (AdjVertexLocation.X < 0)
+	{
+		AdjVertexLocation.X = 0;
+	}
+
+	if (AdjVertexLocation.Y > Dimensions.Y)
+	{
+		AdjVertexLocation.Y = Dimensions.Y;
+	}
+	else if (AdjVertexLocation.Y < 0)
+	{
+		AdjVertexLocation.Y = 0;
+	}
+
+	if (AdjVertexLocation.Z > Dimensions.Z)
+	{
+		AdjVertexLocation.Z = Dimensions.Z;
+	}
+	else if (AdjVertexLocation.Z < 0)
+	{
+		AdjVertexLocation.Z = 0;
+	}
+
+	int32* FoundVertex = VertexIndexMap.Find(AdjVertexLocation);
+
+	if (FoundVertex)
+	{
+		return *FoundVertex;
+	}
+	else
+	{
+		return false;
+	}
 }
 
 void AJetCuboidMesh::BeginPlay()
