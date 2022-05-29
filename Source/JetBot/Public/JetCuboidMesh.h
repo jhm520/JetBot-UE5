@@ -6,6 +6,17 @@
 #include "JetProcMesh.h"
 #include "JetCuboidMesh.generated.h"
 
+USTRUCT(Blueprintable)
+struct FCuboidVertexArray
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly, Category = "Vertex")
+	TArray<int> VertexArray;
+
+	FCuboidVertexArray() {};
+};
+
 /**
  * 
  */
@@ -25,22 +36,36 @@ public:
 	void CreateCuboid(const FVector& InDimensions, int32 InTileSize);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Procedural Mesh")
+	TArray<FVector> CreateCuboidVertexArray_Old(const FVector& InDimensions, int32 InTileSize);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Procedural Mesh")
 	TArray<FVector> CreateCuboidVertexArray(const FVector& InDimensions, int32 InTileSize);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Procedural Mesh")
-	static TArray<FVector2D> CreateCuboidUVArray(const TArray<FVector>& InVertices, const FVector& InDimensions, int32 InTileSize);
+	TArray<FVector2D> CreateCuboidUVArray(const TArray<FVector>& InVertices, const FVector& InDimensions, int32 InTileSize);
 
-	static TArray<FVector2D> CreateCuboidUVArray_Bottom(const TArray<FVector>& InVertices, const FVector& InDimensions, int32 InTileSize);
+	TArray<FVector2D> CreateCuboidUVArray_Bottom(const TArray<FVector>& InVertices, const FVector& InDimensions, int32 InTileSize);
 
-	static TArray<FVector2D> CreateCuboidUVArray_Left(const TArray<FVector>& InVertices, const FVector& InDimensions, int32 InTileSize);
+	TArray<FVector2D> CreateCuboidUVArray_Left(const TArray<FVector>& InVertices, const FVector& InDimensions, int32 InTileSize);
+
+	TArray<FVector2D> CreateCuboidUVArray_Front(const TArray<FVector>& InVertices, const FVector& InDimensions, int32 InTileSize);
 
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Procedural Mesh")
-	static TArray<int32> CreateCuboidTriangleArray(const TArray<FVector>& InVertices, const FVector& InDimensions, int32 InTileSize);
+	TArray<int32> CreateCuboidTriangleArray(const TArray<FVector>& InVertices, const FVector& InDimensions, int32 InTileSize);
 
-	static TArray<int32> CreateCuboidTriangleArray_Bottom(const TArray<FVector>& InVertices, const FVector& InDimensions, int32 InTileSize);
+	TArray<int32> CreateCuboidTriangleArray_Bottom(const TArray<FVector>& InVertices, const FVector& InDimensions, int32 InTileSize);
 
-	static TArray<int32> CreateCuboidTriangleArray_Left(const TArray<FVector>& InVertices, const FVector& InDimensions, int32 InTileSize);
+	TArray<int32> CreateCuboidTriangleArray_Left(const TArray<FVector>& InVertices, const FVector& InDimensions, int32 InTileSize);
+
+	TArray<int32> CreateCuboidTriangleArray_Front(const TArray<FVector>& InVertices, const FVector& InDimensions, int32 InTileSize);
+
+	TArray<int32> CreateCuboidTriangleArray_Top(const TArray<FVector>& InVertices, const FVector& InDimensions, int32 InTileSize);
+
+	TArray<int32> CreateCuboidTriangleArray_Right(const TArray<FVector>& InVertices, const FVector& InDimensions, int32 InTileSize);
+
+	TArray<int32> CreateCuboidTriangleArray_Back(const TArray<FVector>& InVertices, const FVector& InDimensions, int32 InTileSize);
+
 
 	//InVertexLocation is a vector of the cartesian coordinates. Returns the index
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Procedural Mesh")
@@ -53,6 +78,10 @@ public:
 	//a map from cartesian coordinates to vertex index
 	UPROPERTY(BlueprintReadOnly, Category = "Procedural Mesh")
 	TMap<FVector, int> VertexIndexMap;
+
+	//a map from cartesian coordinates to vertex indices, each indices array is ordered by (bottom/top, left/right, front/back)
+	UPROPERTY(BlueprintReadOnly, Category = "Procedural Mesh")
+	TMap<FVector, FCuboidVertexArray> VertexIndicesMap;
 
 protected:
 	virtual void BeginPlay() override;
