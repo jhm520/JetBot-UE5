@@ -167,23 +167,70 @@ TArray<int32> AJetLandscapeMesh::CreateLandscapeTriangleArray(const int32 InSize
 		{
 			TArray<int32> CurrentTriangles;
 
-			int32 IndexOne = GetVertexIndex(FVector2D(x, y), InSize);
-			int32 IndexTwo = GetVertexIndex(FVector2D(x, y + 1), InSize);
-			int32 IndexThree = GetVertexIndex(FVector2D(x + 1, y + 1), InSize);
+			if (!bReverseTriangles)
+			{
+				int32 IndexOne = GetVertexIndex(FVector2D(x, y), InSize);
+				int32 IndexTwo = GetVertexIndex(FVector2D(x, y + 1), InSize);
+				int32 IndexThree = GetVertexIndex(FVector2D(x + 1, y + 1), InSize);
 
-			CurrentTriangles.Add(IndexOne);
-			CurrentTriangles.Add(IndexTwo);
-			CurrentTriangles.Add(IndexThree);
+				CurrentTriangles.Add(IndexOne);
+				CurrentTriangles.Add(IndexTwo);
+				CurrentTriangles.Add(IndexThree);
 
-			int32 IndexFour = GetVertexIndex(FVector2D(x, y), InSize);
-			int32 IndexFive = GetVertexIndex(FVector2D(x + 1, y + 1), InSize);
-			int32 IndexSix = GetVertexIndex(FVector2D(x + 1, y), InSize);
+				int32 IndexFour = GetVertexIndex(FVector2D(x, y), InSize);
+				int32 IndexFive = GetVertexIndex(FVector2D(x + 1, y + 1), InSize);
+				int32 IndexSix = GetVertexIndex(FVector2D(x + 1, y), InSize);
 
-			CurrentTriangles.Add(IndexFour);
-			CurrentTriangles.Add(IndexFive);
-			CurrentTriangles.Add(IndexSix);
+				CurrentTriangles.Add(IndexFour);
+				CurrentTriangles.Add(IndexFive);
+				CurrentTriangles.Add(IndexSix);
+			}
+			else
+			{
+				/*
+				*	|\
+				*/
+
+
+				int32 IndexOne = GetVertexIndex(FVector2D(x, y), InSize);
+				int32 IndexTwo = GetVertexIndex(FVector2D(x, y + 1), InSize);
+				int32 IndexThree = GetVertexIndex(FVector2D(x + 1, y), InSize);
+
+				CurrentTriangles.Add(IndexOne);
+				CurrentTriangles.Add(IndexTwo);
+				CurrentTriangles.Add(IndexThree);
+
+				int32 IndexFour = GetVertexIndex(FVector2D(x+1, y+1), InSize);
+				int32 IndexFive = GetVertexIndex(FVector2D(x + 1, y), InSize);
+				int32 IndexSix = GetVertexIndex(FVector2D(x, y + 1), InSize);
+
+				CurrentTriangles.Add(IndexFour);
+				CurrentTriangles.Add(IndexFive);
+				CurrentTriangles.Add(IndexSix);
+
+				//old
+
+				//CurrentTriangles.Add(i);
+				//CurrentTriangles.Add(i + InSize + 1);
+				//CurrentTriangles.Add(i + 1);
+
+				///*
+				//*	\|
+				//*/
+				//CurrentTriangles.Add(i + InSize + 2);
+				//CurrentTriangles.Add(i + 1);
+				//CurrentTriangles.Add(i + InSize + 1);
+
+			}
+
+			bReverseTriangles = !bReverseTriangles;
 
 			OutTriangleArray.Append(CurrentTriangles);
+		}
+
+		if (!bEven)
+		{
+			bReverseTriangles = !bReverseTriangles;
 		}
 	}
 	
