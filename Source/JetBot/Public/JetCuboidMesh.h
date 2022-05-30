@@ -6,6 +6,17 @@
 #include "JetProcMesh.h"
 #include "JetCuboidMesh.generated.h"
 
+UENUM()
+enum class ECuboidSide : uint8
+{
+	Bottom,
+	Top,
+	Left,
+	Right,
+	Front,
+	Back
+};
+
 USTRUCT(Blueprintable)
 struct FCuboidVertexArray
 {
@@ -74,6 +85,11 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Procedural Mesh")
 	int32 GetCuboidVertexIndex(const FVector& InVertexLocation);
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Procedural Mesh")
+	const FCuboidVertexArray& GetCuboidVertexIndices(const FVector& InVertexLocation);
+
+	UPROPERTY()
+	FCuboidVertexArray EmptyVertex = FCuboidVertexArray();
 
 	//a map from cartesian coordinates to vertex index
 	UPROPERTY(BlueprintReadOnly, Category = "Procedural Mesh")
@@ -82,6 +98,9 @@ public:
 	//a map from cartesian coordinates to vertex indices, each indices array is ordered by (bottom/top, left/right, front/back)
 	UPROPERTY(BlueprintReadOnly, Category = "Procedural Mesh")
 	TMap<FVector, FCuboidVertexArray> VertexIndicesMap;
+
+	//Get the index of the 
+	int32 GetCuboidVertexSideIndex(const FCuboidVertexArray& InCuboidVertexArray, ECuboidSide InCuboidSide);
 
 protected:
 	virtual void BeginPlay() override;
