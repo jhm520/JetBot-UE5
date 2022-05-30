@@ -525,17 +525,17 @@ TArray<int32> AJetCuboidMesh::CreateCuboidTriangleArray(const TArray<FVector>& I
 			const FCuboidVertexArray& IndexEight = GetCuboidVertexIndices(FVector(x, y + 1, ZDim));
 			const FCuboidVertexArray& IndexNine = GetCuboidVertexIndices(FVector(x + 1, y + 1, ZDim));
 
-			CurrentTriangles.Add(IndexSeven.VertexArray[0]);
-			CurrentTriangles.Add(IndexEight.VertexArray[0]);
-			CurrentTriangles.Add(IndexNine.VertexArray[0]);
+			CurrentTriangles.Add(IndexSeven.VertexArray[1]);
+			CurrentTriangles.Add(IndexEight.VertexArray[1]);
+			CurrentTriangles.Add(IndexNine.VertexArray[1]);
 
 			const FCuboidVertexArray& IndexTen = GetCuboidVertexIndices(FVector(x, y, ZDim));
 			const FCuboidVertexArray& IndexEleven = GetCuboidVertexIndices(FVector(x + 1, y + 1, ZDim));
 			const FCuboidVertexArray& IndexTwelve = GetCuboidVertexIndices(FVector(x + 1, y, ZDim));
 
-			CurrentTriangles.Add(IndexTen.VertexArray[0]);
-			CurrentTriangles.Add(IndexEleven.VertexArray[0]);
-			CurrentTriangles.Add(IndexTwelve.VertexArray[0]);
+			CurrentTriangles.Add(IndexTen.VertexArray[1]);
+			CurrentTriangles.Add(IndexEleven.VertexArray[1]);
+			CurrentTriangles.Add(IndexTwelve.VertexArray[1]);
 
 			OutTriangleArray.Append(CurrentTriangles);
 
