@@ -70,7 +70,7 @@ TArray<FVector> AJetCuboidMesh::CreateCuboidVertexArray(const FVector& InDimensi
 
 	int32 i = 0;
 
-	//Bottom/Top
+	//Bottom
 	for (y = 0; y < YDim+1; y++)
 	{
 		for (x = 0; x < XDim + 1;x++)
@@ -84,107 +84,122 @@ TArray<FVector> AJetCuboidMesh::CreateCuboidVertexArray(const FVector& InDimensi
 
 			FCuboidVertexArray* CVAPtr = VertexIndicesMap.Find(NewVertex);
 
-
+			int32 ib = (int32)ECuboidSide::Bottom;
 			if (CVAPtr)
 			{
 				NewCVA = *CVAPtr;
-				NewCVA.VertexArray.Add(i);
+				NewCVA.VertexArray[ib] = i;
 
 				VertexIndicesMap.Add(NewVertex, NewCVA);
 			}
 			else
 			{
-				NewCVA.VertexArray.Add(i);
+				NewCVA.VertexArray[ib] =  i;
 				VertexIndicesMap.Add(NewVertex, NewCVA);
 			}
 
 			i++;
 
-			////Top
-
-			//NewCVA.VertexArray.Empty();
-
-			//NewVertex = FVector(x, y, ZDim);
-
-			//OutVertexArray.Add(NewVertex * InTileSize);
-
-			//CVAPtr = VertexIndicesMap.Find(NewVertex);
-
-			//if (CVAPtr)
-			//{
-			//	NewCVA = *CVAPtr;
-			//	NewCVA.VertexArray.Add(i);
-
-			//	VertexIndicesMap.Add(NewVertex, NewCVA);
-			//}
-			//else
-			//{
-			//	NewCVA.VertexArray.Add(i);
-			//	VertexIndicesMap.Add(NewVertex, NewCVA);
-			//}
-
-			//i++;
+			
 		}
 	}
 
-	//Left/Right
+	//Top
+	for (y = 0; y < YDim + 1; y++)
+	{
+		for (x = 0; x < XDim + 1; x++)
+		{
+
+			FCuboidVertexArray NewCVA = FCuboidVertexArray();
+
+			FVector NewVertex = FVector(x, y, ZDim);
+
+			OutVertexArray.Add(NewVertex * InTileSize);
+
+			FCuboidVertexArray* CVAPtr = VertexIndicesMap.Find(NewVertex);
+
+			int32 it = (int32)ECuboidSide::Top;
+			if (CVAPtr)
+			{
+				NewCVA = *CVAPtr;
+				NewCVA.VertexArray[it] = i;
+
+				VertexIndicesMap.Add(NewVertex, NewCVA);
+			}
+			else
+			{
+				NewCVA.VertexArray[it] = i;
+				VertexIndicesMap.Add(NewVertex, NewCVA);
+			}
+
+			i++;
+		}
+	}
+
+	//Left
 	for (z = 0; z < ZDim + 1; z++)
 	{
 		for (x = 0; x < XDim + 1; x++)
 		{
 			FCuboidVertexArray NewCVA = FCuboidVertexArray();
 
-			//Left
 			FVector NewVertex = FVector(x, 0, z);
 
 			OutVertexArray.Add(NewVertex * InTileSize);
 
 			FCuboidVertexArray* CVAPtr = VertexIndicesMap.Find(NewVertex);
 
-
+			int32 il = (int32)ECuboidSide::Left;
 			if (CVAPtr)
 			{
 				NewCVA = *CVAPtr;
-				NewCVA.VertexArray.Add(i);
+				NewCVA.VertexArray[il] = i;
 
 				VertexIndicesMap.Add(NewVertex, NewCVA);
 			}
 			else
 			{
-				NewCVA.VertexArray.Add(i);
+				NewCVA.VertexArray[il] = i;
 				VertexIndicesMap.Add(NewVertex, NewCVA);
 			}
 
 			i++;
-
-			////Right
-
-			//NewCVA.VertexArray.Empty();
-
-			//NewVertex = FVector(x, YDim, z);
-
-			//OutVertexArray.Add(NewVertex * InTileSize);
-
-			//CVAPtr = VertexIndicesMap.Find(NewVertex);
-
-			//if (CVAPtr)
-			//{
-			//	NewCVA = *CVAPtr;
-			//	NewCVA.VertexArray.Add(i);
-
-			//	VertexIndicesMap.Add(NewVertex, NewCVA);
-			//}
-			//else
-			//{
-			//	NewCVA.VertexArray.Add(i);
-			//	VertexIndicesMap.Add(NewVertex, NewCVA);
-			//}
-
-			//i++;
 		}
 	}
 
-	//Front/Back
+	//Right
+	for (z = 0; z < ZDim + 1; z++)
+	{
+		for (x = 0; x < XDim + 1; x++)
+		{
+
+			FCuboidVertexArray NewCVA = FCuboidVertexArray();;
+
+			FVector NewVertex = FVector(x, YDim, z);
+
+			OutVertexArray.Add(NewVertex * InTileSize);
+
+			FCuboidVertexArray* CVAPtr = VertexIndicesMap.Find(NewVertex);
+
+			int32 ir = (int32)ECuboidSide::Right;
+			if (CVAPtr)
+			{
+				NewCVA = *CVAPtr;
+				NewCVA.VertexArray[ir] = i;
+
+				VertexIndicesMap.Add(NewVertex, NewCVA);
+			}
+			else
+			{
+				NewCVA.VertexArray[ir] = i;
+				VertexIndicesMap.Add(NewVertex, NewCVA);
+			}
+
+			i++;
+		}
+	}
+
+	//Front
 	for (z = 0; z < ZDim + 1; z++)
 	{
 		for (y = 0; y < YDim + 1; y++)
@@ -198,46 +213,55 @@ TArray<FVector> AJetCuboidMesh::CreateCuboidVertexArray(const FVector& InDimensi
 
 			FCuboidVertexArray* CVAPtr = VertexIndicesMap.Find(NewVertex);
 
-
+			int32 ifr = (int32)ECuboidSide::Front;
 			if (CVAPtr)
 			{
 				NewCVA = *CVAPtr;
-				NewCVA.VertexArray.Add(i);
+				NewCVA.VertexArray[ifr] = i;
 
 				VertexIndicesMap.Add(NewVertex, NewCVA);
 			}
 			else
 			{
-				NewCVA.VertexArray.Add(i);
+				NewCVA.VertexArray[ifr] = i;
 				VertexIndicesMap.Add(NewVertex, NewCVA);
 			}
 
 			i++;
 
-			////Back
+		}
+	}
 
-			//NewCVA.VertexArray.Empty();
+	//Back
 
-			//NewVertex = FVector(XDim, y, z);
+	for (z = 0; z < ZDim + 1; z++)
+	{
+		for (y = 0; y < YDim + 1; y++)
+		{
+			FCuboidVertexArray NewCVA = FCuboidVertexArray();;
 
-			//OutVertexArray.Add(NewVertex * InTileSize);
+			FVector NewVertex = FVector(XDim, y, z);
 
-			//CVAPtr = VertexIndicesMap.Find(NewVertex);
+			OutVertexArray.Add(NewVertex * InTileSize);
 
-			//if (CVAPtr)
-			//{
-			//	NewCVA = *CVAPtr;
-			//	NewCVA.VertexArray.Add(i);
+			FCuboidVertexArray* CVAPtr = VertexIndicesMap.Find(NewVertex);
 
-			//	VertexIndicesMap.Add(NewVertex, NewCVA);
-			//}
-			//else
-			//{
-			//	NewCVA.VertexArray.Add(i);
-			//	VertexIndicesMap.Add(NewVertex, NewCVA);
-			//}
 
-			//i++;
+			int32 iba = (int32)ECuboidSide::Back;
+			if (CVAPtr)
+			{
+				NewCVA = *CVAPtr;
+				NewCVA.VertexArray[iba] = i;
+
+				VertexIndicesMap.Add(NewVertex, NewCVA);
+			}
+			else
+			{
+				NewCVA.VertexArray[iba] = i;
+				VertexIndicesMap.Add(NewVertex, NewCVA);
+			}
+
+			i++;
 		}
 	}
 
@@ -258,7 +282,7 @@ TArray<FVector2D> AJetCuboidMesh::CreateCuboidUVArray(const TArray<FVector>& InV
 
 	int32 i = 0;
 
-	//Bottom/Top
+	//Bottom
 	for (y = 0; y < YDim + 1; y++)
 	{
 		for (x = 0; x < XDim + 1; x++)
@@ -267,13 +291,21 @@ TArray<FVector2D> AJetCuboidMesh::CreateCuboidUVArray(const TArray<FVector>& InV
 
 			i++;
 
-			/*OutUVArray.Add(FVector2D(x, y));
-
-			i++;*/
 		}
 	}
 
-	//Left/Right
+	//Top
+	for (y = 0; y < YDim + 1; y++)
+	{
+		for (x = 0; x < XDim + 1; x++)
+		{
+			OutUVArray.Add(FVector2D(x, y));
+
+			i++;
+		}
+	}
+
+	//Left
 	for (z = 0; z < ZDim + 1; z++)
 	{
 		for (x = 0; x < XDim + 1; x++)
@@ -281,14 +313,21 @@ TArray<FVector2D> AJetCuboidMesh::CreateCuboidUVArray(const TArray<FVector>& InV
 			OutUVArray.Add(FVector2D(x, z));
 
 			i++;
-
-			/*OutUVArray.Add(FVector2D(x, z));
-
-			i++;*/
 		}
 	}
 
-	//Front/Back
+	//Right
+	for (z = 0; z < ZDim + 1; z++)
+	{
+		for (x = 0; x < XDim + 1; x++)
+		{
+			OutUVArray.Add(FVector2D(x, z));
+
+			i++;
+		}
+	}
+
+	//Front
 	for (z = 0; z < ZDim + 1; z++)
 	{
 		for (y = 0; y < YDim + 1; y++)
@@ -296,14 +335,19 @@ TArray<FVector2D> AJetCuboidMesh::CreateCuboidUVArray(const TArray<FVector>& InV
 			OutUVArray.Add(FVector2D(y, z));
 
 			i++;
-
-			/*OutUVArray.Add(FVector2D(y, z));
-
-			i++;*/
 		}
 	}
 
+	//Back
+	for (z = 0; z < ZDim + 1; z++)
+	{
+		for (y = 0; y < YDim + 1; y++)
+		{
+			OutUVArray.Add(FVector2D(y, z));
 
+			i++;
+		}
+	}
 
 	//OutUVArray.Append(CreateCuboidUVArray_Bottom(InVertices, InDimensions, InTileSize));
 
@@ -443,9 +487,9 @@ TArray<int32> AJetCuboidMesh::CreateCuboidTriangleArray(const TArray<FVector>& I
 	int32 i = 0;
 
 	//Bottom/Top
-	for (y = 0; y < YDim + 1; y++)
+	for (y = 0; y < YDim; y++)
 	{
-		for (x = 0; x < XDim + 1; x++)
+		for (x = 0; x < XDim; x++)
 		{
 			//Bottom
 			TArray<int32> CurrentTriangles;
@@ -466,8 +510,18 @@ TArray<int32> AJetCuboidMesh::CreateCuboidTriangleArray(const TArray<FVector>& I
 			CurrentTriangles.Add(IndexFive.VertexArray[0]);
 			CurrentTriangles.Add(IndexSix.VertexArray[0]);
 
+			OutTriangleArray.Append(CurrentTriangles);
+		}
+	}
+
+	for (y = 0; y < YDim; y++)
+	{
+		for (x = 0; x < XDim; x++)
+		{
 			//top
-			/*const FCuboidVertexArray& IndexSeven = GetCuboidVertexIndices(FVector(x, y, ZDim));
+			TArray<int32> CurrentTriangles;
+
+			const FCuboidVertexArray& IndexSeven = GetCuboidVertexIndices(FVector(x, y, ZDim));
 			const FCuboidVertexArray& IndexEight = GetCuboidVertexIndices(FVector(x, y + 1, ZDim));
 			const FCuboidVertexArray& IndexNine = GetCuboidVertexIndices(FVector(x + 1, y + 1, ZDim));
 
@@ -481,16 +535,17 @@ TArray<int32> AJetCuboidMesh::CreateCuboidTriangleArray(const TArray<FVector>& I
 
 			CurrentTriangles.Add(IndexTen.VertexArray[0]);
 			CurrentTriangles.Add(IndexEleven.VertexArray[0]);
-			CurrentTriangles.Add(IndexTwelve.VertexArray[0]);*/
+			CurrentTriangles.Add(IndexTwelve.VertexArray[0]);
 
 			OutTriangleArray.Append(CurrentTriangles);
+
 		}
 	}
 
 	//Left/Right
-	for (z = 0; z < ZDim + 1; z++)
+	for (z = 0; z < ZDim; z++)
 	{
-		for (x = 0; x < XDim + 1; x++)
+		for (x = 0; x < XDim; x++)
 		{
 			//Left
 			TArray<int32> CurrentTriangles;
@@ -511,8 +566,18 @@ TArray<int32> AJetCuboidMesh::CreateCuboidTriangleArray(const TArray<FVector>& I
 			CurrentTriangles.Add(GetCuboidVertexSideIndex(IndexFive, ECuboidSide::Left));
 			CurrentTriangles.Add(GetCuboidVertexSideIndex(IndexSix, ECuboidSide::Left));
 
+			OutTriangleArray.Append(CurrentTriangles);
+		}
+	}
+
+	for (z = 0; z < ZDim; z++)
+	{
+		for (x = 0; x < XDim; x++)
+		{
+			TArray<int32> CurrentTriangles;
+
 			//right
-			/*const FCuboidVertexArray& IndexSeven = GetCuboidVertexIndices(FVector(x, YDim, z));
+			const FCuboidVertexArray& IndexSeven = GetCuboidVertexIndices(FVector(x, YDim, z));
 			const FCuboidVertexArray& IndexEight = GetCuboidVertexIndices(FVector(x + 1, YDim, z + 1));
 			const FCuboidVertexArray& IndexNine = GetCuboidVertexIndices(FVector(x, YDim, z + 1));
 
@@ -526,16 +591,16 @@ TArray<int32> AJetCuboidMesh::CreateCuboidTriangleArray(const TArray<FVector>& I
 
 			CurrentTriangles.Add(GetCuboidVertexSideIndex(IndexTen, ECuboidSide::Right));
 			CurrentTriangles.Add(GetCuboidVertexSideIndex(IndexEleven, ECuboidSide::Right));
-			CurrentTriangles.Add(GetCuboidVertexSideIndex(IndexTwelve, ECuboidSide::Right));*/
+			CurrentTriangles.Add(GetCuboidVertexSideIndex(IndexTwelve, ECuboidSide::Right));
 
 			OutTriangleArray.Append(CurrentTriangles);
 		}
 	}
 
 	//Front/Back
-	for (z = 0; z < ZDim + 1; z++)
+	for (z = 0; z < ZDim; z++)
 	{
-		for (y = 0; y < XDim + 1; y++)
+		for (y = 0; y < XDim; y++)
 		{
 			//Front
 			TArray<int32> CurrentTriangles;
@@ -552,37 +617,41 @@ TArray<int32> AJetCuboidMesh::CreateCuboidTriangleArray(const TArray<FVector>& I
 			const FCuboidVertexArray& IndexFive = GetCuboidVertexIndices(FVector(0, y + 1, z));
 			const FCuboidVertexArray& IndexSix = GetCuboidVertexIndices(FVector(0, y + 1, z + 1));
 
-			CurrentTriangles.Add(GetCuboidVertexSideIndex(IndexFour, ECuboidSide::Left));
-			CurrentTriangles.Add(GetCuboidVertexSideIndex(IndexFive, ECuboidSide::Left));
-			CurrentTriangles.Add(GetCuboidVertexSideIndex(IndexSix, ECuboidSide::Left));
-
-			//Back
-			/*const FCuboidVertexArray& IndexSeven = GetCuboidVertexIndices(FVector(XDim, y, z));
-			const FCuboidVertexArray& IndexEight = GetCuboidVertexIndices(FVector(XDim, y, z + 1));
-			const FCuboidVertexArray& IndexNine = GetCuboidVertexIndices(FVector(XDim, y + 1, z + 1));
-
-			CurrentTriangles.Add(GetCuboidVertexSideIndex(IndexSeven, ECuboidSide::Right));
-			CurrentTriangles.Add(GetCuboidVertexSideIndex(IndexEight, ECuboidSide::Right));
-			CurrentTriangles.Add(GetCuboidVertexSideIndex(IndexNine, ECuboidSide::Right));
-
-			const FCuboidVertexArray& IndexTen = GetCuboidVertexIndices(FVector(XDim, y, z));
-			const FCuboidVertexArray& IndexEleven = GetCuboidVertexIndices(FVector(XDim, y + 1, z + 1));
-			const FCuboidVertexArray& IndexTwelve = GetCuboidVertexIndices(FVector(XDim, y + 1, z));
-
-			CurrentTriangles.Add(GetCuboidVertexSideIndex(IndexTen, ECuboidSide::Right));
-			CurrentTriangles.Add(GetCuboidVertexSideIndex(IndexEleven, ECuboidSide::Right));
-			CurrentTriangles.Add(GetCuboidVertexSideIndex(IndexTwelve, ECuboidSide::Right));*/
+			CurrentTriangles.Add(GetCuboidVertexSideIndex(IndexFour, ECuboidSide::Front));
+			CurrentTriangles.Add(GetCuboidVertexSideIndex(IndexFive, ECuboidSide::Front));
+			CurrentTriangles.Add(GetCuboidVertexSideIndex(IndexSix, ECuboidSide::Front));
 
 			OutTriangleArray.Append(CurrentTriangles);
 		}
 	}
 
-	/*OutTriangleArray.Append(CreateCuboidTriangleArray_Bottom(InVertices, InDimensions, InTileSize));
-	OutTriangleArray.Append(CreateCuboidTriangleArray_Left(InVertices, InDimensions, InTileSize));
-	OutTriangleArray.Append(CreateCuboidTriangleArray_Front(InVertices, InDimensions, InTileSize));
-	OutTriangleArray.Append(CreateCuboidTriangleArray_Top(InVertices, InDimensions, InTileSize));
-	OutTriangleArray.Append(CreateCuboidTriangleArray_Right(InVertices, InDimensions, InTileSize));
-	OutTriangleArray.Append(CreateCuboidTriangleArray_Back(InVertices, InDimensions, InTileSize));*/
+	for (z = 0; z < ZDim; z++)
+	{
+		for (y = 0; y < XDim; y++)
+		{
+			//Back
+
+			TArray<int32> CurrentTriangles;
+
+			const FCuboidVertexArray& IndexSeven = GetCuboidVertexIndices(FVector(XDim, y, z));
+			const FCuboidVertexArray& IndexEight = GetCuboidVertexIndices(FVector(XDim, y, z + 1));
+			const FCuboidVertexArray& IndexNine = GetCuboidVertexIndices(FVector(XDim, y + 1, z + 1));
+
+			CurrentTriangles.Add(GetCuboidVertexSideIndex(IndexSeven, ECuboidSide::Back));
+			CurrentTriangles.Add(GetCuboidVertexSideIndex(IndexEight, ECuboidSide::Back));
+			CurrentTriangles.Add(GetCuboidVertexSideIndex(IndexNine, ECuboidSide::Back));
+
+			const FCuboidVertexArray& IndexTen = GetCuboidVertexIndices(FVector(XDim, y, z));
+			const FCuboidVertexArray& IndexEleven = GetCuboidVertexIndices(FVector(XDim, y + 1, z + 1));
+			const FCuboidVertexArray& IndexTwelve = GetCuboidVertexIndices(FVector(XDim, y + 1, z));
+
+			CurrentTriangles.Add(GetCuboidVertexSideIndex(IndexTen, ECuboidSide::Back));
+			CurrentTriangles.Add(GetCuboidVertexSideIndex(IndexEleven, ECuboidSide::Back));
+			CurrentTriangles.Add(GetCuboidVertexSideIndex(IndexTwelve, ECuboidSide::Back));
+
+			OutTriangleArray.Append(CurrentTriangles);
+		}
+	}
 
 	return OutTriangleArray;
 }
@@ -990,6 +1059,15 @@ int32 AJetCuboidMesh::GetCuboidVertexSideIndex(const FCuboidVertexArray& InCuboi
 		return -1;
 	}
 
+	int32 i = (int32)InCuboidSide;
+
+	if (InCuboidVertexArray.VertexArray.IsValidIndex(i))
+	{
+		return InCuboidVertexArray.VertexArray[i];
+	}
+
+	/*return 
+
 	switch (InCuboidSide)
 	{
 	case ECuboidSide::Bottom:
@@ -1034,7 +1112,7 @@ int32 AJetCuboidMesh::GetCuboidVertexSideIndex(const FCuboidVertexArray& InCuboi
 
 		return InCuboidVertexArray.VertexArray[0];
 	}
-	}
+	}*/
 
 	return -1;
 }

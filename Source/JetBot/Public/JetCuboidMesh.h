@@ -23,7 +23,7 @@ struct FCuboidVertexArray
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadOnly, Category = "Vertex")
-	TArray<int> VertexArray;
+	TArray<int32> VertexArray = { 0,0,0,0,0,0 };
 
 	FCuboidVertexArray() {};
 };
