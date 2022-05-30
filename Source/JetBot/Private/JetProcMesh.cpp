@@ -53,7 +53,7 @@ void AJetProcMesh::BeginPlay()
 {
 	Super::BeginPlay();
 
-	CreateMesh();
+	//CreateMesh();
 }
 
 // Called every frame

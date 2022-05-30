@@ -165,6 +165,8 @@ void AJetLandscapeMesh::BeginPlay()
 
 	AddLandscapeFeature(FVector2D(2, 2), FeatureArray);
 
+	CreateMesh();
+
 	Super::BeginPlay();
 }
 

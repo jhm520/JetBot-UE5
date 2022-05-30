@@ -26,6 +26,7 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "Procedural Mesh")
 		UProceduralMeshComponent* ProcMesh;
 
+	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
 	void CreateMesh();
 
 public:
