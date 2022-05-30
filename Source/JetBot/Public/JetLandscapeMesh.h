@@ -18,6 +18,15 @@ public:
 
 	AJetLandscapeMesh();
 
+	/*UPROPERTY(EditAnywhere, Category = "Procedural Mesh")
+	TSubclassOf<AJetLandscapeMesh> NeighborLandscapeClass;*/
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Procedural Mesh")
+	bool bSpawnNeighborLandscapes = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Procedural Mesh")
+	bool bAutoCreateLandscape = true;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Mesh")
 	int32 LandscapeSize = 4;
 
@@ -27,8 +36,15 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Mesh")
 	int32 TileSize = 100;
 
+	//a map from cartesian coordinates to vertex index
+	UPROPERTY(BlueprintReadOnly, Category = "Procedural Mesh")
+	TMap<FVector2D, int32> VertexIndexMap;
+
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
 	void CreateLandscape(int32 InSize);
+
+	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
+	void SpawnNeighborLandscapes();
 
 	TArray<FVector> CreateLandscapeVertexArray(const int32 InSize);
 
