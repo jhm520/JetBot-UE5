@@ -74,7 +74,7 @@ public:
 
 	//"Zip" Landscape two to be congruent with landscape one
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
-	void ZipNeighborLandscapes(AJetLandscapeMesh* InLandscapeOne, AJetLandscapeMesh* InLandscapeTwo);
+	void ZipNeighborLandscape(AJetLandscapeMesh* InZipper, AJetLandscapeMesh* InZippee);
 
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
 	FTransform GetNeighborLandscapeSpawnTransform(ECardinalDirection InNeighborDirection);
@@ -83,7 +83,7 @@ public:
 	TMap<ECardinalDirection, FTransform> NeighborSpawnTransformMap;
 
 	//Returns the direction needed to get from LandscapeOne to LandscapeTwo
-	ECardinalDirection GetLandscapeCardinality(AJetLandscapeMesh* InLandscapeOne, AJetLandscapeMesh* InLandscapeTwo);
+	ECardinalDirection GetNeighborCardinality(AJetLandscapeMesh* InLandscapeOne, AJetLandscapeMesh* InLandscapeTwo);
 
 	TArray<FVector> CreateLandscapeVertexArray(const int32 InSize);
 

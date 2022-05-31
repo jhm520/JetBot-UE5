@@ -13,8 +13,8 @@ namespace LandscapeVars
 	FVector West = FVector(0, -1, 0);
 	FVector East = FVector(0, 1, 0);
 	FVector South = FVector(-1, 0, 0);
-	FVector Southwest = FVector(-1, 1, 0);
-	FVector Southeast = FVector(-1, -1, 0);
+	FVector Southwest = FVector(-1, -1, 0);
+	FVector Southeast = FVector(-1, 1, 0);
 }
 
 PRAGMA_DISABLE_OPTIMIZATION
@@ -163,6 +163,8 @@ void AJetLandscapeMesh::SpawnNeighborLandscape(ECardinalDirection InNeighborDire
 
 	SpawnedActor->CreateLandscape(SpawnedActor->LandscapeSize);
 
+	//ZipNeighborLandscape(this, SpawnedActor);
+
 	int32 MaxDirection = (int32)ECardinalDirection::Northwest;
 	int32 dir = 0;
 
@@ -173,7 +175,7 @@ void AJetLandscapeMesh::SpawnNeighborLandscape(ECardinalDirection InNeighborDire
 
 		if (CurrentNeighbor)
 		{
-			ZipNeighborLandscapes(SpawnedActor, CurrentNeighbor);
+			ZipNeighborLandscape(CurrentNeighbor, SpawnedActor);
 		}
 	}
 
@@ -193,9 +195,112 @@ void AJetLandscapeMesh::SpawnNeighborLandscape(ECardinalDirection InNeighborDire
 	
 }
 
-void AJetLandscapeMesh::ZipNeighborLandscapes(AJetLandscapeMesh* InLandscapeOne, AJetLandscapeMesh* InLandscapeTwo)
+void AJetLandscapeMesh::ZipNeighborLandscape(AJetLandscapeMesh* InZipper, AJetLandscapeMesh* InZippee)
 {
+	//"zip" the landscape up with its neighbors
 
+	if (!InZipper || !InZippee)
+	{
+		return;
+	}
+
+	FVector2D ZippeeVector;
+	FVector2D ZipperVector;
+
+	ECardinalDirection NeighborDir = GetNeighborCardinality(InZipper, InZippee);
+
+	bool bCorner = false;
+
+	/*if (bCorner)
+	{
+		int32 ZippeeIndex = InLandscapeTwo->GetVertexIndex(ZippeeVector * 1, LandscapeSize);
+
+		int32 ZipperIndex = InLandscapeOne->GetVertexIndex(ZipperVector * 1, LandscapeSize);
+
+		InLandscapeTwo->Vertices[ZippeeIndex].Z = Vertices[ZipperIndex].Z;
+		return;
+	}*/
+
+	if (NeighborDir == ECardinalDirection::West)
+	{
+		for (int32 i = 0; i < InZipper->LandscapeSize + 1; i++)
+		{
+
+			int32 ZippeeIndex = InZippee->GetVertexIndex(FVector2D(i, LandscapeSize), LandscapeSize);
+
+			int32 ZipperIndex = InZipper->GetVertexIndex(FVector2D(i, 0), LandscapeSize);
+
+			InZippee->Vertices[ZippeeIndex].Z = InZipper->Vertices[ZipperIndex].Z;
+		}
+	}
+	else if (NeighborDir == ECardinalDirection::East)
+	{
+		for (int32 i = 0; i < InZipper->LandscapeSize + 1; i++)
+		{
+
+			int32 ZippeeIndex = InZippee->GetVertexIndex(FVector2D(i, 0), LandscapeSize);
+
+			int32 ZipperIndex = InZipper->GetVertexIndex(FVector2D(i, LandscapeSize), LandscapeSize);
+
+			InZippee->Vertices[ZippeeIndex].Z = InZipper->Vertices[ZipperIndex].Z;
+		}
+	}
+	else if (NeighborDir == ECardinalDirection::North)
+	{
+		for (int32 i = 0; i < InZipper->LandscapeSize + 1; i++)
+		{
+
+			int32 ZippeeIndex = InZippee->GetVertexIndex(FVector2D(0, i), LandscapeSize);
+
+			int32 ZipperIndex = InZipper->GetVertexIndex(FVector2D(LandscapeSize, i), LandscapeSize);
+
+			InZippee->Vertices[ZippeeIndex].Z = InZipper->Vertices[ZipperIndex].Z;
+		}
+	}
+	else if (NeighborDir == ECardinalDirection::South)
+	{
+		for (int32 i = 0; i < InZipper->LandscapeSize + 1; i++)
+		{
+
+			int32 ZippeeIndex = InZippee->GetVertexIndex(FVector2D(LandscapeSize, i), LandscapeSize);
+
+			int32 ZipperIndex = InZipper->GetVertexIndex(FVector2D(0, i), LandscapeSize);
+
+			InZippee->Vertices[ZippeeIndex].Z = InZipper->Vertices[ZipperIndex].Z;
+		}
+	}
+	else if (NeighborDir == ECardinalDirection::Northwest)
+	{
+		int32 ZippeeIndex = InZippee->GetVertexIndex(FVector2D(0, LandscapeSize), LandscapeSize);
+
+		int32 ZipperIndex = InZipper->GetVertexIndex(FVector2D(LandscapeSize, 0), LandscapeSize);
+
+		InZippee->Vertices[ZippeeIndex].Z = InZipper->Vertices[ZipperIndex].Z;
+	}
+	else if (NeighborDir == ECardinalDirection::Northeast)
+	{
+		int32 ZippeeIndex = InZippee->GetVertexIndex(FVector2D(0, 0), LandscapeSize);
+
+		int32 ZipperIndex = InZipper->GetVertexIndex(FVector2D(LandscapeSize, LandscapeSize), LandscapeSize);
+
+		InZippee->Vertices[ZippeeIndex].Z = InZipper->Vertices[ZipperIndex].Z;
+	}
+	else if (NeighborDir == ECardinalDirection::Southwest)
+	{
+		int32 ZippeeIndex = InZippee->GetVertexIndex(FVector2D(LandscapeSize, LandscapeSize), LandscapeSize);
+
+		int32 ZipperIndex = InZipper->GetVertexIndex(FVector2D(0, 0), LandscapeSize);
+
+		InZippee->Vertices[ZippeeIndex].Z = InZipper->Vertices[ZipperIndex].Z;
+	}
+	else if (NeighborDir == ECardinalDirection::Southeast)
+	{
+		int32 ZippeeIndex = InZippee->GetVertexIndex(FVector2D(LandscapeSize, 0), LandscapeSize);
+
+		int32 ZipperIndex = InZipper->GetVertexIndex(FVector2D(0, LandscapeSize), LandscapeSize);
+
+		InZippee->Vertices[ZippeeIndex].Z = InZipper->Vertices[ZipperIndex].Z;
+	}
 }
 
 FTransform AJetLandscapeMesh::GetNeighborLandscapeSpawnTransform(ECardinalDirection InNeighborDirection)
@@ -210,7 +315,7 @@ FTransform AJetLandscapeMesh::GetNeighborLandscapeSpawnTransform(ECardinalDirect
 	return FTransform();
 }
 
-ECardinalDirection AJetLandscapeMesh::GetLandscapeCardinality(AJetLandscapeMesh* InLandscapeOne, AJetLandscapeMesh* InLandscapeTwo)
+ECardinalDirection AJetLandscapeMesh::GetNeighborCardinality(AJetLandscapeMesh* InLandscapeOne, AJetLandscapeMesh* InLandscapeTwo)
 {
 	FVector PosOne = InLandscapeOne->GetActorLocation();
 	FVector PosTwo = InLandscapeTwo->GetActorLocation();
@@ -234,7 +339,7 @@ ECardinalDirection AJetLandscapeMesh::GetLandscapeCardinality(AJetLandscapeMesh*
 		{
 			FVector CardDirVector = TransPtr->GetLocation().GetSafeNormal();
 
-			if (CardDirVector.Equals(Normal, 1.0f))
+			if (CardDirVector.Equals(Normal, 0.1f))
 			{
 				return CardDir;
 			}
@@ -529,7 +634,14 @@ void AJetLandscapeMesh::BeginPlay()
 
 	if (bSpawnNeighborLandscapes)
 	{
+		SpawnNeighborLandscape(ECardinalDirection::South);
 		SpawnNeighborLandscape(ECardinalDirection::West);
+		SpawnNeighborLandscape(ECardinalDirection::East);
+		SpawnNeighborLandscape(ECardinalDirection::North);
+		SpawnNeighborLandscape(ECardinalDirection::Northeast);
+		SpawnNeighborLandscape(ECardinalDirection::Northwest);
+		SpawnNeighborLandscape(ECardinalDirection::Southeast);
+		SpawnNeighborLandscape(ECardinalDirection::Southwest);
 	}
 
 	//SpawnNeighborLandscapes();
