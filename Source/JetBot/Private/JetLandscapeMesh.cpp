@@ -3,20 +3,82 @@
 
 #include "JetLandscapeMesh.h"
 #include "Kismet/GameplayStatics.h"
+#include "Components/SphereComponent.h"
+
+namespace LandscapeVars
+{
+	FVector North = FVector(1, 0, 0);
+	FVector Northeast = FVector(1, 1, 0);
+	FVector Northwest = FVector(1, -1, 0);
+	FVector West = FVector(0, -1, 0);
+	FVector East = FVector(0, 1, 0);
+	FVector South = FVector(-1, 0, 0);
+	FVector Southwest = FVector(-1, 1, 0);
+	FVector Southeast = FVector(-1, -1, 0);
+}
 
 PRAGMA_DISABLE_OPTIMIZATION
 AJetLandscapeMesh::AJetLandscapeMesh()
 {
 	//
+	SphereCollider = CreateDefaultSubobject<USphereComponent>("SphereCollider");
+	SphereCollider->SetupAttachment(RootComponent);
+
+	SphereCollider->SetSphereRadius(100.0f);
+	SphereCollider->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	SphereCollider->SetCollisionObjectType(ECollisionChannel::ECC_EngineTraceChannel2);
+
+	SphereCollider->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+
+	SphereCollider->SetCollisionResponseToChannel(ECC_GameTraceChannel2, ECollisionResponse::ECR_Block);
+
+	SphereCollider->SetVisibility(true);
+	SphereCollider->SetHiddenInGame(false);
 }
 
 void AJetLandscapeMesh::CreateLandscape(int32 InSize)
 {
+	Vertices.Empty();
+	UVs.Empty();
+	Triangles.Empty();
 	Vertices = CreateLandscapeVertexArray(InSize);
 
 	UVs = CreateLandscapeUVArray(InSize);
 
 	Triangles = CreateLandscapeTriangleArray(InSize);
+}
+
+AJetLandscapeMesh* AJetLandscapeMesh::GetNeighborLandscape_Implementation(ECardinalDirection InNeighborDirection)
+{
+	FTransform* TransPtr = NeighborSpawnTransformMap.Find(InNeighborDirection);
+
+	if (!TransPtr)
+	{
+		return nullptr;
+	}
+
+	const FTransform& TransRef = *TransPtr;
+	FHitResult HitResult;
+
+	const FVector& NeighborLocation = GetActorLocation() + TransRef.GetLocation();
+
+	FVector TraceStart = NeighborLocation - FVector(0,0,200.0f);
+
+	FVector TraceEnd = NeighborLocation + FVector(0,0,200.0f);
+
+	FCollisionObjectQueryParams COQP = FCollisionObjectQueryParams();
+	COQP.AddObjectTypesToQuery(ECC_GameTraceChannel2);
+	FCollisionQueryParams CQP = FCollisionQueryParams();
+	CQP.AddIgnoredActor(this);
+
+	bool bGotHit = GetWorld()->LineTraceSingleByObjectType(HitResult, TraceStart, TraceEnd, COQP, CQP);
+
+	if (!bGotHit)
+	{
+		return nullptr;
+	}
+
+	return Cast<AJetLandscapeMesh>(HitResult.GetActor());
 }
 
 void AJetLandscapeMesh::SpawnNeighborLandscapes()
@@ -57,7 +119,129 @@ void AJetLandscapeMesh::SpawnNeighborLandscapes()
 
 	UGameplayStatics::FinishSpawningActor(SpawnedActor, NeighborTransform);
 
+	//AJetLandscapeMesh* Neighbor = GetNeighborLandscape(ECardinalDirection::West);
 
+	//if (Neighbor)
+	//{
+	//	//we did it!
+
+	//	int32 WeDidit = 69;
+	//}
+
+}
+
+void AJetLandscapeMesh::SpawnNeighborLandscape(ECardinalDirection InNeighborDirection)
+{
+	if (!bSpawnNeighborLandscapes)
+	{
+		return;
+	}
+
+	FVector CurrentLocation = GetActorLocation();
+
+	FTransform NeighborTransform = GetNeighborLandscapeSpawnTransform(InNeighborDirection);
+
+	NeighborTransform.SetLocation(NeighborTransform.GetLocation() + CurrentLocation);
+
+	FActorSpawnParameters ActorSpawnParams = FActorSpawnParameters();
+	UClass* LandscapeClass = AJetLandscapeMesh::StaticClass();
+
+	//Spawn the landscape deferred
+	AJetLandscapeMesh* SpawnedActor = GetWorld()->SpawnActorDeferred<AJetLandscapeMesh>(LandscapeClass, NeighborTransform);
+
+	if (!SpawnedActor)
+	{
+		return;
+	}
+
+	SpawnedActor->bAutoCreateLandscape = false;
+	SpawnedActor->LandscapeSize = LandscapeSize;
+	SpawnedActor->TileSize = TileSize;
+	SpawnedActor->HeightVariation = HeightVariation;
+
+	UGameplayStatics::FinishSpawningActor(SpawnedActor, NeighborTransform);
+
+	SpawnedActor->CreateLandscape(SpawnedActor->LandscapeSize);
+
+	int32 MaxDirection = (int32)ECardinalDirection::Northwest;
+	int32 dir = 0;
+
+	for (dir = 0; dir < MaxDirection; dir++)
+	{
+		ECardinalDirection CardDir = (ECardinalDirection)dir;
+		AJetLandscapeMesh* CurrentNeighbor = SpawnedActor->GetNeighborLandscape(CardDir);
+
+		if (CurrentNeighbor)
+		{
+			ZipNeighborLandscapes(SpawnedActor, CurrentNeighbor);
+		}
+	}
+
+	SpawnedActor->CreateMesh();
+
+	////"zip" the landscape up with its neighbors
+	//for (int32 i = 0; i < LandscapeSize + 1; i++)
+	//{
+	//	int32 SpawnedIndex = SpawnedActor->GetVertexIndex(FVector2D(i, LandscapeSize), LandscapeSize);
+
+	//	int32 ThisIndex = GetVertexIndex(FVector2D(i, 0), LandscapeSize);
+
+	//	SpawnedActor->Vertices[SpawnedIndex].Z = Vertices[ThisIndex].Z;
+	//}
+
+	//finish spawning, trigger BeginPlay() on the new landscape
+	
+}
+
+void AJetLandscapeMesh::ZipNeighborLandscapes(AJetLandscapeMesh* InLandscapeOne, AJetLandscapeMesh* InLandscapeTwo)
+{
+
+}
+
+FTransform AJetLandscapeMesh::GetNeighborLandscapeSpawnTransform(ECardinalDirection InNeighborDirection)
+{
+	FTransform* TransformPtr = NeighborSpawnTransformMap.Find(InNeighborDirection);
+
+	if (TransformPtr)
+	{
+		return *TransformPtr;
+	}
+	
+	return FTransform();
+}
+
+ECardinalDirection AJetLandscapeMesh::GetLandscapeCardinality(AJetLandscapeMesh* InLandscapeOne, AJetLandscapeMesh* InLandscapeTwo)
+{
+	FVector PosOne = InLandscapeOne->GetActorLocation();
+	FVector PosTwo = InLandscapeTwo->GetActorLocation();
+
+	FVector Dir = PosTwo - PosOne;
+
+	Dir.Z = 0;
+
+	FVector Normal = Dir.GetSafeNormal();
+
+	int32 MaxDirection = (int32)ECardinalDirection::Northwest;
+	int32 dir = 0;
+
+	for (dir = 0; dir < MaxDirection; dir++)
+	{
+		ECardinalDirection CardDir = (ECardinalDirection)dir;
+
+		FTransform* TransPtr = NeighborSpawnTransformMap.Find(CardDir);
+
+		if (TransPtr)
+		{
+			FVector CardDirVector = TransPtr->GetLocation().GetSafeNormal();
+
+			if (CardDirVector.Equals(Normal, 1.0f))
+			{
+				return CardDir;
+			}
+		}
+	}
+
+	return ECardinalDirection::None;
 }
 
 TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArray(const int32 InSize)
@@ -301,6 +485,28 @@ TArray<int32> AJetLandscapeMesh::CreateLandscapeTriangleArray(const int32 InSize
 
 void AJetLandscapeMesh::BeginPlay()
 {
+	int32 VectorScale = TileSize * LandscapeSize;
+
+	NeighborSpawnTransformMap.Add(ECardinalDirection::North, FTransform(LandscapeVars::North * VectorScale));
+	NeighborSpawnTransformMap.Add(ECardinalDirection::Northeast, FTransform(LandscapeVars::Northeast * VectorScale));
+	NeighborSpawnTransformMap.Add(ECardinalDirection::Northwest, FTransform(LandscapeVars::Northwest * VectorScale));
+	NeighborSpawnTransformMap.Add(ECardinalDirection::West, FTransform(LandscapeVars::West * VectorScale));
+	NeighborSpawnTransformMap.Add(ECardinalDirection::East, FTransform(LandscapeVars::East * VectorScale));
+	NeighborSpawnTransformMap.Add(ECardinalDirection::Southeast, FTransform(LandscapeVars::Southeast * VectorScale));
+	NeighborSpawnTransformMap.Add(ECardinalDirection::South, FTransform(LandscapeVars::South * VectorScale));
+	NeighborSpawnTransformMap.Add(ECardinalDirection::Southwest, FTransform(LandscapeVars::Southwest * VectorScale));
+
+	SphereCollider->SetSphereRadius(100.0f);
+	SphereCollider->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	SphereCollider->SetCollisionObjectType(ECC_GameTraceChannel2);
+
+	//SphereCollider->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+
+	SphereCollider->SetCollisionResponseToChannel(ECC_GameTraceChannel2, ECollisionResponse::ECR_Block);
+
+	SphereCollider->SetVisibility(true);
+	SphereCollider->SetHiddenInGame(false);
+
 	TArray<FVector> FeatureArray;
 
 	FeatureArray.Add(FVector(0, 0, 0));
@@ -315,13 +521,18 @@ void AJetLandscapeMesh::BeginPlay()
 		AddLandscapeFeature(FVector2D(0, 0), FeatureArray);
 
 		AddLandscapeFeature(FVector2D(2, 2), FeatureArray);
+
+		CreateMesh();
 	}
-	
-	CreateMesh();
 
 	Super::BeginPlay();
 
-	SpawnNeighborLandscapes();
+	if (bSpawnNeighborLandscapes)
+	{
+		SpawnNeighborLandscape(ECardinalDirection::West);
+	}
+
+	//SpawnNeighborLandscapes();
 }
 
 void AJetLandscapeMesh::AddLandscapeFeature(const FVector2D InFeatureLocation, TArray<FVector> InFeatureVertexArray)

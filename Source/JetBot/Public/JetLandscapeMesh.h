@@ -9,6 +9,23 @@
 /**
  * 
  */
+
+class USphereComponent;
+
+UENUM(BlueprintType)
+enum class ECardinalDirection : uint8
+{
+	None,
+	North,
+	Northeast,
+	East,
+	Southeast,
+	South,
+	Southwest,
+	West,
+	Northwest
+};
+
 UCLASS()
 class JETBOT_API AJetLandscapeMesh : public AJetProcMesh
 {
@@ -17,6 +34,9 @@ class JETBOT_API AJetLandscapeMesh : public AJetProcMesh
 public:
 
 	AJetLandscapeMesh();
+
+	UPROPERTY(EditDefaultsOnly, Category = "Collision")
+	USphereComponent* SphereCollider = nullptr;
 
 	/*UPROPERTY(EditAnywhere, Category = "Procedural Mesh")
 	TSubclassOf<AJetLandscapeMesh> NeighborLandscapeClass;*/
@@ -43,8 +63,27 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
 	void CreateLandscape(int32 InSize);
 
+	UFUNCTION(BlueprintCallable,BlueprintPure, BlueprintNativeEvent, Category = "Procedural Mesh")
+	AJetLandscapeMesh* GetNeighborLandscape(ECardinalDirection InNeighborDirection);
+
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
 	void SpawnNeighborLandscapes();
+
+	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
+	void SpawnNeighborLandscape(ECardinalDirection InNeighborDirection);
+
+	//"Zip" Landscape two to be congruent with landscape one
+	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
+	void ZipNeighborLandscapes(AJetLandscapeMesh* InLandscapeOne, AJetLandscapeMesh* InLandscapeTwo);
+
+	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
+	FTransform GetNeighborLandscapeSpawnTransform(ECardinalDirection InNeighborDirection);
+
+	UPROPERTY(BlueprintReadOnly, Category = "Procedural Mesh")
+	TMap<ECardinalDirection, FTransform> NeighborSpawnTransformMap;
+
+	//Returns the direction needed to get from LandscapeOne to LandscapeTwo
+	ECardinalDirection GetLandscapeCardinality(AJetLandscapeMesh* InLandscapeOne, AJetLandscapeMesh* InLandscapeTwo);
 
 	TArray<FVector> CreateLandscapeVertexArray(const int32 InSize);
 
