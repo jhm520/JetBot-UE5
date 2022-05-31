@@ -67,9 +67,9 @@ AJetLandscapeMesh* AJetLandscapeMesh::GetNeighborLandscape_Implementation(ECardi
 
 	const FVector& NeighborLocation = GetActorLocation() + TransRef.GetLocation();
 
-	FVector TraceStart = NeighborLocation - FVector(0,0,200.0f);
+	FVector TraceStart = NeighborLocation - FVector(0,0,200.0f+(HeightVariation*2));
 
-	FVector TraceEnd = NeighborLocation + FVector(0,0,200.0f);
+	FVector TraceEnd = NeighborLocation + FVector(0,0,200.0f+(HeightVariation*2));
 
 	FCollisionObjectQueryParams COQP = FCollisionObjectQueryParams();
 	COQP.AddObjectTypesToQuery(ECC_GameTraceChannel2);
@@ -116,8 +116,10 @@ void AJetLandscapeMesh::SpawnNeighborLandscape(ECardinalDirection InNeighborDire
 	FVector CurrentLocation = GetActorLocation();
 
 	FTransform NeighborTransform = GetNeighborLandscapeSpawnTransform(InNeighborDirection);
+	
+	int32 HeightMod = FMath::RandRange(-HeightVariation, HeightVariation);
 
-	NeighborTransform.SetLocation(NeighborTransform.GetLocation() + CurrentLocation);
+	NeighborTransform.SetLocation(NeighborTransform.GetLocation() + CurrentLocation + FVector(0,0,HeightMod));
 
 	FActorSpawnParameters ActorSpawnParams = FActorSpawnParameters();
 	UClass* LandscapeClass = GetClass();
@@ -187,16 +189,6 @@ void AJetLandscapeMesh::ZipNeighborLandscape(AJetLandscapeMesh* InZipper, AJetLa
 
 	bool bCorner = false;
 
-	/*if (bCorner)
-	{
-		int32 ZippeeIndex = InLandscapeTwo->GetVertexIndex(ZippeeVector * 1, LandscapeSize);
-
-		int32 ZipperIndex = InLandscapeOne->GetVertexIndex(ZipperVector * 1, LandscapeSize);
-
-		InLandscapeTwo->Vertices[ZippeeIndex].Z = Vertices[ZipperIndex].Z;
-		return;
-	}*/
-
 	if (NeighborDir == ECardinalDirection::West)
 	{
 		for (int32 i = 0; i < InZipper->LandscapeSize + 1; i++)
@@ -206,7 +198,11 @@ void AJetLandscapeMesh::ZipNeighborLandscape(AJetLandscapeMesh* InZipper, AJetLa
 
 			int32 ZipperIndex = InZipper->GetVertexIndex(FVector2D(i, 0), LandscapeSize);
 
-			InZippee->Vertices[ZippeeIndex].Z = InZipper->Vertices[ZipperIndex].Z;
+			FVector WorldZipperLoc = InZipper->GetActorTransform().TransformPosition(InZipper->Vertices[ZipperIndex]);
+			
+			FVector ZippeeRelative = InZippee->GetActorTransform().InverseTransformPosition(WorldZipperLoc);
+
+			InZippee->Vertices[ZippeeIndex].Z = ZippeeRelative.Z;
 		}
 	}
 	else if (NeighborDir == ECardinalDirection::East)
@@ -218,7 +214,11 @@ void AJetLandscapeMesh::ZipNeighborLandscape(AJetLandscapeMesh* InZipper, AJetLa
 
 			int32 ZipperIndex = InZipper->GetVertexIndex(FVector2D(i, LandscapeSize), LandscapeSize);
 
-			InZippee->Vertices[ZippeeIndex].Z = InZipper->Vertices[ZipperIndex].Z;
+			FVector WorldZipperLoc = InZipper->GetActorTransform().TransformPosition(InZipper->Vertices[ZipperIndex]);
+
+			FVector ZippeeRelative = InZippee->GetActorTransform().InverseTransformPosition(WorldZipperLoc);
+
+			InZippee->Vertices[ZippeeIndex].Z = ZippeeRelative.Z;
 		}
 	}
 	else if (NeighborDir == ECardinalDirection::North)
@@ -230,7 +230,11 @@ void AJetLandscapeMesh::ZipNeighborLandscape(AJetLandscapeMesh* InZipper, AJetLa
 
 			int32 ZipperIndex = InZipper->GetVertexIndex(FVector2D(LandscapeSize, i), LandscapeSize);
 
-			InZippee->Vertices[ZippeeIndex].Z = InZipper->Vertices[ZipperIndex].Z;
+			FVector WorldZipperLoc = InZipper->GetActorTransform().TransformPosition(InZipper->Vertices[ZipperIndex]);
+
+			FVector ZippeeRelative = InZippee->GetActorTransform().InverseTransformPosition(WorldZipperLoc);
+
+			InZippee->Vertices[ZippeeIndex].Z = ZippeeRelative.Z;
 		}
 	}
 	else if (NeighborDir == ECardinalDirection::South)
@@ -242,7 +246,11 @@ void AJetLandscapeMesh::ZipNeighborLandscape(AJetLandscapeMesh* InZipper, AJetLa
 
 			int32 ZipperIndex = InZipper->GetVertexIndex(FVector2D(0, i), LandscapeSize);
 
-			InZippee->Vertices[ZippeeIndex].Z = InZipper->Vertices[ZipperIndex].Z;
+			FVector WorldZipperLoc = InZipper->GetActorTransform().TransformPosition(InZipper->Vertices[ZipperIndex]);
+
+			FVector ZippeeRelative = InZippee->GetActorTransform().InverseTransformPosition(WorldZipperLoc);
+
+			InZippee->Vertices[ZippeeIndex].Z = ZippeeRelative.Z;
 		}
 	}
 	else if (NeighborDir == ECardinalDirection::Northwest)
@@ -251,7 +259,11 @@ void AJetLandscapeMesh::ZipNeighborLandscape(AJetLandscapeMesh* InZipper, AJetLa
 
 		int32 ZipperIndex = InZipper->GetVertexIndex(FVector2D(LandscapeSize, 0), LandscapeSize);
 
-		InZippee->Vertices[ZippeeIndex].Z = InZipper->Vertices[ZipperIndex].Z;
+		FVector WorldZipperLoc = InZipper->GetActorTransform().TransformPosition(InZipper->Vertices[ZipperIndex]);
+
+		FVector ZippeeRelative = InZippee->GetActorTransform().InverseTransformPosition(WorldZipperLoc);
+
+		InZippee->Vertices[ZippeeIndex].Z = ZippeeRelative.Z;
 	}
 	else if (NeighborDir == ECardinalDirection::Northeast)
 	{
@@ -259,7 +271,11 @@ void AJetLandscapeMesh::ZipNeighborLandscape(AJetLandscapeMesh* InZipper, AJetLa
 
 		int32 ZipperIndex = InZipper->GetVertexIndex(FVector2D(LandscapeSize, LandscapeSize), LandscapeSize);
 
-		InZippee->Vertices[ZippeeIndex].Z = InZipper->Vertices[ZipperIndex].Z;
+		FVector WorldZipperLoc = InZipper->GetActorTransform().TransformPosition(InZipper->Vertices[ZipperIndex]);
+
+		FVector ZippeeRelative = InZippee->GetActorTransform().InverseTransformPosition(WorldZipperLoc);
+
+		InZippee->Vertices[ZippeeIndex].Z = ZippeeRelative.Z;
 	}
 	else if (NeighborDir == ECardinalDirection::Southwest)
 	{
@@ -267,7 +283,11 @@ void AJetLandscapeMesh::ZipNeighborLandscape(AJetLandscapeMesh* InZipper, AJetLa
 
 		int32 ZipperIndex = InZipper->GetVertexIndex(FVector2D(0, 0), LandscapeSize);
 
-		InZippee->Vertices[ZippeeIndex].Z = InZipper->Vertices[ZipperIndex].Z;
+		FVector WorldZipperLoc = InZipper->GetActorTransform().TransformPosition(InZipper->Vertices[ZipperIndex]);
+
+		FVector ZippeeRelative = InZippee->GetActorTransform().InverseTransformPosition(WorldZipperLoc);
+
+		InZippee->Vertices[ZippeeIndex].Z = ZippeeRelative.Z;
 	}
 	else if (NeighborDir == ECardinalDirection::Southeast)
 	{
@@ -275,7 +295,11 @@ void AJetLandscapeMesh::ZipNeighborLandscape(AJetLandscapeMesh* InZipper, AJetLa
 
 		int32 ZipperIndex = InZipper->GetVertexIndex(FVector2D(0, LandscapeSize), LandscapeSize);
 
-		InZippee->Vertices[ZippeeIndex].Z = InZipper->Vertices[ZipperIndex].Z;
+		FVector WorldZipperLoc = InZipper->GetActorTransform().TransformPosition(InZipper->Vertices[ZipperIndex]);
+
+		FVector ZippeeRelative = InZippee->GetActorTransform().InverseTransformPosition(WorldZipperLoc);
+
+		InZippee->Vertices[ZippeeIndex].Z = ZippeeRelative.Z;
 	}
 }
 
