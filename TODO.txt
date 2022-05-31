@@ -4,4 +4,10 @@ TODO: Experiment with different approach to world tile spawning
 	
 	New Approach: Start with a flat tile, and for each of its neighbors, choose what terrain shape it will be: flat, ramp up, ramp down, ramp up 2x, ramp down 2x, wall, low wall, high wall. For each of those scenarios, choose a different set of tile classes that fit that type, then go through the normal spawning procedure with that customized set of tile classes
 
-TODO: Generate multiple vertices for each face so that UV can be wrapped properly on each face
+We're now using procedural mesh
+
+DONE: Generate multiple vertices for each face so that UV can be wrapped properly on each face
+TODO: Spawn neighboring landscapes when a player enters a landscape
+	Keep a running list of all the landscapes
+	When a player's position updates and registers that they are within a landscape, spawn that landscape's neighbors
+	Sort tiles by distanc eascending, per each player, non replicated, when going through the tiles. Will greatly reduce each frame's iterations of the location update register loop
