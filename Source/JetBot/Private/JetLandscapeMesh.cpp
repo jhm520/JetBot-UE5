@@ -369,6 +369,16 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArray(const int32 InSize
 		{
 			int32 RandInt = FMath::RandRange(-HeightVariation, HeightVariation);
 
+			int32 HeightMod = RandInt;
+			if (x > 0 && y > 0)
+			{
+				int32 xPre = GetVertexIndex(FVector2D(x - 1, y), InSize);
+
+				int32 yPre = GetVertexIndex(FVector2D(x, y-1), InSize);
+
+				HeightMod = HeightMod + ((OutVertexArray[xPre].Z + OutVertexArray[yPre].Z) / 2);
+			}
+
 			OutVertexArray.Add(FVector(x * TileSize, y * TileSize, RandInt));
 
 			VertexIndexMap.Add(FVector2D(x, y), i);
