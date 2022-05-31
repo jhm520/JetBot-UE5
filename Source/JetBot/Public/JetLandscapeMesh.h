@@ -41,19 +41,25 @@ public:
 	/*UPROPERTY(EditAnywhere, Category = "Procedural Mesh")
 	TSubclassOf<AJetLandscapeMesh> NeighborLandscapeClass;*/
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Procedural Mesh")
-	bool bSpawnNeighborLandscapes = false;
+	UFUNCTION(BlueprintCallable, Category = "Landscape")
+	void OnPlayerEnteredLandscape(ACharacter* InPlayer);
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Procedural Mesh")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Landscape")
+	bool bSpawnNeighborLandscapesAtBeginPlay = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Landscape")
+	bool bHasSpawnedNeighborLandscapes = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Landscape")
 	bool bAutoCreateLandscape = true;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Mesh")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
 	int32 LandscapeSize = 4;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Mesh")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
 	int32 HeightVariation = 50;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Mesh")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
 	int32 TileSize = 100;
 
 	//a map from cartesian coordinates to vertex index

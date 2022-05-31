@@ -36,6 +36,11 @@ AJetLandscapeMesh::AJetLandscapeMesh()
 	SphereCollider->SetHiddenInGame(false);
 }
 
+void AJetLandscapeMesh::OnPlayerEnteredLandscape(ACharacter* InPlayer)
+{
+	SpawnNeighborLandscapes();
+}
+
 void AJetLandscapeMesh::CreateLandscape(int32 InSize)
 {
 	Vertices.Empty();
@@ -83,56 +88,27 @@ AJetLandscapeMesh* AJetLandscapeMesh::GetNeighborLandscape_Implementation(ECardi
 
 void AJetLandscapeMesh::SpawnNeighborLandscapes()
 {
-	if (!bSpawnNeighborLandscapes)
+	if (!bHasSpawnedNeighborLandscapes)
 	{
-		return;
+		SpawnNeighborLandscape(ECardinalDirection::South);
+		SpawnNeighborLandscape(ECardinalDirection::West);
+		SpawnNeighborLandscape(ECardinalDirection::East);
+		SpawnNeighborLandscape(ECardinalDirection::North);
+		SpawnNeighborLandscape(ECardinalDirection::Northeast);
+		SpawnNeighborLandscape(ECardinalDirection::Northwest);
+		SpawnNeighborLandscape(ECardinalDirection::Southeast);
+		SpawnNeighborLandscape(ECardinalDirection::Southwest);
+
+		bHasSpawnedNeighborLandscapes = true;
 	}
-	FVector CurrentLocation = GetActorLocation();
-
-	FVector NeighborLocation = CurrentLocation + (FVector(0, -1, 0) * LandscapeSize * TileSize);
-
-	FTransform NeighborTransform = GetActorTransform();
-
-	NeighborTransform.SetLocation(NeighborLocation);
-
-	FActorSpawnParameters ActorSpawnParams = FActorSpawnParameters();
-	UClass* LandscapeClass = AJetLandscapeMesh::StaticClass();
-
-	AJetLandscapeMesh* SpawnedActor = GetWorld()->SpawnActorDeferred<AJetLandscapeMesh>(LandscapeClass, NeighborTransform);
-
-	SpawnedActor->bAutoCreateLandscape = false;
-	SpawnedActor->LandscapeSize = LandscapeSize;
-	SpawnedActor->TileSize = TileSize;
-	SpawnedActor->HeightVariation = HeightVariation;
-
-	SpawnedActor->CreateLandscape(SpawnedActor->LandscapeSize);
-
-	for (int32 i = 0; i < LandscapeSize + 1; i++)
-	{
-		int32 SpawnedIndex = SpawnedActor->GetVertexIndex(FVector2D(i, LandscapeSize), LandscapeSize);
-
-		int32 ThisIndex = GetVertexIndex(FVector2D(i, 0), LandscapeSize);
-
-		SpawnedActor->Vertices[SpawnedIndex].Z = Vertices[ThisIndex].Z;
-	}
-
-
-	UGameplayStatics::FinishSpawningActor(SpawnedActor, NeighborTransform);
-
-	//AJetLandscapeMesh* Neighbor = GetNeighborLandscape(ECardinalDirection::West);
-
-	//if (Neighbor)
-	//{
-	//	//we did it!
-
-	//	int32 WeDidit = 69;
-	//}
-
 }
 
 void AJetLandscapeMesh::SpawnNeighborLandscape(ECardinalDirection InNeighborDirection)
 {
-	if (!bSpawnNeighborLandscapes)
+	//if the neighbor landscape already exists, we don't need to spawn it, return
+	AJetLandscapeMesh* NeighborLandscape = GetNeighborLandscape(InNeighborDirection);
+
+	if (NeighborLandscape)
 	{
 		return;
 	}
@@ -144,7 +120,7 @@ void AJetLandscapeMesh::SpawnNeighborLandscape(ECardinalDirection InNeighborDire
 	NeighborTransform.SetLocation(NeighborTransform.GetLocation() + CurrentLocation);
 
 	FActorSpawnParameters ActorSpawnParams = FActorSpawnParameters();
-	UClass* LandscapeClass = AJetLandscapeMesh::StaticClass();
+	UClass* LandscapeClass = GetClass();
 
 	//Spawn the landscape deferred
 	AJetLandscapeMesh* SpawnedActor = GetWorld()->SpawnActorDeferred<AJetLandscapeMesh>(LandscapeClass, NeighborTransform);
@@ -632,19 +608,10 @@ void AJetLandscapeMesh::BeginPlay()
 
 	Super::BeginPlay();
 
-	if (bSpawnNeighborLandscapes)
+	if (bSpawnNeighborLandscapesAtBeginPlay)
 	{
-		SpawnNeighborLandscape(ECardinalDirection::South);
-		SpawnNeighborLandscape(ECardinalDirection::West);
-		SpawnNeighborLandscape(ECardinalDirection::East);
-		SpawnNeighborLandscape(ECardinalDirection::North);
-		SpawnNeighborLandscape(ECardinalDirection::Northeast);
-		SpawnNeighborLandscape(ECardinalDirection::Northwest);
-		SpawnNeighborLandscape(ECardinalDirection::Southeast);
-		SpawnNeighborLandscape(ECardinalDirection::Southwest);
+		SpawnNeighborLandscapes();
 	}
-
-	//SpawnNeighborLandscapes();
 }
 
 void AJetLandscapeMesh::AddLandscapeFeature(const FVector2D InFeatureLocation, TArray<FVector> InFeatureVertexArray)
