@@ -7,12 +7,39 @@
 #include "ProceduralMeshComponent.h"
 #include "JetProcMesh.generated.h"
 
+USTRUCT(BlueprintType)
+struct FProcMeshData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite, Category = "Procedural Mesh")
+	FTransform SpawnTransform = FTransform();
+
+	UPROPERTY(BlueprintReadWrite, Category = "Procedural Mesh")
+	TArray<FVector> Vertices;
+
+	UPROPERTY(BlueprintReadWrite, Category = "Procedural Mesh")
+	TArray<int32> Triangles;
+
+	UPROPERTY(BlueprintReadWrite, Category = "Procedural Mesh")
+	TArray<FVector2D> UVs;
+
+	UPROPERTY(BlueprintReadWrite, Category = "Procedural Mesh")
+	TMap<FVector2D, int32> VertexIndexMap;
+
+
+	FProcMeshData() {}
+};
+
 UCLASS()
 class JETBOT_API AJetProcMesh : public AActor
 {
 	GENERATED_BODY()
 
 public:
+
+	UPROPERTY(BlueprintReadWrite, Category = "Procedural Mesh")
+		FProcMeshData ProcMeshData;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Mesh")
 		TArray<FVector> Vertices;

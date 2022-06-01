@@ -11,3 +11,12 @@ TODO: Spawn neighboring landscapes when a player enters a landscape
 	Keep a running list of all the landscapes
 	When a player's position updates and registers that they are within a landscape, spawn that landscape's neighbors
 	Sort tiles by distanc eascending, per each player, non replicated, when going through the tiles. Will greatly reduce each frame's iterations of the location update register loop
+
+DONE: Implement height differential
+DONE: Delete far away landscapes and save their data to be respawned upon getting close again
+	Deleting far away landscapes:
+		Upon entering a new landscape, get all the neighbors from the previous tile, and all the neighbors of the new tile. Subtract the new neighbors from the previous neighbors, and what is left of the previous neighbors, delete those tiles.
+
+		Upon entering a new landscape, when spawning the neighbors, check if the landscape tile is contained within ProcMeshDataMap. If it is, spawn the landscape using that data.
+TODO: Landscape code cleanup
+	

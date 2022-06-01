@@ -44,6 +44,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Landscape")
 	void OnPlayerEnteredLandscape(ACharacter* InPlayer);
 
+	UFUNCTION(BlueprintCallable, Category = "Landscape")
+	void OnPlayerExitedLandscape(ACharacter* InPlayer, AJetLandscapeMesh* NewLandscape);
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Landscape")
 	bool bSpawnNeighborLandscapesAtBeginPlay = false;
 
@@ -76,7 +79,13 @@ public:
 	void SpawnNeighborLandscapes();
 
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
+	TArray<AJetLandscapeMesh*> GetAllNeighborLandscapes();
+
+	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
 	void SpawnNeighborLandscape(ECardinalDirection InNeighborDirection);
+
+	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
+	void SpawnLandscapeWithData(const FProcMeshData& InProcMeshData);
 
 	//"Zip" Landscape two to be congruent with landscape one
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
@@ -103,4 +112,7 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason);
+
 };

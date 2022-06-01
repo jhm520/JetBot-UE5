@@ -3,6 +3,8 @@
 
 #include "JetLandscapeMesh.h"
 #include "Kismet/GameplayStatics.h"
+#include "../JetBot.h"
+#include "JetGameState.h"
 #include "Components/SphereComponent.h"
 
 namespace LandscapeVars
@@ -21,6 +23,8 @@ PRAGMA_DISABLE_OPTIMIZATION
 AJetLandscapeMesh::AJetLandscapeMesh()
 {
 	//
+	PrimaryActorTick.bCanEverTick = false;
+
 	SphereCollider = CreateDefaultSubobject<USphereComponent>("SphereCollider");
 	SphereCollider->SetupAttachment(RootComponent);
 
@@ -32,13 +36,52 @@ AJetLandscapeMesh::AJetLandscapeMesh()
 
 	SphereCollider->SetCollisionResponseToChannel(ECC_GameTraceChannel2, ECollisionResponse::ECR_Block);
 
-	SphereCollider->SetVisibility(true);
-	SphereCollider->SetHiddenInGame(false);
+	SphereCollider->SetVisibility(false);
+	SphereCollider->SetHiddenInGame(true);
 }
 
 void AJetLandscapeMesh::OnPlayerEnteredLandscape(ACharacter* InPlayer)
 {
+	if (!InPlayer || !InPlayer->IsLocallyControlled())
+	{
+		return;
+	}
+
 	SpawnNeighborLandscapes();
+}
+
+void AJetLandscapeMesh::OnPlayerExitedLandscape(ACharacter* InPlayer, AJetLandscapeMesh* NewLandscape)
+{
+	if (!InPlayer || !InPlayer->IsLocallyControlled())
+	{
+		return;
+	}
+
+	if (!NewLandscape)
+	{
+		return;
+	}
+
+	TArray<AJetLandscapeMesh*> OldNeighbors = GetAllNeighborLandscapes();
+
+	TArray<AJetLandscapeMesh*> NewNeighbors = NewLandscape->GetAllNeighborLandscapes();
+
+	bHasSpawnedNeighborLandscapes = false;
+
+	OldNeighbors.Remove(NewLandscape);
+
+	for (AJetLandscapeMesh* Land : NewNeighbors)
+	{
+		OldNeighbors.Remove(Land);
+	}
+
+	for (AJetLandscapeMesh* OldNeighbor : OldNeighbors)
+	{
+		if (OldNeighbor)
+		{
+			OldNeighbor->Destroy();
+		}
+	}
 }
 
 void AJetLandscapeMesh::CreateLandscape(int32 InSize)
@@ -103,6 +146,22 @@ void AJetLandscapeMesh::SpawnNeighborLandscapes()
 	}
 }
 
+TArray<AJetLandscapeMesh*> AJetLandscapeMesh::GetAllNeighborLandscapes()
+{
+	TArray<AJetLandscapeMesh*> OutLandscapes;
+
+	OutLandscapes.Add(GetNeighborLandscape(ECardinalDirection::Northeast));
+	OutLandscapes.Add(GetNeighborLandscape(ECardinalDirection::North));
+	OutLandscapes.Add(GetNeighborLandscape(ECardinalDirection::Northwest));
+	OutLandscapes.Add(GetNeighborLandscape(ECardinalDirection::East));
+	OutLandscapes.Add(GetNeighborLandscape(ECardinalDirection::West));
+	OutLandscapes.Add(GetNeighborLandscape(ECardinalDirection::Southeast));
+	OutLandscapes.Add(GetNeighborLandscape(ECardinalDirection::South));
+	OutLandscapes.Add(GetNeighborLandscape(ECardinalDirection::Southwest));
+
+	return OutLandscapes;
+}
+
 void AJetLandscapeMesh::SpawnNeighborLandscape(ECardinalDirection InNeighborDirection)
 {
 	//if the neighbor landscape already exists, we don't need to spawn it, return
@@ -116,10 +175,27 @@ void AJetLandscapeMesh::SpawnNeighborLandscape(ECardinalDirection InNeighborDire
 	FVector CurrentLocation = GetActorLocation();
 
 	FTransform NeighborTransform = GetNeighborLandscapeSpawnTransform(InNeighborDirection);
-	
+	NeighborTransform.SetLocation(NeighborTransform.GetLocation() + CurrentLocation);
+
 	int32 HeightMod = FMath::RandRange(-HeightVariation, HeightVariation);
 
-	NeighborTransform.SetLocation(NeighborTransform.GetLocation() + CurrentLocation + FVector(0,0,HeightMod));
+	NeighborTransform.SetLocation(NeighborTransform.GetLocation() + FVector(0, 0, HeightMod));
+
+	//Search for the previously spawned landscape, spawn with that data if found
+	AJetGameState* GameState = Cast<AJetGameState>(GetWorld()->GetGameState());
+
+	if (GameState)
+	{
+		FProcMeshData* DataPtr = GameState->LandscapeDataMap.Find(NeighborTransform.GetLocation() * FVector(1,1,0));
+
+		if (DataPtr)
+		{
+			SpawnLandscapeWithData(*DataPtr);
+			return;
+		}
+	}
+	
+	
 
 	FActorSpawnParameters ActorSpawnParams = FActorSpawnParameters();
 	UClass* LandscapeClass = GetClass();
@@ -159,6 +235,19 @@ void AJetLandscapeMesh::SpawnNeighborLandscape(ECardinalDirection InNeighborDire
 
 	SpawnedActor->CreateMesh();
 
+	GameState = Cast<AJetGameState>(GetWorld()->GetGameState());
+
+	if (GameState)
+	{
+		SpawnedActor->ProcMeshData.SpawnTransform = NeighborTransform;
+		SpawnedActor->ProcMeshData.Vertices = SpawnedActor->Vertices;
+		SpawnedActor->ProcMeshData.UVs = SpawnedActor->UVs;
+		SpawnedActor->ProcMeshData.Triangles = SpawnedActor->Triangles;
+		SpawnedActor->ProcMeshData.VertexIndexMap = SpawnedActor->VertexIndexMap;
+
+		GameState->OnLandscapeSpawned(SpawnedActor, SpawnedActor->ProcMeshData);
+	}
+
 	////"zip" the landscape up with its neighbors
 	//for (int32 i = 0; i < LandscapeSize + 1; i++)
 	//{
@@ -171,6 +260,47 @@ void AJetLandscapeMesh::SpawnNeighborLandscape(ECardinalDirection InNeighborDire
 
 	//finish spawning, trigger BeginPlay() on the new landscape
 	
+}
+
+void AJetLandscapeMesh::SpawnLandscapeWithData(const FProcMeshData& InProcMeshData)
+{
+	FActorSpawnParameters ActorSpawnParams = FActorSpawnParameters();
+	UClass* LandscapeClass = GetClass();
+
+	//Spawn the landscape deferred
+	AJetLandscapeMesh* SpawnedActor = GetWorld()->SpawnActorDeferred<AJetLandscapeMesh>(LandscapeClass, InProcMeshData.SpawnTransform);
+
+	if (!SpawnedActor)
+	{
+		return;
+	}
+
+	SpawnedActor->bAutoCreateLandscape = false;
+	SpawnedActor->LandscapeSize = LandscapeSize;
+	SpawnedActor->TileSize = TileSize;
+	SpawnedActor->HeightVariation = HeightVariation;
+
+	UGameplayStatics::FinishSpawningActor(SpawnedActor, InProcMeshData.SpawnTransform);
+
+	SpawnedActor->Vertices = InProcMeshData.Vertices;
+	SpawnedActor->UVs = InProcMeshData.UVs;
+	SpawnedActor->Triangles = InProcMeshData.Triangles;
+	SpawnedActor->VertexIndexMap = InProcMeshData.VertexIndexMap;
+
+	SpawnedActor->CreateMesh();
+
+	AJetGameState* GameState = Cast<AJetGameState>(GetWorld()->GetGameState());
+
+	if (GameState)
+	{
+		SpawnedActor->ProcMeshData.SpawnTransform = InProcMeshData.SpawnTransform;
+		SpawnedActor->ProcMeshData.Vertices = SpawnedActor->Vertices;
+		SpawnedActor->ProcMeshData.UVs = SpawnedActor->UVs;
+		SpawnedActor->ProcMeshData.Triangles = SpawnedActor->Triangles;
+		SpawnedActor->ProcMeshData.VertexIndexMap = SpawnedActor->VertexIndexMap;
+
+		GameState->OnLandscapeSpawned(SpawnedActor, SpawnedActor->ProcMeshData);
+	}
 }
 
 void AJetLandscapeMesh::ZipNeighborLandscape(AJetLandscapeMesh* InZipper, AJetLandscapeMesh* InZippee)
@@ -197,6 +327,16 @@ void AJetLandscapeMesh::ZipNeighborLandscape(AJetLandscapeMesh* InZipper, AJetLa
 			int32 ZippeeIndex = InZippee->GetVertexIndex(FVector2D(i, LandscapeSize), LandscapeSize);
 
 			int32 ZipperIndex = InZipper->GetVertexIndex(FVector2D(i, 0), LandscapeSize);
+
+			if (ZippeeIndex < 0)
+			{
+				continue;
+			}
+
+			if (ZipperIndex < 0)
+			{
+				continue;
+			}
 
 			FVector WorldZipperLoc = InZipper->GetActorTransform().TransformPosition(InZipper->Vertices[ZipperIndex]);
 			
@@ -638,7 +778,21 @@ void AJetLandscapeMesh::BeginPlay()
 		AddLandscapeFeature(FVector2D(2, 2), FeatureArray);
 
 		CreateMesh();
+
+		AJetGameState* GameState = Cast<AJetGameState>(GetWorld()->GetGameState());
+
+		if (GameState)
+		{
+			ProcMeshData.SpawnTransform = GetActorTransform();
+			ProcMeshData.Vertices = Vertices;
+			ProcMeshData.UVs = UVs;
+			ProcMeshData.Triangles = Triangles;
+
+			GameState->OnLandscapeSpawned(this, ProcMeshData);
+		}
 	}
+
+	
 
 	Super::BeginPlay();
 
@@ -646,6 +800,18 @@ void AJetLandscapeMesh::BeginPlay()
 	{
 		SpawnNeighborLandscapes();
 	}
+}
+
+void AJetLandscapeMesh::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	AJetGameState* GameState = Cast<AJetGameState>(GetWorld()->GetGameState());
+
+	if (GameState)
+	{
+		GameState->OnLandscapeDestroyed(this, ProcMeshData);
+	}
+
+	Super::EndPlay(EndPlayReason);
 }
 
 void AJetLandscapeMesh::AddLandscapeFeature(const FVector2D InFeatureLocation, TArray<FVector> InFeatureVertexArray)
