@@ -84,8 +84,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
 	void SpawnNeighborLandscape(ECardinalDirection InNeighborDirection);
 
-	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
-	void SpawnLandscapeWithData(const FProcMeshData& InProcMeshData);
+	UFUNCTION(BlueprintCallable, meta = (WorldContext = "WorldContextObject"), Category = "Procedural Mesh")
+	static void SpawnLandscapeWithData(UObject* WorldContextObject, const FProcMeshData& InProcMeshData, int32 InLandscapeSize, int32 InTileSize, int32 InHeightVariation);
 
 	//"Zip" Landscape two to be congruent with landscape one
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")

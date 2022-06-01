@@ -19,4 +19,5 @@ DONE: Delete far away landscapes and save their data to be respawned upon gettin
 
 		Upon entering a new landscape, when spawning the neighbors, check if the landscape tile is contained within ProcMeshDataMap. If it is, spawn the landscape using that data.
 TODO: Landscape code cleanup
+TODO: Rename FProcMeshData to FLandscapeData
 	

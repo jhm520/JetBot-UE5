@@ -190,7 +190,7 @@ void AJetLandscapeMesh::SpawnNeighborLandscape(ECardinalDirection InNeighborDire
 
 		if (DataPtr)
 		{
-			SpawnLandscapeWithData(*DataPtr);
+			SpawnLandscapeWithData(this, *DataPtr, LandscapeSize, TileSize, HeightVariation);
 			return;
 		}
 	}
@@ -262,13 +262,13 @@ void AJetLandscapeMesh::SpawnNeighborLandscape(ECardinalDirection InNeighborDire
 	
 }
 
-void AJetLandscapeMesh::SpawnLandscapeWithData(const FProcMeshData& InProcMeshData)
+void AJetLandscapeMesh::SpawnLandscapeWithData(UObject* WorldContextObject, const FProcMeshData& InProcMeshData, int32 InLandscapeSize, int32 InTileSize, int32 InHeightVariation)
 {
 	FActorSpawnParameters ActorSpawnParams = FActorSpawnParameters();
-	UClass* LandscapeClass = GetClass();
+	UClass* LandscapeClass = WorldContextObject->GetClass();
 
 	//Spawn the landscape deferred
-	AJetLandscapeMesh* SpawnedActor = GetWorld()->SpawnActorDeferred<AJetLandscapeMesh>(LandscapeClass, InProcMeshData.SpawnTransform);
+	AJetLandscapeMesh* SpawnedActor = WorldContextObject->GetWorld()->SpawnActorDeferred<AJetLandscapeMesh>(LandscapeClass, InProcMeshData.SpawnTransform);
 
 	if (!SpawnedActor)
 	{
@@ -276,9 +276,9 @@ void AJetLandscapeMesh::SpawnLandscapeWithData(const FProcMeshData& InProcMeshDa
 	}
 
 	SpawnedActor->bAutoCreateLandscape = false;
-	SpawnedActor->LandscapeSize = LandscapeSize;
-	SpawnedActor->TileSize = TileSize;
-	SpawnedActor->HeightVariation = HeightVariation;
+	SpawnedActor->LandscapeSize = InLandscapeSize;
+	SpawnedActor->TileSize = InTileSize;
+	SpawnedActor->HeightVariation = InHeightVariation;
 
 	UGameplayStatics::FinishSpawningActor(SpawnedActor, InProcMeshData.SpawnTransform);
 
@@ -289,7 +289,7 @@ void AJetLandscapeMesh::SpawnLandscapeWithData(const FProcMeshData& InProcMeshDa
 
 	SpawnedActor->CreateMesh();
 
-	AJetGameState* GameState = Cast<AJetGameState>(GetWorld()->GetGameState());
+	AJetGameState* GameState = Cast<AJetGameState>(WorldContextObject->GetWorld()->GetGameState());
 
 	if (GameState)
 	{
