@@ -7,6 +7,18 @@
 #include "ProceduralMeshComponent.h"
 #include "JetProcMesh.generated.h"
 
+//A struct to contain the vertex map for a single face of a Proc mesh
+USTRUCT(Blueprintable)
+struct FProcMeshFaceVertexMap
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite, Category = "Procedural Mesh")
+	TMap<FVector, int32> VertexIndexMap;
+
+	FProcMeshFaceVertexMap() {};
+};
+
 USTRUCT(BlueprintType)
 struct FProcMeshData
 {
@@ -32,18 +44,6 @@ struct FProcMeshData
 
 
 	FProcMeshData() {}
-};
-
-//A struct to contain the vertex map for a single face of a Proc mesh
-USTRUCT(Blueprintable)
-struct FProcMeshFaceVertexMap
-{
-	GENERATED_BODY()
-
-	UPROPERTY(BlueprintReadWrite, Category = "Procedural Mesh")
-	TMap<FVector, int32> VertexIndexMap;
-
-	FCuboidVertexArray() {};
 };
 
 UCLASS()

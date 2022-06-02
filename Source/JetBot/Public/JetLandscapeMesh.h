@@ -103,11 +103,11 @@ public:
 	//Returns the direction needed to get from LandscapeOne to LandscapeTwo
 	ECardinalDirection GetNeighborCardinality(AJetLandscapeMesh* InLandscapeOne, AJetLandscapeMesh* InLandscapeTwo);
 
-	TArray<FVector> CreateLandscapeVertexArray(const int32 InSize);
+	TArray<FVector> CreateLandscapeVertexArray(int32 InLandscapeSize, int32 InTileSize, int32 InHeightVariation);
 
-	TArray<FVector2D> CreateLandscapeUVArray(const int32 InSize);
+	TArray<FVector2D> CreateLandscapeUVArray(int32 InLandscapeSize, int32 InTileSize, int32 InHeightVariation);
 
-	TArray<int32> CreateLandscapeTriangleArray(const int32 InSize);
+	TArray<int32> CreateLandscapeTriangleArray(int32 InLandscapeSize, int32 InTileSize, int32 InHeightVariation);
 
 	void AddLandscapeFeature(const FVector2D InFeatureLocation, TArray<FVector> InFeatureVertexArray);
 

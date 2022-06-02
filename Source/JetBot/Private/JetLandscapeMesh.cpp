@@ -89,11 +89,11 @@ void AJetLandscapeMesh::CreateLandscape(int32 InSize)
 	Vertices.Empty();
 	UVs.Empty();
 	Triangles.Empty();
-	Vertices = CreateLandscapeVertexArray(InSize);
+	Vertices = CreateLandscapeVertexArray(LandscapeSize, TileSize, HeightVariation);
 
-	UVs = CreateLandscapeUVArray(InSize);
+	UVs = CreateLandscapeUVArray(LandscapeSize, TileSize, HeightVariation);
 
-	Triangles = CreateLandscapeTriangleArray(InSize);
+	Triangles = CreateLandscapeTriangleArray(LandscapeSize, TileSize, HeightVariation);
 }
 
 FProcMeshData AJetLandscapeMesh::CreateLandscapeData(int32 InLandscapeSize, int32 InTileSize, int32 InHeightVariation)
@@ -101,7 +101,7 @@ FProcMeshData AJetLandscapeMesh::CreateLandscapeData(int32 InLandscapeSize, int3
 
 	FProcMeshData OutProcMeshData;
 
-	//OutProcMeshData.Vertices = CreateLandscapeVertexArray()
+	OutProcMeshData.Vertices = CreateLandscapeVertexArray(InLandscapeSize, InTileSize, InHeightVariation);
 
 	return OutProcMeshData;
 }
@@ -257,18 +257,6 @@ void AJetLandscapeMesh::SpawnNeighborLandscape(ECardinalDirection InNeighborDire
 
 		GameState->OnLandscapeSpawned(SpawnedActor, SpawnedActor->ProcMeshData);
 	}
-
-	////"zip" the landscape up with its neighbors
-	//for (int32 i = 0; i < LandscapeSize + 1; i++)
-	//{
-	//	int32 SpawnedIndex = SpawnedActor->GetVertexIndex(FVector2D(i, LandscapeSize), LandscapeSize);
-
-	//	int32 ThisIndex = GetVertexIndex(FVector2D(i, 0), LandscapeSize);
-
-	//	SpawnedActor->Vertices[SpawnedIndex].Z = Vertices[ThisIndex].Z;
-	//}
-
-	//finish spawning, trigger BeginPlay() on the new landscape
 	
 }
 
@@ -499,17 +487,17 @@ ECardinalDirection AJetLandscapeMesh::GetNeighborCardinality(AJetLandscapeMesh* 
 	return ECardinalDirection::None;
 }
 
-TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArray(const int32 InSize)
+TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArray(int32 InLandscapeSize, int32 InTileSize, int32 InHeightVariation)
 {
-	int32 VertexNum = (InSize + 1) * (InSize + 1);
+	int32 VertexNum = (InLandscapeSize + 1) * (InLandscapeSize + 1);
 
 	int32 x = 0;
 	int32 y = 0;
 
 	TArray<FVector> OutVertexArray;
 
-	int32 XDim = InSize + 1;
-	int32 YDim = InSize + 1;
+	int32 XDim = InLandscapeSize + 1;
+	int32 YDim = InLandscapeSize + 1;
 
 	int32 i = 0;
 
@@ -522,9 +510,9 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArray(const int32 InSize
 			int32 HeightMod = RandInt;
 			if (x > 0 && y > 0)
 			{
-				int32 xPre = GetVertexIndex(FVector2D(x - 1, y), InSize);
+				int32 xPre = GetVertexIndex(FVector2D(x - 1, y), InLandscapeSize);
 
-				int32 yPre = GetVertexIndex(FVector2D(x, y-1), InSize);
+				int32 yPre = GetVertexIndex(FVector2D(x, y-1), InLandscapeSize);
 
 				HeightMod = HeightMod + ((OutVertexArray[xPre].Z + OutVertexArray[yPre].Z) / 2);
 			}
@@ -537,28 +525,12 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArray(const int32 InSize
 		}
 	}
 
-	//for (i = 0; i < VertexNum; i++)
-	//{
-	//	//Height variation adds a degree of randomness to the landscape geometry
-	//	int32 RandInt = FMath::RandRange(-HeightVariation, HeightVariation);
-
-	//	OutVertexArray.Add(FVector(x * TileSize, y * TileSize, RandInt));
-
-	//	x++;
-
-	//	if (x >= InSize + 1)
-	//	{
-	//		x = 0;
-	//		y++;
-	//	}
-	//}
-
 	return OutVertexArray;
 }
 
-TArray<FVector2D> AJetLandscapeMesh::CreateLandscapeUVArray(const int32 InSize)
+TArray<FVector2D> AJetLandscapeMesh::CreateLandscapeUVArray(int32 InLandscapeSize, int32 InTileSize, int32 InHeightVariation)
 {
-	int32 VertexNum = (InSize + 1) * (InSize + 1);
+	int32 VertexNum = (InLandscapeSize + 1) * (InLandscapeSize + 1);
 
 	int32 x = 0;
 	int32 y = 0;
@@ -567,8 +539,8 @@ TArray<FVector2D> AJetLandscapeMesh::CreateLandscapeUVArray(const int32 InSize)
 
 	int32 i = 0;
 
-	int32 XDim = InSize + 1;
-	int32 YDim = InSize + 1;
+	int32 XDim = InLandscapeSize + 1;
+	int32 YDim = InLandscapeSize + 1;
 
 	for (y = 0; y < YDim; y++)
 	{
@@ -578,26 +550,13 @@ TArray<FVector2D> AJetLandscapeMesh::CreateLandscapeUVArray(const int32 InSize)
 		}
 	}
 
-	//for ( i < VertexNum; i++)
-	//{
-	//	OutUVArray.Add(FVector2D(x, y));
-
-	//	x++;
-
-	//	if (x >= InSize + 1)
-	//	{
-	//		x = 0;
-	//		y++;
-	//	}
-	//}
-
 	return OutUVArray;
 }
 
-TArray<int32> AJetLandscapeMesh::CreateLandscapeTriangleArray(const int32 InSize)
+TArray<int32> AJetLandscapeMesh::CreateLandscapeTriangleArray(int32 InLandscapeSize, int32 InTileSize, int32 InHeightVariation)
 {
 
-	int32 VertexNum = (InSize + 1) * (InSize + 1);
+	int32 VertexNum = (InLandscapeSize + 1) * (InLandscapeSize + 1);
 
 	int32 x = 0;
 	int32 y = 0;
@@ -608,27 +567,27 @@ TArray<int32> AJetLandscapeMesh::CreateLandscapeTriangleArray(const int32 InSize
 
 	bool bReversed = false;
 
-	bool bEven = (InSize % 2) == 0;
+	bool bEven = (InLandscapeSize % 2) == 0;
 
-	for (y = 0; y < InSize + 1; y++)
+	for (y = 0; y < InLandscapeSize + 1; y++)
 	{
-		for (x = 0; x < InSize + 1; x++)
+		for (x = 0; x < InLandscapeSize + 1; x++)
 		{
 			TArray<int32> CurrentTriangles;
 
 			if (!bReverseTriangles)
 			{
-				int32 IndexOne = GetVertexIndex(FVector2D(x, y), InSize);
-				int32 IndexTwo = GetVertexIndex(FVector2D(x, y + 1), InSize);
-				int32 IndexThree = GetVertexIndex(FVector2D(x + 1, y + 1), InSize);
+				int32 IndexOne = GetVertexIndex(FVector2D(x, y), InLandscapeSize);
+				int32 IndexTwo = GetVertexIndex(FVector2D(x, y + 1), InLandscapeSize);
+				int32 IndexThree = GetVertexIndex(FVector2D(x + 1, y + 1), InLandscapeSize);
 
 				CurrentTriangles.Add(IndexOne);
 				CurrentTriangles.Add(IndexTwo);
 				CurrentTriangles.Add(IndexThree);
 
-				int32 IndexFour = GetVertexIndex(FVector2D(x, y), InSize);
-				int32 IndexFive = GetVertexIndex(FVector2D(x + 1, y + 1), InSize);
-				int32 IndexSix = GetVertexIndex(FVector2D(x + 1, y), InSize);
+				int32 IndexFour = GetVertexIndex(FVector2D(x, y), InLandscapeSize);
+				int32 IndexFive = GetVertexIndex(FVector2D(x + 1, y + 1), InLandscapeSize);
+				int32 IndexSix = GetVertexIndex(FVector2D(x + 1, y), InLandscapeSize);
 
 				CurrentTriangles.Add(IndexFour);
 				CurrentTriangles.Add(IndexFive);
@@ -641,34 +600,21 @@ TArray<int32> AJetLandscapeMesh::CreateLandscapeTriangleArray(const int32 InSize
 				*/
 
 
-				int32 IndexOne = GetVertexIndex(FVector2D(x, y), InSize);
-				int32 IndexTwo = GetVertexIndex(FVector2D(x, y + 1), InSize);
-				int32 IndexThree = GetVertexIndex(FVector2D(x + 1, y), InSize);
+				int32 IndexOne = GetVertexIndex(FVector2D(x, y), InLandscapeSize);
+				int32 IndexTwo = GetVertexIndex(FVector2D(x, y + 1), InLandscapeSize);
+				int32 IndexThree = GetVertexIndex(FVector2D(x + 1, y), InLandscapeSize);
 
 				CurrentTriangles.Add(IndexOne);
 				CurrentTriangles.Add(IndexTwo);
 				CurrentTriangles.Add(IndexThree);
 
-				int32 IndexFour = GetVertexIndex(FVector2D(x+1, y+1), InSize);
-				int32 IndexFive = GetVertexIndex(FVector2D(x + 1, y), InSize);
-				int32 IndexSix = GetVertexIndex(FVector2D(x, y + 1), InSize);
+				int32 IndexFour = GetVertexIndex(FVector2D(x+1, y+1), InLandscapeSize);
+				int32 IndexFive = GetVertexIndex(FVector2D(x + 1, y), InLandscapeSize);
+				int32 IndexSix = GetVertexIndex(FVector2D(x, y + 1), InLandscapeSize);
 
 				CurrentTriangles.Add(IndexFour);
 				CurrentTriangles.Add(IndexFive);
 				CurrentTriangles.Add(IndexSix);
-
-				//old
-
-				//CurrentTriangles.Add(i);
-				//CurrentTriangles.Add(i + InSize + 1);
-				//CurrentTriangles.Add(i + 1);
-
-				///*
-				//*	\|
-				//*/
-				//CurrentTriangles.Add(i + InSize + 2);
-				//CurrentTriangles.Add(i + 1);
-				//CurrentTriangles.Add(i + InSize + 1);
 
 			}
 
@@ -682,68 +628,6 @@ TArray<int32> AJetLandscapeMesh::CreateLandscapeTriangleArray(const int32 InSize
 			bReverseTriangles = !bReverseTriangles;
 		}
 	}
-	
-
-	//for (int32 i = 0; i < VertexNum; i++)
-	//{
-	//	int32 iMod = i % (InSize + 1);
-
-	//	//we don't have to spawn a tile on the last vertex of the row, so we just skip it and move on to the next row
-	//	//if the size of the landscape is odd, we reverse the triangles for the first tile of the next row
-	//	if (iMod >= InSize)
-	//	{
-	//		if (!bEven && !bReversed)
-	//		{
-	//			bReverseTriangles = !bReverseTriangles;
-	//			bReversed = true;
-	//		}
-
-	//		continue;
-	//	}
-
-	//	bReversed = false;
-
-	//	TArray<int32> CurrentTriangles;
-
-	//	if (!bReverseTriangles)
-	//	{
-	//		/*
-	//		*	|/
-	//		*/
-	//		CurrentTriangles.Add(i);
-	//		CurrentTriangles.Add(i + InSize + 1);
-	//		CurrentTriangles.Add(i + InSize + 2);
-
-	//		/*
-	//		*	/|
-	//		*/
-	//		CurrentTriangles.Add(i);
-	//		CurrentTriangles.Add(i + InSize + 2);
-	//		CurrentTriangles.Add(i + 1);
-
-	//	}
-	//	else
-	//	{
-	//		/*
-	//		*	|\
-	//		*/
-	//		CurrentTriangles.Add(i);
-	//		CurrentTriangles.Add(i + InSize + 1);
-	//		CurrentTriangles.Add(i + 1);
-
-	//		/*
-	//		*	\|
-	//		*/
-	//		CurrentTriangles.Add(i + InSize + 2);
-	//		CurrentTriangles.Add(i + 1);
-	//		CurrentTriangles.Add(i + InSize + 1);
-
-	//	}
-
-	//	bReverseTriangles = !bReverseTriangles;
-
-	//	OutTriangleArray.Append(CurrentTriangles);
-	//}
 
 	return OutTriangleArray;
 }
