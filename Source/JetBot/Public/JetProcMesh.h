@@ -27,8 +27,23 @@ struct FProcMeshData
 	UPROPERTY(BlueprintReadWrite, Category = "Procedural Mesh")
 	TMap<FVector2D, int32> VertexIndexMap;
 
+	UPROPERTY(BlueprintReadWrite, Category = "Procedural Mesh")
+	TArray<FProcMeshFaceVertexMap> FaceVertexMapArray;
+
 
 	FProcMeshData() {}
+};
+
+//A struct to contain the vertex map for a single face of a Proc mesh
+USTRUCT(Blueprintable)
+struct FProcMeshFaceVertexMap
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite, Category = "Procedural Mesh")
+	TMap<FVector, int32> VertexIndexMap;
+
+	FCuboidVertexArray() {};
 };
 
 UCLASS()

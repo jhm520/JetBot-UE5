@@ -96,6 +96,16 @@ void AJetLandscapeMesh::CreateLandscape(int32 InSize)
 	Triangles = CreateLandscapeTriangleArray(InSize);
 }
 
+FProcMeshData AJetLandscapeMesh::CreateLandscapeData(int32 InLandscapeSize, int32 InTileSize, int32 InHeightVariation)
+{
+
+	FProcMeshData OutProcMeshData;
+
+	//OutProcMeshData.Vertices = CreateLandscapeVertexArray()
+
+	return OutProcMeshData;
+}
+
 AJetLandscapeMesh* AJetLandscapeMesh::GetNeighborLandscape_Implementation(ECardinalDirection InNeighborDirection)
 {
 	FTransform* TransPtr = NeighborSpawnTransformMap.Find(InNeighborDirection);

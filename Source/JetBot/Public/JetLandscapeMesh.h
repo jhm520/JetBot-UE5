@@ -72,6 +72,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
 	void CreateLandscape(int32 InSize);
 
+	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
+	FProcMeshData CreateLandscapeData(int32 InLandscapeSize, int32 InTileSize, int32 InHeightVariation);
+
 	UFUNCTION(BlueprintCallable,BlueprintPure, BlueprintNativeEvent, Category = "Procedural Mesh")
 	AJetLandscapeMesh* GetNeighborLandscape(ECardinalDirection InNeighborDirection);
 
