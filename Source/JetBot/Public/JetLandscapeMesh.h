@@ -73,7 +73,7 @@ public:
 	void CreateLandscape(int32 InSize);
 
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
-	FProcMeshData CreateLandscapeData(int32 InLandscapeSize, int32 InTileSize, int32 InHeightVariation);
+	 FProcMeshData CreateLandscapeData(int32 InLandscapeSize, int32 InTileSize, int32 InHeightVariation);
 
 	UFUNCTION(BlueprintCallable,BlueprintPure, BlueprintNativeEvent, Category = "Procedural Mesh")
 	AJetLandscapeMesh* GetNeighborLandscape(ECardinalDirection InNeighborDirection);
@@ -103,7 +103,7 @@ public:
 	//Returns the direction needed to get from LandscapeOne to LandscapeTwo
 	ECardinalDirection GetNeighborCardinality(AJetLandscapeMesh* InLandscapeOne, AJetLandscapeMesh* InLandscapeTwo);
 
-	TArray<FVector> CreateLandscapeVertexArray(int32 InLandscapeSize, int32 InTileSize, int32 InHeightVariation);
+	TArray<FVector> CreateLandscapeVertexArray(int32 InLandscapeSize, int32 InTileSize, int32 InHeightVariation, FProcMeshFaceVertexMap& OutLandscapeVertexMap);
 
 	TArray<FVector2D> CreateLandscapeUVArray(int32 InLandscapeSize, int32 InTileSize, int32 InHeightVariation);
 

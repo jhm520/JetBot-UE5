@@ -89,7 +89,9 @@ void AJetLandscapeMesh::CreateLandscape(int32 InSize)
 	Vertices.Empty();
 	UVs.Empty();
 	Triangles.Empty();
-	Vertices = CreateLandscapeVertexArray(LandscapeSize, TileSize, HeightVariation);
+
+	FProcMeshFaceVertexMap LandscapeVertexMap;
+	Vertices = CreateLandscapeVertexArray(LandscapeSize, TileSize, HeightVariation, LandscapeVertexMap);
 
 	UVs = CreateLandscapeUVArray(LandscapeSize, TileSize, HeightVariation);
 
@@ -101,7 +103,14 @@ FProcMeshData AJetLandscapeMesh::CreateLandscapeData(int32 InLandscapeSize, int3
 
 	FProcMeshData OutProcMeshData;
 
-	OutProcMeshData.Vertices = CreateLandscapeVertexArray(InLandscapeSize, InTileSize, InHeightVariation);
+	FProcMeshFaceVertexMap LandscapeVertexMap;
+
+	OutProcMeshData.Vertices = CreateLandscapeVertexArray(InLandscapeSize, InTileSize, InHeightVariation, LandscapeVertexMap);
+	OutProcMeshData.FaceVertexMapArray.Add(LandscapeVertexMap);
+
+	OutProcMeshData.UVs = CreateLandscapeUVArray(InLandscapeSize, InTileSize, InHeightVariation);
+
+	OutProcMeshData.Triangles = CreateLandscapeTriangleArray(InLandscapeSize, InTileSize, InHeightVariation);
 
 	return OutProcMeshData;
 }
@@ -487,7 +496,7 @@ ECardinalDirection AJetLandscapeMesh::GetNeighborCardinality(AJetLandscapeMesh* 
 	return ECardinalDirection::None;
 }
 
-TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArray(int32 InLandscapeSize, int32 InTileSize, int32 InHeightVariation)
+TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArray(int32 InLandscapeSize, int32 InTileSize, int32 InHeightVariation, FProcMeshFaceVertexMap& OutLandscapeVertexMap)
 {
 	int32 VertexNum = (InLandscapeSize + 1) * (InLandscapeSize + 1);
 
@@ -519,6 +528,7 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArray(int32 InLandscapeS
 
 			OutVertexArray.Add(FVector(x * TileSize, y * TileSize, RandInt));
 
+			OutLandscapeVertexMap.VertexIndexMap.Add(FVector(x, y, 0), i);
 			VertexIndexMap.Add(FVector2D(x, y), i);
 
 			i++;
