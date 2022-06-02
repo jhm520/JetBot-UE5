@@ -36,9 +36,6 @@ struct FProcMeshData
 	UPROPERTY(BlueprintReadWrite, Category = "Procedural Mesh")
 	TArray<FVector2D> UVs;
 
-	/*UPROPERTY(BlueprintReadWrite, Category = "Procedural Mesh")
-	TMap<FVector2D, int32> VertexIndexMap;*/
-
 	UPROPERTY(BlueprintReadWrite, Category = "Procedural Mesh")
 	TArray<FProcMeshFaceVertexMap> FaceVertexMapArray;
 
@@ -58,15 +55,6 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, Category = "Procedural Mesh")
 		FProcMeshData ProcMeshData;
-
-	/*UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Mesh")
-		TArray<FVector> Vertices;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Mesh")
-		TArray<int32> Triangles;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Mesh")
-		TArray<FVector2D> UVs;*/
 
 	UPROPERTY(BlueprintReadWrite, Category = "Procedural Mesh")
 		UProceduralMeshComponent* ProcMesh;

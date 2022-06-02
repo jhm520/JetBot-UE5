@@ -20,7 +20,6 @@ namespace LandscapeStatics
 
 }
 
-PRAGMA_DISABLE_OPTIMIZATION
 AJetLandscapeMesh::AJetLandscapeMesh()
 {
 	//
@@ -83,20 +82,6 @@ void AJetLandscapeMesh::OnPlayerExitedLandscape(ACharacter* InPlayer, AJetLandsc
 			OldNeighbor->Destroy();
 		}
 	}
-}
-
-void AJetLandscapeMesh::CreateLandscape(int32 InSize)
-{
-	/*Vertices.Empty();
-	UVs.Empty();
-	Triangles.Empty();*/
-
-	/*FProcMeshFaceVertexMap LandscapeVertexMap;
-	Vertices = CreateLandscapeVertexArray(LandscapeSize, TileSize, HeightVariation, LandscapeVertexMap);
-
-	UVs = CreateLandscapeUVArray(LandscapeSize, TileSize, HeightVariation);
-
-	Triangles = CreateLandscapeTriangleArray(LandscapeVertexMap.VertexIndexMap, LandscapeSize, TileSize, HeightVariation);*/
 }
 
 FProcMeshData AJetLandscapeMesh::CreateLandscapeData(const FTransform& InSpawnTransform, int32 InLandscapeSize, int32 InTileSize, int32 InHeightVariation)
@@ -300,23 +285,12 @@ void AJetLandscapeMesh::SpawnLandscapeWithData(UObject* WorldContextObject, cons
 
 	UGameplayStatics::FinishSpawningActor(SpawnedActor, InProcMeshData.SpawnTransform);
 
-	/*SpawnedActor->Vertices = InProcMeshData.Vertices;
-	SpawnedActor->UVs = InProcMeshData.UVs;
-	SpawnedActor->Triangles = InProcMeshData.Triangles;
-	SpawnedActor->VertexIndexMap = InProcMeshData.VertexIndexMap;*/
-
 	SpawnedActor->CreateMesh();
 
 	AJetGameState* GameState = Cast<AJetGameState>(WorldContextObject->GetWorld()->GetGameState());
 
 	if (GameState)
 	{
-		/*SpawnedActor->ProcMeshData.SpawnTransform = InProcMeshData.SpawnTransform;
-		SpawnedActor->ProcMeshData.Vertices = SpawnedActor->Vertices;
-		SpawnedActor->ProcMeshData.UVs = SpawnedActor->UVs;
-		SpawnedActor->ProcMeshData.Triangles = SpawnedActor->Triangles;
-		SpawnedActor->ProcMeshData.VertexIndexMap = SpawnedActor->VertexIndexMap;*/
-
 		GameState->OnLandscapeSpawned(SpawnedActor, SpawnedActor->ProcMeshData);
 	}
 }
@@ -676,9 +650,6 @@ void AJetLandscapeMesh::BeginPlay()
 
 	SphereCollider->SetCollisionResponseToChannel(ECC_GameTraceChannel2, ECollisionResponse::ECR_Block);
 
-	SphereCollider->SetVisibility(true);
-	SphereCollider->SetHiddenInGame(false);
-
 	TArray<FVector> FeatureArray;
 
 	FeatureArray.Add(FVector(0, 0, 0));
@@ -769,12 +740,7 @@ int32 AJetLandscapeMesh::GetVertexIndexOld(const FVector2D InVertexLocation, con
 	
 	return -1;
 
-	/*int32 OutVertexIndex = InVertexLocation.X + (InVertexLocation.Y * (InSize + 1));
-
-
-	return OutVertexIndex;*/
 }
-PRAGMA_ENABLE_OPTIMIZATION
 
 int32 AJetLandscapeMesh::GetVertexIndex(TMap<FVector, int32> InVertexIndexMap, const FVector& InVertexLocation, const int32 InSize)
 {

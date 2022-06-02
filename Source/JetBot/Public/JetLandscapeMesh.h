@@ -38,9 +38,6 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Collision")
 	USphereComponent* SphereCollider = nullptr;
 
-	/*UPROPERTY(EditAnywhere, Category = "Procedural Mesh")
-	TSubclassOf<AJetLandscapeMesh> NeighborLandscapeClass;*/
-
 	UFUNCTION(BlueprintCallable, Category = "Landscape")
 	void OnPlayerEnteredLandscape(ACharacter* InPlayer);
 
@@ -64,13 +61,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
 	int32 TileSize = 100;
-
-	//a map from cartesian coordinates to vertex index
-	/*UPROPERTY(BlueprintReadOnly, Category = "Procedural Mesh")
-	TMap<FVector2D, int32> VertexIndexMap;*/
-
-	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
-	void CreateLandscape(int32 InSize);
 
 	//Creates data needed to make a landscape
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
