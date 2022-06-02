@@ -37,6 +37,16 @@ class JETBOT_API AJetCuboidMesh : public AJetProcMesh
 	GENERATED_BODY()
 
 public:
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Mesh")
+		TArray<FVector> Vertices;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Mesh")
+		TArray<int32> Triangles;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Mesh")
+		TArray<FVector2D> UVs;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Mesh")
 	FVector Dimensions = FVector(1, 1, 1);;
 

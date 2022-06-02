@@ -66,14 +66,17 @@ public:
 	int32 TileSize = 100;
 
 	//a map from cartesian coordinates to vertex index
-	UPROPERTY(BlueprintReadOnly, Category = "Procedural Mesh")
-	TMap<FVector2D, int32> VertexIndexMap;
+	/*UPROPERTY(BlueprintReadOnly, Category = "Procedural Mesh")
+	TMap<FVector2D, int32> VertexIndexMap;*/
 
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
 	void CreateLandscape(int32 InSize);
 
+	//Creates data needed to make a landscape
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
-	 FProcMeshData CreateLandscapeData(int32 InLandscapeSize, int32 InTileSize, int32 InHeightVariation);
+	static FProcMeshData CreateLandscapeData(const FTransform& InSpawnTransform, int32 InLandscapeSize, int32 InTileSize, int32 InHeightVariation);
+
+	void ZipLandscapeDataWithNeighbors(AJetLandscapeMesh* InZippee, FProcMeshData& InOutLandscapeData);
 
 	UFUNCTION(BlueprintCallable,BlueprintPure, BlueprintNativeEvent, Category = "Procedural Mesh")
 	AJetLandscapeMesh* GetNeighborLandscape(ECardinalDirection InNeighborDirection);
@@ -86,6 +89,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
 	void SpawnNeighborLandscape(ECardinalDirection InNeighborDirection);
+
+	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
+	void SpawnNeighboringLandscapeWithData(const FProcMeshData& InNeighborData);
 
 	UFUNCTION(BlueprintCallable, meta = (WorldContext = "WorldContextObject"), Category = "Procedural Mesh")
 	static void SpawnLandscapeWithData(UObject* WorldContextObject, const FProcMeshData& InProcMeshData, int32 InLandscapeSize, int32 InTileSize, int32 InHeightVariation);
@@ -103,15 +109,19 @@ public:
 	//Returns the direction needed to get from LandscapeOne to LandscapeTwo
 	ECardinalDirection GetNeighborCardinality(AJetLandscapeMesh* InLandscapeOne, AJetLandscapeMesh* InLandscapeTwo);
 
-	TArray<FVector> CreateLandscapeVertexArray(int32 InLandscapeSize, int32 InTileSize, int32 InHeightVariation, FProcMeshFaceVertexMap& OutLandscapeVertexMap);
+	static TArray<FVector> CreateLandscapeVertexArray(int32 InLandscapeSize, int32 InTileSize, int32 InHeightVariation, FProcMeshFaceVertexMap& OutLandscapeVertexMap);
 
-	TArray<FVector2D> CreateLandscapeUVArray(int32 InLandscapeSize, int32 InTileSize, int32 InHeightVariation);
+	static TArray<FVector2D> CreateLandscapeUVArray(int32 InLandscapeSize, int32 InTileSize, int32 InHeightVariation);
 
-	TArray<int32> CreateLandscapeTriangleArray(int32 InLandscapeSize, int32 InTileSize, int32 InHeightVariation);
+	static TArray<int32> CreateLandscapeTriangleArray(const TMap<FVector, int32>& InVertexIndexMap, int32 InLandscapeSize, int32 InTileSize, int32 InHeightVariation);
 
-	void AddLandscapeFeature(const FVector2D InFeatureLocation, TArray<FVector> InFeatureVertexArray);
+	void AddLandscapeFeature(const FVector InFeatureLocation, TArray<FVector> InFeatureVertexArray);
 
-	int32 GetVertexIndex(const FVector2D InVertexLocation, const int32 InSize);
+	int32 GetVertexIndexOld(const FVector2D InVertexLocation, const int32 InSize);
+
+	static int32 GetVertexIndex(TMap<FVector, int32> InVertexIndexMap, const FVector& InVertexLocation, const int32 InSize);
+
+	TMap<FVector, int32> GetLandscapeVertexMap();
 
 protected:
 	virtual void BeginPlay() override;

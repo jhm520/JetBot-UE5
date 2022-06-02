@@ -36,11 +36,14 @@ struct FProcMeshData
 	UPROPERTY(BlueprintReadWrite, Category = "Procedural Mesh")
 	TArray<FVector2D> UVs;
 
-	UPROPERTY(BlueprintReadWrite, Category = "Procedural Mesh")
-	TMap<FVector2D, int32> VertexIndexMap;
+	/*UPROPERTY(BlueprintReadWrite, Category = "Procedural Mesh")
+	TMap<FVector2D, int32> VertexIndexMap;*/
 
 	UPROPERTY(BlueprintReadWrite, Category = "Procedural Mesh")
 	TArray<FProcMeshFaceVertexMap> FaceVertexMapArray;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Mesh")
+	TArray<UMaterialInterface*> Materials;
 
 
 	FProcMeshData() {}
@@ -56,14 +59,14 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "Procedural Mesh")
 		FProcMeshData ProcMeshData;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Mesh")
+	/*UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Mesh")
 		TArray<FVector> Vertices;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Mesh")
 		TArray<int32> Triangles;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Mesh")
-		TArray<FVector2D> UVs;
+		TArray<FVector2D> UVs;*/
 
 	UPROPERTY(BlueprintReadWrite, Category = "Procedural Mesh")
 		UProceduralMeshComponent* ProcMesh;
@@ -78,9 +81,6 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Mesh")
-		TArray<UMaterialInterface*> Materials;
 
 public:
 	// Called every frame
