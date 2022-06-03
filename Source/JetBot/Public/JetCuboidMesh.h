@@ -54,16 +54,16 @@ public:
 	int32 TileSize = 100;
 
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
-	void CreateCuboid(const FVector& InDimensions, int32 InTileSize);
+	static FProcMeshData CreateCuboidData(const FVector& InDimensions, int32 InTileSize);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Procedural Mesh")
 	TArray<FVector> CreateCuboidVertexArray_Old(const FVector& InDimensions, int32 InTileSize);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Procedural Mesh")
-	TArray<FVector> CreateCuboidVertexArray(const FVector& InDimensions, int32 InTileSize, TArray<FProcMeshFaceVertexMap>& OutFaceVertexMapArray);
+	static TArray<FVector> CreateCuboidVertexArray(const FVector& InDimensions, int32 InTileSize, TArray<FProcMeshFaceVertexMap>& OutFaceVertexMapArray);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Procedural Mesh")
-	TArray<FVector2D> CreateCuboidUVArray(const TArray<FVector>& InVertices, const FVector& InDimensions, int32 InTileSize);
+	static TArray<FVector2D> CreateCuboidUVArray(const TArray<FVector>& InVertices, const FVector& InDimensions, int32 InTileSize);
 
 	TArray<FVector2D> CreateCuboidUVArray_Bottom(const TArray<FVector>& InVertices, const FVector& InDimensions, int32 InTileSize);
 
@@ -73,27 +73,22 @@ public:
 
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Procedural Mesh")
-	TArray<int32> CreateCuboidTriangleArray(const FProcMeshData& InProcMeshData, const TArray<FVector>& InVertices, const FVector& InDimensions, int32 InTileSize);
+	static TArray<int32> CreateCuboidTriangleArray(const FProcMeshData& InProcMeshData, const TArray<FVector>& InVertices, const FVector& InDimensions, int32 InTileSize);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Procedural Mesh")
 	TArray<int32> CreateCuboidFaceTriangleArray(TMap<FVector, int32> InVertexIndexMap, const TArray<FVector>& InVertices, const FVector& InDimensions, int32 InTileSize, int32 InFaceDepth);
 
-	TArray<int32> CreateCuboidTriangleArray_Bottom(const FProcMeshData& InProcMeshData, const TArray<FVector>& InVertices, const FVector& InDimensions, int32 InTileSize);
+	static TArray<int32> CreateCuboidTriangleArray_Bottom(const FProcMeshData& InProcMeshData, const TArray<FVector>& InVertices, const FVector& InDimensions, int32 InTileSize);
 
-	TArray<int32> CreateCuboidTriangleArray_Top(const FProcMeshData& InProcMeshData, const TArray<FVector>& InVertices, const FVector& InDimensions, int32 InTileSize);
+	static TArray<int32> CreateCuboidTriangleArray_Top(const FProcMeshData& InProcMeshData, const TArray<FVector>& InVertices, const FVector& InDimensions, int32 InTileSize);
 
+	static TArray<int32> CreateCuboidTriangleArray_Left(const FProcMeshData& InProcMeshData, const TArray<FVector>& InVertices, const FVector& InDimensions, int32 InTileSize);
 
-	TArray<int32> CreateCuboidTriangleArray_Left(const FProcMeshData& InProcMeshData, const TArray<FVector>& InVertices, const FVector& InDimensions, int32 InTileSize);
+	static TArray<int32> CreateCuboidTriangleArray_Right(const FProcMeshData& InProcMeshData, const TArray<FVector>& InVertices, const FVector& InDimensions, int32 InTileSize);
 
-	TArray<int32> CreateCuboidTriangleArray_Right(const FProcMeshData& InProcMeshData, const TArray<FVector>& InVertices, const FVector& InDimensions, int32 InTileSize);
+	static TArray<int32> CreateCuboidTriangleArray_Front(const FProcMeshData& InProcMeshData, const TArray<FVector>& InVertices, const FVector& InDimensions, int32 InTileSize);
 
-
-
-	TArray<int32> CreateCuboidTriangleArray_Front(const FProcMeshData& InProcMeshData, const TArray<FVector>& InVertices, const FVector& InDimensions, int32 InTileSize);
-
-
-	TArray<int32> CreateCuboidTriangleArray_Back(const FProcMeshData& InProcMeshData, const TArray<FVector>& InVertices, const FVector& InDimensions, int32 InTileSize);
-
+	static TArray<int32> CreateCuboidTriangleArray_Back(const FProcMeshData& InProcMeshData, const TArray<FVector>& InVertices, const FVector& InDimensions, int32 InTileSize);
 
 	//InVertexLocation is a vector of the cartesian coordinates. Returns the index
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Procedural Mesh")

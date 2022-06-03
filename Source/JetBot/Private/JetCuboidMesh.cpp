@@ -4,9 +4,11 @@
 #include "JetCuboidMesh.h"
 
 PRAGMA_DISABLE_OPTIMIZATION
-void AJetCuboidMesh::CreateCuboid(const FVector& InDimensions, int32 InTileSize)
+FProcMeshData AJetCuboidMesh::CreateCuboidData(const FVector& InDimensions, int32 InTileSize)
 {
-	ProcMeshData.FaceVertexMapArray = {
+	FProcMeshData OutProcMeshData = FProcMeshData();
+
+	OutProcMeshData.FaceVertexMapArray = {
 		FProcMeshFaceVertexMap(),
 		FProcMeshFaceVertexMap(),
 		FProcMeshFaceVertexMap(),
@@ -15,9 +17,11 @@ void AJetCuboidMesh::CreateCuboid(const FVector& InDimensions, int32 InTileSize)
 		FProcMeshFaceVertexMap()
 	};
 
-	ProcMeshData.Vertices = CreateCuboidVertexArray(InDimensions, InTileSize, ProcMeshData.FaceVertexMapArray);
-	ProcMeshData.UVs = CreateCuboidUVArray(Vertices, InDimensions, InTileSize);
-	ProcMeshData.Triangles = CreateCuboidTriangleArray(ProcMeshData, Vertices, InDimensions, InTileSize);
+	OutProcMeshData.Vertices = CreateCuboidVertexArray(InDimensions, InTileSize, OutProcMeshData.FaceVertexMapArray);
+	OutProcMeshData.UVs = CreateCuboidUVArray(OutProcMeshData.Vertices, InDimensions, InTileSize);
+	OutProcMeshData.Triangles = CreateCuboidTriangleArray(OutProcMeshData, OutProcMeshData.Vertices, InDimensions, InTileSize);
+
+	return OutProcMeshData;
 }
 
 TArray<FVector> AJetCuboidMesh::CreateCuboidVertexArray_Old(const FVector& InDimensions, int32 InTileSize)
@@ -407,16 +411,6 @@ TArray<FVector2D> AJetCuboidMesh::CreateCuboidUVArray_Front(const TArray<FVector
 TArray<int32> AJetCuboidMesh::CreateCuboidTriangleArray(const FProcMeshData& InProcMeshData, const TArray<FVector>& InVertices, const FVector& InDimensions, int32 InTileSize)
 {
 	TArray<int32> OutTriangleArray;
-
-	const int32 XDim = InDimensions.X;
-	const int32 YDim = InDimensions.Y;
-	const int32 ZDim = InDimensions.Z;
-
-	int32 x = 0;
-	int32 y = 0;
-	int32 z = 0;
-
-	int32 i = 0;
 
 	//cuboids must have 6 faces
 	if (InProcMeshData.FaceVertexMapArray.Num() != 6)
@@ -1053,10 +1047,9 @@ const FCuboidVertexArray& AJetCuboidMesh::GetCuboidVertexIndices(const FVector& 
 void AJetCuboidMesh::BeginPlay()
 {
 
-	CreateCuboid(Dimensions, TileSize);
+	ProcMeshData = CreateCuboidData(Dimensions, TileSize);
 
 	CreateMesh();
-
 
 	Super::BeginPlay();
 }
