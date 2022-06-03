@@ -316,9 +316,9 @@ void AJetLandscapeMesh::ZipNeighborLandscape(AJetLandscapeMesh* InZipper, AJetLa
 		for (int32 i = 0; i < InZipper->LandscapeSize + 1; i++)
 		{
 
-			int32 ZippeeIndex = InZippee->GetVertexIndex(InZippee->GetLandscapeVertexMap(), FVector(i, LandscapeSize, 0), LandscapeSize);
+			int32 ZippeeIndex = InZippee->GetVertexIndex(InZippee->GetLandscapeVertexMap(), FVector(i, LandscapeSize, 0), FVector(LandscapeSize, LandscapeSize, 0));
 
-			int32 ZipperIndex = InZipper->GetVertexIndex(InZipper->GetLandscapeVertexMap(), FVector(i, 0, 0), LandscapeSize);
+			int32 ZipperIndex = InZipper->GetVertexIndex(InZipper->GetLandscapeVertexMap(), FVector(i, 0, 0), FVector(LandscapeSize, LandscapeSize, 0));
 
 			if (ZippeeIndex < 0)
 			{
@@ -342,9 +342,9 @@ void AJetLandscapeMesh::ZipNeighborLandscape(AJetLandscapeMesh* InZipper, AJetLa
 		for (int32 i = 0; i < InZipper->LandscapeSize + 1; i++)
 		{
 
-			int32 ZippeeIndex = InZippee->GetVertexIndex(InZippee->GetLandscapeVertexMap(), FVector(i, 0, 0), LandscapeSize);
+			int32 ZippeeIndex = InZippee->GetVertexIndex(InZippee->GetLandscapeVertexMap(), FVector(i, 0, 0), FVector(LandscapeSize, LandscapeSize, 0));
 
-			int32 ZipperIndex = InZipper->GetVertexIndex(InZipper->GetLandscapeVertexMap(), FVector(i, LandscapeSize, 0), LandscapeSize);
+			int32 ZipperIndex = InZipper->GetVertexIndex(InZipper->GetLandscapeVertexMap(), FVector(i, LandscapeSize, 0), FVector(LandscapeSize, LandscapeSize, 0));
 
 			FVector WorldZipperLoc = InZipper->GetActorTransform().TransformPosition(InZipper->ProcMeshData.Vertices[ZipperIndex]);
 
@@ -358,9 +358,9 @@ void AJetLandscapeMesh::ZipNeighborLandscape(AJetLandscapeMesh* InZipper, AJetLa
 		for (int32 i = 0; i < InZipper->LandscapeSize + 1; i++)
 		{
 
-			int32 ZippeeIndex = InZippee->GetVertexIndex(InZippee->GetLandscapeVertexMap(), FVector(0, i, 0), LandscapeSize);
+			int32 ZippeeIndex = InZippee->GetVertexIndex(InZippee->GetLandscapeVertexMap(), FVector(0, i, 0), FVector(LandscapeSize, LandscapeSize, 0));
 
-			int32 ZipperIndex = InZipper->GetVertexIndex(InZipper->GetLandscapeVertexMap(), FVector(LandscapeSize, i, 0), LandscapeSize);
+			int32 ZipperIndex = InZipper->GetVertexIndex(InZipper->GetLandscapeVertexMap(), FVector(LandscapeSize, i, 0), FVector(LandscapeSize, LandscapeSize, 0));
 
 			FVector WorldZipperLoc = InZipper->GetActorTransform().TransformPosition(InZipper->ProcMeshData.Vertices[ZipperIndex]);
 
@@ -374,9 +374,9 @@ void AJetLandscapeMesh::ZipNeighborLandscape(AJetLandscapeMesh* InZipper, AJetLa
 		for (int32 i = 0; i < InZipper->LandscapeSize + 1; i++)
 		{
 
-			int32 ZippeeIndex = InZippee->GetVertexIndex(InZippee->GetLandscapeVertexMap(), FVector(LandscapeSize, i, 0), LandscapeSize);
+			int32 ZippeeIndex = InZippee->GetVertexIndex(InZippee->GetLandscapeVertexMap(), FVector(LandscapeSize, i, 0), FVector(LandscapeSize, LandscapeSize, 0));
 
-			int32 ZipperIndex = InZipper->GetVertexIndex(InZipper->GetLandscapeVertexMap(), FVector(0, i, 0), LandscapeSize);
+			int32 ZipperIndex = InZipper->GetVertexIndex(InZipper->GetLandscapeVertexMap(), FVector(0, i, 0), FVector(LandscapeSize, LandscapeSize, 0));
 
 			FVector WorldZipperLoc = InZipper->GetActorTransform().TransformPosition(InZipper->ProcMeshData.Vertices[ZipperIndex]);
 
@@ -387,9 +387,9 @@ void AJetLandscapeMesh::ZipNeighborLandscape(AJetLandscapeMesh* InZipper, AJetLa
 	}
 	else if (NeighborDir == ECardinalDirection::Northwest)
 	{
-		int32 ZippeeIndex = InZippee->GetVertexIndex(InZippee->GetLandscapeVertexMap(), FVector(0, LandscapeSize, 0), LandscapeSize);
+		int32 ZippeeIndex = InZippee->GetVertexIndex(InZippee->GetLandscapeVertexMap(), FVector(0, LandscapeSize, 0), FVector(LandscapeSize, LandscapeSize, 0));
 
-		int32 ZipperIndex = InZipper->GetVertexIndex(InZipper->GetLandscapeVertexMap(), FVector(LandscapeSize, 0, 0), LandscapeSize);
+		int32 ZipperIndex = InZipper->GetVertexIndex(InZipper->GetLandscapeVertexMap(), FVector(LandscapeSize, 0, 0), FVector(LandscapeSize, LandscapeSize, 0));
 
 		FVector WorldZipperLoc = InZipper->GetActorTransform().TransformPosition(InZipper->ProcMeshData.Vertices[ZipperIndex]);
 
@@ -399,9 +399,9 @@ void AJetLandscapeMesh::ZipNeighborLandscape(AJetLandscapeMesh* InZipper, AJetLa
 	}
 	else if (NeighborDir == ECardinalDirection::Northeast)
 	{
-		int32 ZippeeIndex = InZippee->GetVertexIndex(InZippee->GetLandscapeVertexMap(), FVector(0, 0, 0), LandscapeSize);
+		int32 ZippeeIndex = InZippee->GetVertexIndex(InZippee->GetLandscapeVertexMap(), FVector(0, 0, 0), FVector(LandscapeSize, LandscapeSize, 0));
 
-		int32 ZipperIndex = InZipper->GetVertexIndex(InZipper->GetLandscapeVertexMap(), FVector(LandscapeSize, LandscapeSize, 0), LandscapeSize);
+		int32 ZipperIndex = InZipper->GetVertexIndex(InZipper->GetLandscapeVertexMap(), FVector(LandscapeSize, LandscapeSize, 0), FVector(LandscapeSize, LandscapeSize, 0));
 
 		FVector WorldZipperLoc = InZipper->GetActorTransform().TransformPosition(InZipper->ProcMeshData.Vertices[ZipperIndex]);
 
@@ -411,9 +411,9 @@ void AJetLandscapeMesh::ZipNeighborLandscape(AJetLandscapeMesh* InZipper, AJetLa
 	}
 	else if (NeighborDir == ECardinalDirection::Southwest)
 	{
-		int32 ZippeeIndex = InZippee->GetVertexIndex(InZippee->GetLandscapeVertexMap(), FVector(LandscapeSize, LandscapeSize, 0), LandscapeSize);
+		int32 ZippeeIndex = InZippee->GetVertexIndex(InZippee->GetLandscapeVertexMap(), FVector(LandscapeSize, LandscapeSize, 0), FVector(LandscapeSize, LandscapeSize, 0));
 
-		int32 ZipperIndex = InZipper->GetVertexIndex(InZipper->GetLandscapeVertexMap(), FVector(0, 0, 0), LandscapeSize);
+		int32 ZipperIndex = InZipper->GetVertexIndex(InZipper->GetLandscapeVertexMap(), FVector(0, 0, 0), FVector(LandscapeSize, LandscapeSize, 0));
 
 		FVector WorldZipperLoc = InZipper->GetActorTransform().TransformPosition(InZipper->ProcMeshData.Vertices[ZipperIndex]);
 
@@ -423,9 +423,9 @@ void AJetLandscapeMesh::ZipNeighborLandscape(AJetLandscapeMesh* InZipper, AJetLa
 	}
 	else if (NeighborDir == ECardinalDirection::Southeast)
 	{
-		int32 ZippeeIndex = InZippee->GetVertexIndex(InZippee->GetLandscapeVertexMap(), FVector(LandscapeSize, 0, 0), LandscapeSize);
+		int32 ZippeeIndex = InZippee->GetVertexIndex(InZippee->GetLandscapeVertexMap(), FVector(LandscapeSize, 0, 0), FVector(LandscapeSize, LandscapeSize, 0));
 
-		int32 ZipperIndex = InZipper->GetVertexIndex(InZipper->GetLandscapeVertexMap(), FVector(0, LandscapeSize, 0), LandscapeSize);
+		int32 ZipperIndex = InZipper->GetVertexIndex(InZipper->GetLandscapeVertexMap(), FVector(0, LandscapeSize, 0), FVector(LandscapeSize, LandscapeSize, 0));
 
 		FVector WorldZipperLoc = InZipper->GetActorTransform().TransformPosition(InZipper->ProcMeshData.Vertices[ZipperIndex]);
 
@@ -504,9 +504,9 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArray(int32 InLandscapeS
 			int32 HeightMod = RandInt;
 			if (x > 0 && y > 0)
 			{
-				int32 xPre = GetVertexIndex(OutLandscapeVertexMap.VertexIndexMap, FVector(x - 1, y, 0), InLandscapeSize);
+				int32 xPre = GetVertexIndex(OutLandscapeVertexMap.VertexIndexMap, FVector(x - 1, y, 0), FVector(InLandscapeSize, InLandscapeSize, 0));
 
-				int32 yPre = GetVertexIndex(OutLandscapeVertexMap.VertexIndexMap, FVector(x, y-1, 0), InLandscapeSize);
+				int32 yPre = GetVertexIndex(OutLandscapeVertexMap.VertexIndexMap, FVector(x, y-1, 0), FVector(InLandscapeSize, InLandscapeSize, 0));
 
 				HeightMod = HeightMod + ((OutVertexArray[xPre].Z + OutVertexArray[yPre].Z) / 2);
 			}
@@ -572,17 +572,17 @@ TArray<int32> AJetLandscapeMesh::CreateLandscapeTriangleArray(const TMap<FVector
 
 			if (!bReverseTriangles)
 			{
-				int32 IndexOne = GetVertexIndex(InVertexIndexMap, FVector(x, y, 0), InLandscapeSize);
-				int32 IndexTwo = GetVertexIndex(InVertexIndexMap, FVector(x, y + 1, 0), InLandscapeSize);
-				int32 IndexThree = GetVertexIndex(InVertexIndexMap, FVector(x + 1, y + 1, 0), InLandscapeSize);
+				int32 IndexOne = GetVertexIndex(InVertexIndexMap, FVector(x, y, 0), FVector(InLandscapeSize, InLandscapeSize, 0));
+				int32 IndexTwo = GetVertexIndex(InVertexIndexMap, FVector(x, y + 1, 0), FVector(InLandscapeSize, InLandscapeSize, 0));
+				int32 IndexThree = GetVertexIndex(InVertexIndexMap, FVector(x + 1, y + 1, 0), FVector(InLandscapeSize, InLandscapeSize, 0));
 
 				CurrentTriangles.Add(IndexOne);
 				CurrentTriangles.Add(IndexTwo);
 				CurrentTriangles.Add(IndexThree);
 
-				int32 IndexFour = GetVertexIndex(InVertexIndexMap, FVector(x, y, 0), InLandscapeSize);
-				int32 IndexFive = GetVertexIndex(InVertexIndexMap, FVector(x + 1, y + 1, 0), InLandscapeSize);
-				int32 IndexSix = GetVertexIndex(InVertexIndexMap, FVector(x + 1, y, 0), InLandscapeSize);
+				int32 IndexFour = GetVertexIndex(InVertexIndexMap, FVector(x, y, 0), FVector(InLandscapeSize, InLandscapeSize, 0));
+				int32 IndexFive = GetVertexIndex(InVertexIndexMap, FVector(x + 1, y + 1, 0), FVector(InLandscapeSize, InLandscapeSize, 0));
+				int32 IndexSix = GetVertexIndex(InVertexIndexMap, FVector(x + 1, y, 0), FVector(InLandscapeSize, InLandscapeSize, 0));
 
 				CurrentTriangles.Add(IndexFour);
 				CurrentTriangles.Add(IndexFive);
@@ -595,17 +595,17 @@ TArray<int32> AJetLandscapeMesh::CreateLandscapeTriangleArray(const TMap<FVector
 				*/
 
 
-				int32 IndexOne = GetVertexIndex(InVertexIndexMap, FVector(x, y, 0), InLandscapeSize);
-				int32 IndexTwo = GetVertexIndex(InVertexIndexMap, FVector(x, y + 1, 0), InLandscapeSize);
-				int32 IndexThree = GetVertexIndex(InVertexIndexMap, FVector(x + 1, y, 0), InLandscapeSize);
+				int32 IndexOne = GetVertexIndex(InVertexIndexMap, FVector(x, y, 0), FVector(InLandscapeSize, InLandscapeSize, 0));
+				int32 IndexTwo = GetVertexIndex(InVertexIndexMap, FVector(x, y + 1, 0), FVector(InLandscapeSize, InLandscapeSize, 0));
+				int32 IndexThree = GetVertexIndex(InVertexIndexMap, FVector(x + 1, y, 0), FVector(InLandscapeSize, InLandscapeSize, 0));
 
 				CurrentTriangles.Add(IndexOne);
 				CurrentTriangles.Add(IndexTwo);
 				CurrentTriangles.Add(IndexThree);
 
-				int32 IndexFour = GetVertexIndex(InVertexIndexMap, FVector(x+1, y+1, 0), InLandscapeSize);
-				int32 IndexFive = GetVertexIndex(InVertexIndexMap, FVector(x + 1, y, 0), InLandscapeSize);
-				int32 IndexSix = GetVertexIndex(InVertexIndexMap, FVector(x, y + 1, 0), InLandscapeSize);
+				int32 IndexFour = GetVertexIndex(InVertexIndexMap, FVector(x+1, y+1, 0), FVector(InLandscapeSize, InLandscapeSize, 0));
+				int32 IndexFive = GetVertexIndex(InVertexIndexMap, FVector(x + 1, y, 0), FVector(InLandscapeSize, InLandscapeSize, 0));
+				int32 IndexSix = GetVertexIndex(InVertexIndexMap, FVector(x, y + 1, 0), FVector(InLandscapeSize, InLandscapeSize, 0));
 
 				CurrentTriangles.Add(IndexFour);
 				CurrentTriangles.Add(IndexFive);
@@ -703,7 +703,7 @@ void AJetLandscapeMesh::AddLandscapeFeature(const FVector InFeatureLocation, TAr
 {
 	for (FVector Vertex : InFeatureVertexArray)
 	{
-		int32 VertexIndex = GetVertexIndex(ProcMeshData.FaceVertexMapArray[0].VertexIndexMap, InFeatureLocation + Vertex, LandscapeSize);
+		int32 VertexIndex = GetVertexIndex(ProcMeshData.FaceVertexMapArray[0].VertexIndexMap, InFeatureLocation + Vertex, FVector(LandscapeSize, LandscapeSize, 0));
 
 		ProcMeshData.Vertices[VertexIndex].Z = Vertex.Z;
 	}
@@ -740,48 +740,6 @@ int32 AJetLandscapeMesh::GetVertexIndexOld(const FVector2D InVertexLocation, con
 	
 	return -1;
 
-}
-
-int32 AJetLandscapeMesh::GetVertexIndex(TMap<FVector, int32> InVertexIndexMap, const FVector& InVertexLocation, const int32 InSize)
-{
-	FVector AdjVertexLocation = InVertexLocation;
-
-	if (AdjVertexLocation.X > InSize)
-	{
-		AdjVertexLocation.X = InSize;
-	}
-	else if (AdjVertexLocation.X < 0)
-	{
-		AdjVertexLocation.X = 0;
-	}
-
-
-	if (AdjVertexLocation.Y > InSize)
-	{
-		AdjVertexLocation.Y = InSize;
-	}
-	else if (AdjVertexLocation.Y < 0)
-	{
-		AdjVertexLocation.Y = 0;
-	}
-
-	if (AdjVertexLocation.Z > InSize)
-	{
-		AdjVertexLocation.Z = InSize;
-	}
-	else if (AdjVertexLocation.Z < 0)
-	{
-		AdjVertexLocation.Z = 0;
-	}
-
-	int32* IndexPtr = InVertexIndexMap.Find(AdjVertexLocation);
-
-	if (IndexPtr)
-	{
-		return *IndexPtr;
-	}
-
-	return -1;
 }
 
 TMap<FVector, int32> AJetLandscapeMesh::GetLandscapeVertexMap()

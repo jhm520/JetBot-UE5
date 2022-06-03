@@ -109,7 +109,6 @@ public:
 
 	int32 GetVertexIndexOld(const FVector2D InVertexLocation, const int32 InSize);
 
-	static int32 GetVertexIndex(TMap<FVector, int32> InVertexIndexMap, const FVector& InVertexLocation, const int32 InSize);
 
 	TMap<FVector, int32> GetLandscapeVertexMap();
 

@@ -33,6 +33,48 @@ AJetProcMesh::AJetProcMesh()
 
 }
 
+int32 AJetProcMesh::GetVertexIndex(TMap<FVector, int32> InVertexIndexMap, const FVector& InVertexLocation, const FVector& InDimensions)
+{
+	FVector AdjVertexLocation = InVertexLocation;
+
+	if (AdjVertexLocation.X > InDimensions.X)
+	{
+		AdjVertexLocation.X = InDimensions.X;
+	}
+	else if (AdjVertexLocation.X < 0)
+	{
+		AdjVertexLocation.X = 0;
+	}
+
+
+	if (AdjVertexLocation.Y > InDimensions.Y)
+	{
+		AdjVertexLocation.Y = InDimensions.Y;
+	}
+	else if (AdjVertexLocation.Y < 0)
+	{
+		AdjVertexLocation.Y = 0;
+	}
+
+	if (AdjVertexLocation.Z > InDimensions.Z)
+	{
+		AdjVertexLocation.Z = InDimensions.Z;
+	}
+	else if (AdjVertexLocation.Z < 0)
+	{
+		AdjVertexLocation.Z = 0;
+	}
+
+	int32* IndexPtr = InVertexIndexMap.Find(AdjVertexLocation);
+
+	if (IndexPtr)
+	{
+		return *IndexPtr;
+	}
+
+	return -1;
+}
+
 void AJetProcMesh::CreateMesh()
 {
 

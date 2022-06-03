@@ -66,6 +66,8 @@ public:
 	// Sets default values for this actor's properties
 	AJetProcMesh();
 
+	static int32 GetVertexIndex(TMap<FVector, int32> InVertexIndexMap, const FVector& InVertexLocation, const FVector& InDimensions);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
