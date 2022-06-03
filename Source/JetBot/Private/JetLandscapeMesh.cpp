@@ -204,6 +204,7 @@ void AJetLandscapeMesh::SpawnNeighborLandscape(ECardinalDirection InNeighborDire
 		}
 	}
 
+	//Create a new landscape and spawn it
 	FProcMeshData NewLandscapeData = CreateLandscapeData(NeighborTransform, LandscapeSize, TileSize, HeightVariation);
 
 	SpawnNeighboringLandscapeWithData(NewLandscapeData);
@@ -676,8 +677,6 @@ void AJetLandscapeMesh::BeginPlay()
 			GameState->OnLandscapeSpawned(this, ProcMeshData);
 		}
 	}
-
-	
 
 	Super::BeginPlay();
 

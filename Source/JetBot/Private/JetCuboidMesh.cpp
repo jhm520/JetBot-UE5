@@ -3,7 +3,6 @@
 
 #include "JetCuboidMesh.h"
 
-PRAGMA_DISABLE_OPTIMIZATION
 FProcMeshData AJetCuboidMesh::CreateCuboidData(const FVector& InDimensions, int32 InTileSize)
 {
 	FProcMeshData OutProcMeshData = FProcMeshData();
@@ -574,4 +573,3 @@ void AJetCuboidMesh::BeginPlay()
 
 	Super::BeginPlay();
 }
-PRAGMA_ENABLE_OPTIMIZATION

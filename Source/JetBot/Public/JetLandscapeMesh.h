@@ -77,11 +77,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
 	TArray<AJetLandscapeMesh*> GetAllNeighborLandscapes();
 
+	//Spawn a landscape neighboring this landscape
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
 	void SpawnNeighborLandscape(ECardinalDirection InNeighborDirection);
 
-	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
+private:
+	//Spawn a landscape neighboring this landscape with data
 	void SpawnNeighboringLandscapeWithData(const FProcMeshData& InNeighborData);
+public:
 
 	UFUNCTION(BlueprintCallable, meta = (WorldContext = "WorldContextObject"), Category = "Procedural Mesh")
 	static void SpawnLandscapeWithData(UObject* WorldContextObject, const FProcMeshData& InProcMeshData, int32 InLandscapeSize, int32 InTileSize, int32 InHeightVariation);
