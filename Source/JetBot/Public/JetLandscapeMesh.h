@@ -62,6 +62,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
 	int32 TileSize = 100;
 
+	//the radius at which the player's tile spawns its neighbors.
+	//A radius of 1 will spawn 8 tiles around the origin tile, 2 will spawn 8 tiles,
+	//then another 16 around the 8, 3 will do another layer, and so on
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
+	int32 NeighborSpawnRadius = 1;
+
 	//Creates data needed to make a landscape
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
 	static FProcMeshData CreateLandscapeData(const FTransform& InSpawnTransform, int32 InLandscapeSize, int32 InTileSize, int32 InHeightVariation);
