@@ -78,6 +78,9 @@ public:
 	AJetLandscapeMesh* GetNeighborLandscape(ECardinalDirection InNeighborDirection);
 
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
+	void SpawnNeighborLandscapesInRadius();
+
+	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
 	void SpawnNeighborLandscapes();
 
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
@@ -85,15 +88,15 @@ public:
 
 	//Spawn a landscape neighboring this landscape
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
-	void SpawnNeighborLandscape(ECardinalDirection InNeighborDirection);
+	AJetLandscapeMesh* SpawnNeighborLandscape(ECardinalDirection InNeighborDirection);
 
 private:
 	//Spawn a landscape neighboring this landscape with data
-	void SpawnNeighboringLandscapeWithData(const FProcMeshData& InNeighborData);
+	AJetLandscapeMesh* SpawnNeighboringLandscapeWithData(const FProcMeshData& InNeighborData);
 public:
 
 	UFUNCTION(BlueprintCallable, meta = (WorldContext = "WorldContextObject"), Category = "Procedural Mesh")
-	static void SpawnLandscapeWithData(UObject* WorldContextObject, const FProcMeshData& InProcMeshData, int32 InLandscapeSize, int32 InTileSize, int32 InHeightVariation);
+	static AJetLandscapeMesh* SpawnLandscapeWithData(UObject* WorldContextObject, const FProcMeshData& InProcMeshData, int32 InLandscapeSize, int32 InTileSize, int32 InHeightVariation);
 
 	//"Zip" Landscape two to be congruent with landscape one
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
