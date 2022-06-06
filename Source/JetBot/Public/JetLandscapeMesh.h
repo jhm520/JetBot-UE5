@@ -72,13 +72,19 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
 	static FProcMeshData CreateLandscapeData(const FTransform& InSpawnTransform, int32 InLandscapeSize, int32 InTileSize, int32 InHeightVariation);
 
-	void ZipLandscapeDataWithNeighbors(AJetLandscapeMesh* InZippee, FProcMeshData& InOutLandscapeData);
+	void ZipLandscapeDataWithNeighbors(FProcMeshData& InOutLandscapeData);
+
+	void ZipLandscapeDataWithNeighbor(ECardinalDirection InNeighborDirection, FProcMeshData& InOutLandscapeData);
 
 	UFUNCTION(BlueprintCallable,BlueprintPure, BlueprintNativeEvent, Category = "Procedural Mesh")
 	AJetLandscapeMesh* GetNeighborLandscape(ECardinalDirection InNeighborDirection);
 
 	UFUNCTION(BlueprintCallable,BlueprintPure, Category = "Procedural Mesh")
 	bool GetNeighborLandscapeData(ECardinalDirection InNeighborDirection, FProcMeshData& OutProcMeshData);
+
+	UFUNCTION(BlueprintCallable,BlueprintPure, meta = (WorldContext = "WorldContextObject"), Category = "Procedural Mesh")
+	static bool Static_GetNeighborLandscapeData(UObject* WorldContextObject, const FProcMeshData& InLandscapeData, ECardinalDirection InNeighborDirection, FProcMeshData& OutNeighborData, int32 InVectorScale);
+
 
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
 	void SpawnNeighborLandscapesInRadius();
@@ -96,6 +102,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
 		AJetLandscapeMesh* SpawnNeighborLandscape(ECardinalDirection InNeighborDirection);
 
+	//Spawn a landscape neighboring this landscape
+	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
+	bool CreateNewNeighborLandscapeData(ECardinalDirection InNeighborDirection, FProcMeshData& OutProcMeshData);
+
 private:
 	//Spawn a landscape neighboring this landscape with data
 	AJetLandscapeMesh* SpawnNeighboringLandscapeWithData(const FProcMeshData& InNeighborData);
@@ -109,13 +119,17 @@ public:
 	void ZipNeighborLandscape(AJetLandscapeMesh* InZipper, AJetLandscapeMesh* InZippee);
 
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
-	FTransform GetNeighborLandscapeSpawnTransform(ECardinalDirection InNeighborDirection);
+	static FTransform GetNeighborLandscapeSpawnTransform(ECardinalDirection InNeighborDirection, int32 InVectorScale);
 
-	UPROPERTY(BlueprintReadOnly, Category = "Procedural Mesh")
-	TMap<ECardinalDirection, FTransform> NeighborSpawnTransformMap;
+	/*UPROPERTY(BlueprintReadOnly, Category = "Procedural Mesh")
+	TMap<ECardinalDirection, FTransform> NeighborSpawnTransformMap;*/
 
 	//Returns the direction needed to get from LandscapeOne to LandscapeTwo
 	ECardinalDirection GetNeighborCardinality(AJetLandscapeMesh* InLandscapeOne, AJetLandscapeMesh* InLandscapeTwo);
+
+	//Returns the direction needed to get from LandscapeOne to LandscapeTwo
+	static ECardinalDirection GetNeighborDataCardinality(const FProcMeshData& InLandscapeDataOne, const FProcMeshData& InLandscapeDataTwo);
+
 
 	static TArray<FVector> CreateLandscapeVertexArray(int32 InLandscapeSize, int32 InTileSize, int32 InHeightVariation, FProcMeshFaceVertexMap& OutLandscapeVertexMap);
 

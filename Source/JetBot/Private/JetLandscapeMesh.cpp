@@ -19,6 +19,18 @@ namespace LandscapeStatics
 	FVector Southwest = FVector(-1, -1, 0);
 	FVector Southeast = FVector(-1, 1, 0);
 
+	TMap<ECardinalDirection, FTransform> NeighborSpawnTransformMap =
+	{
+		{ECardinalDirection::North, FTransform(LandscapeStatics::North)},
+		{ECardinalDirection::Northeast, FTransform(LandscapeStatics::Northeast)},
+		{ECardinalDirection::Northwest, FTransform(LandscapeStatics::Northwest)},
+		{ECardinalDirection::West, FTransform(LandscapeStatics::West)},
+		{ECardinalDirection::East, FTransform(LandscapeStatics::East)},
+		{ECardinalDirection::Southeast, FTransform(LandscapeStatics::Southeast)},
+		{ECardinalDirection::South, FTransform(LandscapeStatics::South)},
+		{ECardinalDirection::Southwest, FTransform(LandscapeStatics::Southwest)}
+	};
+
 }
 
 AJetLandscapeMesh::AJetLandscapeMesh()
@@ -101,14 +113,156 @@ FProcMeshData AJetLandscapeMesh::CreateLandscapeData(const FTransform& InSpawnTr
 	return OutProcMeshData;
 }
 
-void AJetLandscapeMesh::ZipLandscapeDataWithNeighbors(AJetLandscapeMesh* InZippee, FProcMeshData& InOutLandscapeData)
+void AJetLandscapeMesh::ZipLandscapeDataWithNeighbors(FProcMeshData& InOutLandscapeData)
 {
+	int32 MaxDirection = (int32)ECardinalDirection::Northwest;
+	int32 dir = 0;
 
+	for (dir = 0; dir < MaxDirection + 1; dir++)
+	{
+		ECardinalDirection CardDir = (ECardinalDirection)dir;
+
+		ZipLandscapeDataWithNeighbor(CardDir, InOutLandscapeData);
+	}
+}
+
+void AJetLandscapeMesh::ZipLandscapeDataWithNeighbor(ECardinalDirection InNeighborDirection, FProcMeshData& InOutLandscapeData)
+{
+	FVector2D ZippeeVector;
+	FVector2D ZipperVector;
+
+	bool bCorner = false;
+
+	FProcMeshData NeighborData;
+	bool bGotNeighborData = GetNeighborLandscapeData(InNeighborDirection, NeighborData);
+
+	/*if (InNeighborDirection == ECardinalDirection::West)
+	{
+		for (int32 i = 0; i < InZipper->LandscapeSize + 1; i++)
+		{
+
+			int32 ZippeeIndex = InZippee->GetVertexIndex(InZippee->GetLandscapeVertexMap(), FVector(i, LandscapeSize, 0), FVector(LandscapeSize, LandscapeSize, 0));
+
+			int32 ZipperIndex = InZipper->GetVertexIndex(InZipper->GetLandscapeVertexMap(), FVector(i, 0, 0), FVector(LandscapeSize, LandscapeSize, 0));
+
+			if (ZippeeIndex < 0)
+			{
+				continue;
+			}
+
+			if (ZipperIndex < 0)
+			{
+				continue;
+			}
+
+			FVector WorldZipperLoc = InZipper->GetActorTransform().TransformPosition(InZipper->ProcMeshData.Vertices[ZipperIndex]);
+
+			FVector ZippeeRelative = InZippee->GetActorTransform().InverseTransformPosition(WorldZipperLoc);
+
+			InZippee->ProcMeshData.Vertices[ZippeeIndex].Z = ZippeeRelative.Z;
+		}
+	}
+	else if (InNeighborDirection == ECardinalDirection::East)
+	{
+		for (int32 i = 0; i < InZipper->LandscapeSize + 1; i++)
+		{
+
+			int32 ZippeeIndex = InZippee->GetVertexIndex(InZippee->GetLandscapeVertexMap(), FVector(i, 0, 0), FVector(LandscapeSize, LandscapeSize, 0));
+
+			int32 ZipperIndex = InZipper->GetVertexIndex(InZipper->GetLandscapeVertexMap(), FVector(i, LandscapeSize, 0), FVector(LandscapeSize, LandscapeSize, 0));
+
+			FVector WorldZipperLoc = InZipper->GetActorTransform().TransformPosition(InZipper->ProcMeshData.Vertices[ZipperIndex]);
+
+			FVector ZippeeRelative = InZippee->GetActorTransform().InverseTransformPosition(WorldZipperLoc);
+
+			InZippee->ProcMeshData.Vertices[ZippeeIndex].Z = ZippeeRelative.Z;
+		}
+	}
+	else if (InNeighborDirection == ECardinalDirection::North)
+	{
+		for (int32 i = 0; i < InZipper->LandscapeSize + 1; i++)
+		{
+
+			int32 ZippeeIndex = InZippee->GetVertexIndex(InZippee->GetLandscapeVertexMap(), FVector(0, i, 0), FVector(LandscapeSize, LandscapeSize, 0));
+
+			int32 ZipperIndex = InZipper->GetVertexIndex(InZipper->GetLandscapeVertexMap(), FVector(LandscapeSize, i, 0), FVector(LandscapeSize, LandscapeSize, 0));
+
+			FVector WorldZipperLoc = InZipper->GetActorTransform().TransformPosition(InZipper->ProcMeshData.Vertices[ZipperIndex]);
+
+			FVector ZippeeRelative = InZippee->GetActorTransform().InverseTransformPosition(WorldZipperLoc);
+
+			InZippee->ProcMeshData.Vertices[ZippeeIndex].Z = ZippeeRelative.Z;
+		}
+	}
+	else if (InNeighborDirection == ECardinalDirection::South)
+	{
+		for (int32 i = 0; i < InZipper->LandscapeSize + 1; i++)
+		{
+
+			int32 ZippeeIndex = InZippee->GetVertexIndex(InZippee->GetLandscapeVertexMap(), FVector(LandscapeSize, i, 0), FVector(LandscapeSize, LandscapeSize, 0));
+
+			int32 ZipperIndex = InZipper->GetVertexIndex(InZipper->GetLandscapeVertexMap(), FVector(0, i, 0), FVector(LandscapeSize, LandscapeSize, 0));
+
+			FVector WorldZipperLoc = InZipper->GetActorTransform().TransformPosition(InZipper->ProcMeshData.Vertices[ZipperIndex]);
+
+			FVector ZippeeRelative = InZippee->GetActorTransform().InverseTransformPosition(WorldZipperLoc);
+
+			InZippee->ProcMeshData.Vertices[ZippeeIndex].Z = ZippeeRelative.Z;
+		}
+	}
+	else if (InNeighborDirection == ECardinalDirection::Northwest)
+	{
+		int32 ZippeeIndex = InZippee->GetVertexIndex(InZippee->GetLandscapeVertexMap(), FVector(0, LandscapeSize, 0), FVector(LandscapeSize, LandscapeSize, 0));
+
+		int32 ZipperIndex = InZipper->GetVertexIndex(InZipper->GetLandscapeVertexMap(), FVector(LandscapeSize, 0, 0), FVector(LandscapeSize, LandscapeSize, 0));
+
+		FVector WorldZipperLoc = InZipper->GetActorTransform().TransformPosition(InZipper->ProcMeshData.Vertices[ZipperIndex]);
+
+		FVector ZippeeRelative = InZippee->GetActorTransform().InverseTransformPosition(WorldZipperLoc);
+
+		InZippee->ProcMeshData.Vertices[ZippeeIndex].Z = ZippeeRelative.Z;
+	}
+	else if (InNeighborDirection == ECardinalDirection::Northeast)
+	{
+		int32 ZippeeIndex = InZippee->GetVertexIndex(InZippee->GetLandscapeVertexMap(), FVector(0, 0, 0), FVector(LandscapeSize, LandscapeSize, 0));
+
+		int32 ZipperIndex = InZipper->GetVertexIndex(InZipper->GetLandscapeVertexMap(), FVector(LandscapeSize, LandscapeSize, 0), FVector(LandscapeSize, LandscapeSize, 0));
+
+		FVector WorldZipperLoc = InZipper->GetActorTransform().TransformPosition(InZipper->ProcMeshData.Vertices[ZipperIndex]);
+
+		FVector ZippeeRelative = InZippee->GetActorTransform().InverseTransformPosition(WorldZipperLoc);
+
+		InZippee->ProcMeshData.Vertices[ZippeeIndex].Z = ZippeeRelative.Z;
+	}
+	else if (NeighborDir == ECardinalDirection::Southwest)
+	{
+		int32 ZippeeIndex = InZippee->GetVertexIndex(InZippee->GetLandscapeVertexMap(), FVector(LandscapeSize, LandscapeSize, 0), FVector(LandscapeSize, LandscapeSize, 0));
+
+		int32 ZipperIndex = InZipper->GetVertexIndex(InZipper->GetLandscapeVertexMap(), FVector(0, 0, 0), FVector(LandscapeSize, LandscapeSize, 0));
+
+		FVector WorldZipperLoc = InZipper->GetActorTransform().TransformPosition(InZipper->ProcMeshData.Vertices[ZipperIndex]);
+
+		FVector ZippeeRelative = InZippee->GetActorTransform().InverseTransformPosition(WorldZipperLoc);
+
+		InZippee->ProcMeshData.Vertices[ZippeeIndex].Z = ZippeeRelative.Z;
+	}
+	else if (InNeighborDirection == ECardinalDirection::Southeast)
+	{
+		int32 ZippeeIndex = InZippee->GetVertexIndex(InZippee->GetLandscapeVertexMap(), FVector(LandscapeSize, 0, 0), FVector(LandscapeSize, LandscapeSize, 0));
+
+		int32 ZipperIndex = InZipper->GetVertexIndex(InZipper->GetLandscapeVertexMap(), FVector(0, LandscapeSize, 0), FVector(LandscapeSize, LandscapeSize, 0));
+
+		FVector WorldZipperLoc = InZipper->GetActorTransform().TransformPosition(InZipper->ProcMeshData.Vertices[ZipperIndex]);
+
+		FVector ZippeeRelative = InZippee->GetActorTransform().InverseTransformPosition(WorldZipperLoc);
+
+		InZippee->ProcMeshData.Vertices[ZippeeIndex].Z = ZippeeRelative.Z;
+	}*/
 }
 
 AJetLandscapeMesh* AJetLandscapeMesh::GetNeighborLandscape_Implementation(ECardinalDirection InNeighborDirection)
 {
-	FTransform* TransPtr = NeighborSpawnTransformMap.Find(InNeighborDirection);
+	FTransform* TransPtr = LandscapeStatics::NeighborSpawnTransformMap.Find(InNeighborDirection);
 
 	if (!TransPtr)
 	{
@@ -148,7 +302,20 @@ bool AJetLandscapeMesh::GetNeighborLandscapeData(ECardinalDirection InNeighborDi
 		return false;
 	}
 
-	return GameState->GameState_GetNeighborLandscapeData(this, InNeighborDirection, OutProcMeshData);
+	return GameState->GameState_GetNeighborLandscapeData(ProcMeshData, InNeighborDirection, OutProcMeshData, TileSize * LandscapeSize);
+
+}
+
+bool AJetLandscapeMesh::Static_GetNeighborLandscapeData(UObject* WorldContextObject, const FProcMeshData& InLandscapeData, ECardinalDirection InNeighborDirection, FProcMeshData& OutNeighborData, int32 InVectorScale)
+{
+	AJetGameState* GameState = Cast<AJetGameState>(WorldContextObject->GetWorld()->GetGameState());
+
+	if (!GameState)
+	{
+		return false;
+	}
+
+	return GameState->GameState_GetNeighborLandscapeData(InLandscapeData, InNeighborDirection, OutNeighborData, InVectorScale);
 
 }
 
@@ -164,7 +331,11 @@ void AJetLandscapeMesh::SpawnNeighborLandscapesInRadius()
 	TArray<AJetLandscapeMesh*> NeighborLandscapes;
 	TArray<AJetLandscapeMesh*> NewNeighbors;
 
+	TArray<FProcMeshData> NeighborLandscapeDatas;
+	TArray<FProcMeshData> NewNeighborLandscapeDatas;
+
 	NeighborLandscapes.Add(this);
+	NeighborLandscapeDatas.Add(ProcMeshData);
 
 	for (i = 0; i < NeighborSpawnRadius; i++)
 	{
@@ -173,10 +344,10 @@ void AJetLandscapeMesh::SpawnNeighborLandscapesInRadius()
 			int32 MaxDirection = (int32)ECardinalDirection::Northwest;
 			int32 dir = 0;
 
-			/*if (!n)
+			if (!n)
 			{
 				continue;
-			}*/
+			}
 
 			for (dir = 0; dir < MaxDirection + 1; dir++)
 			{
@@ -189,6 +360,14 @@ void AJetLandscapeMesh::SpawnNeighborLandscapesInRadius()
 				//TODO: Don't spawn the tiles here. Check the tiles existence using the GetNeighborLandscapeData, add those to an array, and spawn all of them at the end using their data
 				FProcMeshData LandscapeData;
 				bool bHasNeighbor = n->GetNeighborLandscapeData(CardDir, LandscapeData);
+
+				FProcMeshData NewNeighborLandscape;
+				bool bCreatedNewNeighbor = false;
+				if (!bHasNeighbor)
+				{
+					bCreatedNewNeighbor = CreateNewNeighborLandscapeData(CardDir, NewNeighborLandscape);
+					//CurrentNeighbor = n->SpawnNeighborLandscape(CardDir);
+				}
 
 				if (!bHasNeighbor)
 				{
@@ -308,8 +487,8 @@ AJetLandscapeMesh* AJetLandscapeMesh::SpawnNeighborLandscape(ECardinalDirection 
 	}
 
 	FVector CurrentLocation = GetActorLocation();
-
-	FTransform NeighborTransform = GetNeighborLandscapeSpawnTransform(InNeighborDirection);
+	int32 VectorScale = TileSize * LandscapeSize;
+	FTransform NeighborTransform = GetNeighborLandscapeSpawnTransform(InNeighborDirection, VectorScale);
 	NeighborTransform.SetLocation(NeighborTransform.GetLocation() + CurrentLocation);
 
 	int32 HeightMod = FMath::RandRange(-HeightVariation, HeightVariation);
@@ -335,6 +514,56 @@ AJetLandscapeMesh* AJetLandscapeMesh::SpawnNeighborLandscape(ECardinalDirection 
 	return SpawnNeighboringLandscapeWithData(NewLandscapeData);
 	//ZipLandscapeDataWithNeighbors(NewLandscapeData);
 }
+
+bool AJetLandscapeMesh::CreateNewNeighborLandscapeData(ECardinalDirection InNeighborDirection, FProcMeshData& OutProcMeshData)
+{
+	//if the neighbor landscape already exists, we don't need to spawn it, return
+	bool bFoundNeighbor = GetNeighborLandscapeData(InNeighborDirection, OutProcMeshData);
+
+	if (bFoundNeighbor)
+	{
+		return false;
+	}
+
+	if (InNeighborDirection == ECardinalDirection::None)
+	{
+		return false;
+	}
+
+	FVector CurrentLocation = GetActorLocation();
+	int32 VectorScale = TileSize * LandscapeSize;
+
+	FTransform NeighborTransform = GetNeighborLandscapeSpawnTransform(InNeighborDirection, VectorScale);
+	NeighborTransform.SetLocation(NeighborTransform.GetLocation() + CurrentLocation);
+
+	int32 HeightMod = FMath::RandRange(-HeightVariation, HeightVariation);
+
+	NeighborTransform.SetLocation(NeighborTransform.GetLocation() + FVector(0, 0, HeightMod));
+
+	////Search for the previously spawned landscape, spawn with that data if found
+	//AJetGameState* GameState = Cast<AJetGameState>(GetWorld()->GetGameState());
+
+	//if (GameState)
+	//{
+	//	FProcMeshData* DataPtr = GameState->LandscapeDataMap.Find(NeighborTransform.GetLocation() * FVector(1, 1, 0));
+
+	//	if (DataPtr)
+	//	{
+	//		return SpawnLandscapeWithData(this, *DataPtr, LandscapeSize, TileSize, HeightVariation, NeighborSpawnRadius);
+	//	}
+	//}
+
+	//Create a new landscape and spawn it
+	FProcMeshData NewLandscapeData = CreateLandscapeData(NeighborTransform, LandscapeSize, TileSize, HeightVariation);
+	
+	ZipLandscapeDataWithNeighbors(NewLandscapeData);
+
+	OutProcMeshData = NewLandscapeData;
+
+	return true;
+	//ZipLandscapeDataWithNeighbors(NewLandscapeData);
+}
+
 
 AJetLandscapeMesh* AJetLandscapeMesh::SpawnNeighboringLandscapeWithData(const FProcMeshData& InNeighborData)
 {
@@ -566,13 +795,16 @@ void AJetLandscapeMesh::ZipNeighborLandscape(AJetLandscapeMesh* InZipper, AJetLa
 	}
 }
 
-FTransform AJetLandscapeMesh::GetNeighborLandscapeSpawnTransform(ECardinalDirection InNeighborDirection)
+FTransform AJetLandscapeMesh::GetNeighborLandscapeSpawnTransform(ECardinalDirection InNeighborDirection, int32 InVectorScale)
 {
-	FTransform* TransformPtr = NeighborSpawnTransformMap.Find(InNeighborDirection);
+	FTransform* TransformPtr = LandscapeStatics::NeighborSpawnTransformMap.Find(InNeighborDirection);
 
 	if (TransformPtr)
 	{
-		return *TransformPtr;
+		FTransform OutTransform = *TransformPtr;
+
+		OutTransform.SetLocation(OutTransform.GetLocation() * InVectorScale);
+		return OutTransform;
 	}
 	
 	return FTransform();
@@ -596,7 +828,44 @@ ECardinalDirection AJetLandscapeMesh::GetNeighborCardinality(AJetLandscapeMesh* 
 	{
 		ECardinalDirection CardDir = (ECardinalDirection)dir;
 
-		FTransform* TransPtr = NeighborSpawnTransformMap.Find(CardDir);
+		FTransform* TransPtr = LandscapeStatics::NeighborSpawnTransformMap.Find(CardDir);
+
+		if (TransPtr)
+		{
+			FVector CardDirVector = TransPtr->GetLocation().GetSafeNormal();
+
+			if (CardDirVector.Equals(Normal, 0.1f))
+			{
+				return CardDir;
+			}
+		}
+	}
+
+	return ECardinalDirection::None;
+}
+
+ECardinalDirection AJetLandscapeMesh::GetNeighborDataCardinality(const FProcMeshData& InLandscapeDataOne, const FProcMeshData& InLandscapeDataTwo)
+{
+	FVector PosOne = InLandscapeDataOne.SpawnTransform.GetLocation();
+	FVector PosTwo = InLandscapeDataTwo.SpawnTransform.GetLocation();
+
+	FVector Dir = PosTwo - PosOne;
+
+	Dir.Z = 0;
+
+	FVector Normal = Dir.GetSafeNormal();
+
+	int32 MaxDirection = (int32)ECardinalDirection::Northwest;
+	int32 dir = 0;
+
+	TMap<ECardinalDirection, FTransform> LocalNeighborSpawnTransformMap =
+	{ {ECardinalDirection::North, FTransform(FVector(1,0,0))} };
+
+	for (dir = 0; dir < MaxDirection + 1; dir++)
+	{
+		ECardinalDirection CardDir = (ECardinalDirection)dir;
+
+		FTransform* TransPtr = LocalNeighborSpawnTransformMap.Find(CardDir);
 
 		if (TransPtr)
 		{
@@ -762,7 +1031,7 @@ void AJetLandscapeMesh::BeginPlay()
 {
 	int32 VectorScale = TileSize * LandscapeSize;
 
-	NeighborSpawnTransformMap.Add(ECardinalDirection::North, FTransform(LandscapeStatics::North * VectorScale));
+	/*NeighborSpawnTransformMap.Add(ECardinalDirection::North, FTransform(LandscapeStatics::North * VectorScale));
 	NeighborSpawnTransformMap.Add(ECardinalDirection::Northeast, FTransform(LandscapeStatics::Northeast * VectorScale));
 	NeighborSpawnTransformMap.Add(ECardinalDirection::Northwest, FTransform(LandscapeStatics::Northwest * VectorScale));
 	NeighborSpawnTransformMap.Add(ECardinalDirection::West, FTransform(LandscapeStatics::West * VectorScale));
@@ -771,7 +1040,7 @@ void AJetLandscapeMesh::BeginPlay()
 	NeighborSpawnTransformMap.Add(ECardinalDirection::South, FTransform(LandscapeStatics::South * VectorScale));
 	NeighborSpawnTransformMap.Add(ECardinalDirection::Southwest, FTransform(LandscapeStatics::Southwest * VectorScale));
 
-
+*/
 
 	SphereCollider->SetSphereRadius(100.0f);
 	SphereCollider->SetCollisionEnabled(ECollisionEnabled::QueryOnly);

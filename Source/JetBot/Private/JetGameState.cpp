@@ -24,35 +24,49 @@ void AJetGameState::OnLandscapeDestroyed_Implementation(AJetLandscapeMesh* InLan
 
 }
 
-bool AJetGameState::GameState_GetNeighborLandscapeData(AJetLandscapeMesh* InLandscape, ECardinalDirection InNeighborDirection, FProcMeshData& OutProcMeshData)
+bool AJetGameState::GameState_GetNeighborLandscapeData(const FProcMeshData& InLandscapeData, ECardinalDirection InNeighborDirection, FProcMeshData& OutNeighborData, int32 InVectorScale)
 {
-	if (!InLandscape)
+	/*if (!InLandscape)
 	{
 		return false;
-	}
+	}*/
 
 	if (InNeighborDirection == ECardinalDirection::None)
 	{
 		return false;
 	}
 
-	/*AJetLandscapeMesh* FoundLandscape = InLandscape->GetNeighborLandscape(InNeighborDirection);
+	const FTransform MapTransform = AJetLandscapeMesh::GetNeighborLandscapeSpawnTransform(InNeighborDirection, InVectorScale);
 
-	if (FoundLandscape)
-	{
-		return true;
-	}*/
-
-	const FTransform MapTransform = InLandscape->GetNeighborLandscapeSpawnTransform(InNeighborDirection);
-
-	FProcMeshData* DataPtr = LandscapeDataMap.Find((InLandscape->GetActorLocation() + MapTransform.GetLocation()) * FVector(1, 1, 0));
+	FProcMeshData* DataPtr = LandscapeDataMap.Find((InLandscapeData.SpawnTransform.GetLocation() + MapTransform.GetLocation()) * FVector(1, 1, 0));
 
 	if (DataPtr)
 	{
-		OutProcMeshData = *DataPtr;
+		OutNeighborData = *DataPtr;
 		return true;
 	}
 
 	return false;
 }
+
+bool AJetGameState::Static_GameState_GetNeighborLandscapeData(const FProcMeshData& InLandscapeData, ECardinalDirection InNeighborDirection, FProcMeshData& OutNeighborData, int32 InVectorScale)
+{
+	if (InNeighborDirection == ECardinalDirection::None)
+	{
+		return false;
+	}
+
+	const FTransform MapTransform = AJetLandscapeMesh::GetNeighborLandscapeSpawnTransform(InNeighborDirection, InVectorScale);
+
+	FProcMeshData* DataPtr = LandscapeDataMap.Find((InLandscapeData.SpawnTransform.GetLocation() + MapTransform.GetLocation()) * FVector(1, 1, 0));
+
+	if (DataPtr)
+	{
+		OutNeighborData = *DataPtr;
+		return true;
+	}
+
+	return false;
+}
+
 PRAGMA_ENABLE_OPTIMIZATION
