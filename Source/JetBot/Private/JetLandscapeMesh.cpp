@@ -139,6 +139,19 @@ AJetLandscapeMesh* AJetLandscapeMesh::GetNeighborLandscape_Implementation(ECardi
 	return Cast<AJetLandscapeMesh>(HitResult.GetActor());
 }
 
+bool AJetLandscapeMesh::GetNeighborLandscapeExists(ECardinalDirection InNeighborDirection)
+{
+	AJetGameState* GameState = Cast<AJetGameState>(GetWorld()->GetGameState());
+
+	if (!GameState)
+	{
+		return false;
+	}
+
+	return GameState->GameState_GetNeighborLandscapeExists(this, InNeighborDirection);
+
+}
+
 void AJetLandscapeMesh::SpawnNeighborLandscapesInRadius()
 {
 	if (bHasSpawnedNeighborLandscapes)
@@ -160,13 +173,20 @@ void AJetLandscapeMesh::SpawnNeighborLandscapesInRadius()
 			int32 MaxDirection = (int32)ECardinalDirection::Northwest;
 			int32 dir = 0;
 
+			if (!n)
+			{
+				continue;
+			}
+
 			for (dir = 0; dir < MaxDirection + 1; dir++)
 			{
 				ECardinalDirection CardDir = (ECardinalDirection)dir;
 
 				AJetLandscapeMesh* CurrentNeighbor = n->GetNeighborLandscape(CardDir);
 
-				if (!CurrentNeighbor)
+				bool bHasNeighbor = n->GetNeighborLandscapeExists(CardDir);
+
+				if (!bHasNeighbor)
 				{
 					CurrentNeighbor = n->SpawnNeighborLandscape(CardDir);
 				}
@@ -325,8 +345,7 @@ AJetLandscapeMesh* AJetLandscapeMesh::SpawnNeighboringLandscapeWithData(const FP
 	SpawnedActor->NeighborSpawnRadius = NeighborSpawnRadius;
 
 	SpawnedActor->ProcMeshData = InNeighborData;
-
-
+	
 	UGameplayStatics::FinishSpawningActor(SpawnedActor, InNeighborData.SpawnTransform);
 
 	//SpawnedActor->CreateLandscape(SpawnedActor->LandscapeSize);
@@ -347,14 +366,16 @@ AJetLandscapeMesh* AJetLandscapeMesh::SpawnNeighboringLandscapeWithData(const FP
 		}
 	}
 
-	SpawnedActor->CreateMesh();
-
 	AJetGameState* GameState = Cast<AJetGameState>(GetWorld()->GetGameState());
 
 	if (GameState)
 	{
 		GameState->OnLandscapeSpawned(SpawnedActor, SpawnedActor->ProcMeshData);
 	}
+
+	SpawnedActor->CreateMesh();
+
+	
 
 	return SpawnedActor;
 }

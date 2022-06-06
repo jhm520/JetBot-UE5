@@ -30,4 +30,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Procedural Mesh")
 	void OnLandscapeDestroyed(AJetLandscapeMesh* InLandscape, const FProcMeshData& InProcMesh);
+
+	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
+	bool GameState_GetNeighborLandscapeExists(AJetLandscapeMesh* InLandscape, ECardinalDirection InNeighborDirection);
 };

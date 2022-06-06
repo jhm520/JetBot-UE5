@@ -77,6 +77,9 @@ public:
 	UFUNCTION(BlueprintCallable,BlueprintPure, BlueprintNativeEvent, Category = "Procedural Mesh")
 	AJetLandscapeMesh* GetNeighborLandscape(ECardinalDirection InNeighborDirection);
 
+	UFUNCTION(BlueprintCallable,BlueprintPure, Category = "Procedural Mesh")
+	bool GetNeighborLandscapeExists(ECardinalDirection InNeighborDirection);
+
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
 	void SpawnNeighborLandscapesInRadius();
 
