@@ -139,7 +139,7 @@ AJetLandscapeMesh* AJetLandscapeMesh::GetNeighborLandscape_Implementation(ECardi
 	return Cast<AJetLandscapeMesh>(HitResult.GetActor());
 }
 
-bool AJetLandscapeMesh::GetNeighborLandscapeExists(ECardinalDirection InNeighborDirection)
+bool AJetLandscapeMesh::GetNeighborLandscapeData(ECardinalDirection InNeighborDirection, FProcMeshData& OutProcMeshData)
 {
 	AJetGameState* GameState = Cast<AJetGameState>(GetWorld()->GetGameState());
 
@@ -148,7 +148,7 @@ bool AJetLandscapeMesh::GetNeighborLandscapeExists(ECardinalDirection InNeighbor
 		return false;
 	}
 
-	return GameState->GameState_GetNeighborLandscapeExists(this, InNeighborDirection);
+	return GameState->GameState_GetNeighborLandscapeData(this, InNeighborDirection, OutProcMeshData);
 
 }
 
@@ -173,22 +173,33 @@ void AJetLandscapeMesh::SpawnNeighborLandscapesInRadius()
 			int32 MaxDirection = (int32)ECardinalDirection::Northwest;
 			int32 dir = 0;
 
-			if (!n)
+			/*if (!n)
 			{
 				continue;
-			}
+			}*/
 
 			for (dir = 0; dir < MaxDirection + 1; dir++)
 			{
 				ECardinalDirection CardDir = (ECardinalDirection)dir;
 
-				AJetLandscapeMesh* CurrentNeighbor = n->GetNeighborLandscape(CardDir);
+				//AJetLandscapeMesh* CurrentNeighbor = n->GetNeighborLandscape(CardDir);
 
-				bool bHasNeighbor = n->GetNeighborLandscapeExists(CardDir);
+				AJetLandscapeMesh* CurrentNeighbor = nullptr;
 
-				if (!CurrentNeighbor)
+				//TODO: Don't spawn the tiles here. Check the tiles existence using the GetNeighborLandscapeData, add those to an array, and spawn all of them at the end using their data
+				FProcMeshData LandscapeData;
+				bool bHasNeighbor = n->GetNeighborLandscapeData(CardDir, LandscapeData);
+
+				if (!bHasNeighbor)
 				{
 					CurrentNeighbor = n->SpawnNeighborLandscape(CardDir);
+				}
+				else
+				{
+					if (!LandscapeData.bIsActive)
+					{
+						CurrentNeighbor = n->SpawnLandscapeWithData(this, LandscapeData, n->LandscapeSize, n->TileSize, n->HeightVariation, n->NeighborSpawnRadius);
+					}
 				}
 
 				if (CurrentNeighbor)

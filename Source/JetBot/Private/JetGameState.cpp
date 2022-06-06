@@ -9,15 +9,22 @@ PRAGMA_DISABLE_OPTIMIZATION
 void AJetGameState::OnLandscapeSpawned_Implementation(AJetLandscapeMesh* InLandscape, const FProcMeshData& InProcMesh)
 {
 	LandscapeDataArray.Add(InProcMesh);
-	LandscapeDataMap.Add(InProcMesh.SpawnTransform.GetLocation()*FVector(1,1,0), InProcMesh);
+	FProcMeshData NewProcMesh = InProcMesh;
+
+	NewProcMesh.bIsActive = true;
+	LandscapeDataMap.Add(NewProcMesh.SpawnTransform.GetLocation()*FVector(1,1,0), NewProcMesh);
 }
 
 void AJetGameState::OnLandscapeDestroyed_Implementation(AJetLandscapeMesh* InLandscape, const FProcMeshData& InProcMesh)
 {
+	FProcMeshData NewProcMesh = InProcMesh;
+
+	NewProcMesh.bIsActive = false;
+	LandscapeDataMap.Add(NewProcMesh.SpawnTransform.GetLocation() * FVector(1, 1, 0), NewProcMesh);
 
 }
 
-bool AJetGameState::GameState_GetNeighborLandscapeExists(AJetLandscapeMesh* InLandscape, ECardinalDirection InNeighborDirection)
+bool AJetGameState::GameState_GetNeighborLandscapeData(AJetLandscapeMesh* InLandscape, ECardinalDirection InNeighborDirection, FProcMeshData& OutProcMeshData)
 {
 	if (!InLandscape)
 	{
@@ -29,12 +36,12 @@ bool AJetGameState::GameState_GetNeighborLandscapeExists(AJetLandscapeMesh* InLa
 		return false;
 	}
 
-	AJetLandscapeMesh* FoundLandscape = InLandscape->GetNeighborLandscape(InNeighborDirection);
+	/*AJetLandscapeMesh* FoundLandscape = InLandscape->GetNeighborLandscape(InNeighborDirection);
 
 	if (FoundLandscape)
 	{
 		return true;
-	}
+	}*/
 
 	const FTransform MapTransform = InLandscape->GetNeighborLandscapeSpawnTransform(InNeighborDirection);
 
@@ -42,6 +49,7 @@ bool AJetGameState::GameState_GetNeighborLandscapeExists(AJetLandscapeMesh* InLa
 
 	if (DataPtr)
 	{
+		OutProcMeshData = *DataPtr;
 		return true;
 	}
 

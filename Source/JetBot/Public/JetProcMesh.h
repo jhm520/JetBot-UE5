@@ -42,6 +42,9 @@ struct FProcMeshData
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Mesh")
 	TArray<UMaterialInterface*> Materials;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Mesh")
+	bool bIsActive = false;
+
 
 	FProcMeshData() {}
 };
