@@ -376,7 +376,7 @@ AJetLandscapeMesh* AJetLandscapeMesh::SpawnLandscapeWithData(UObject* WorldConte
 	SpawnedActor->LandscapeSize = InLandscapeSize;
 	SpawnedActor->TileSize = InTileSize;
 	SpawnedActor->HeightVariation = InHeightVariation;
-	//SpawnedActor->NeighborSpawnRadius
+	SpawnedActor->NeighborSpawnRadius = InNeighborSpawnRadius;
 
 	SpawnedActor->ProcMeshData = InProcMeshData;
 
