@@ -163,11 +163,20 @@ void AJetLandscapeMesh::SpawnNeighborLandscapesInRadius()
 			for (dir = 0; dir < MaxDirection + 1; dir++)
 			{
 				ECardinalDirection CardDir = (ECardinalDirection)dir;
-				AJetLandscapeMesh* CurrentNeighbor = n->SpawnNeighborLandscape(CardDir);
+
+				AJetLandscapeMesh* CurrentNeighbor = n->GetNeighborLandscape(CardDir);
+
+				if (!CurrentNeighbor)
+				{
+					CurrentNeighbor = n->SpawnNeighborLandscape(CardDir);
+				}
 
 				if (CurrentNeighbor)
 				{
-					NewNeighbors.Add(CurrentNeighbor);
+					if (!NewNeighbors.Contains(CurrentNeighbor))
+					{
+						NewNeighbors.Add(CurrentNeighbor);
+					}
 				}
 			}
 		}
@@ -178,6 +187,11 @@ void AJetLandscapeMesh::SpawnNeighborLandscapesInRadius()
 	}
 
 	bHasSpawnedNeighborLandscapes = true;
+}
+
+TArray<AJetLandscapeMesh*> AJetLandscapeMesh::GetNeighborLandscapesInRadius()
+{
+	return TArray<AJetLandscapeMesh*>();
 }
 
 void AJetLandscapeMesh::SpawnNeighborLandscapes()
@@ -197,27 +211,46 @@ TArray<AJetLandscapeMesh*> AJetLandscapeMesh::GetAllNeighborLandscapes()
 
 	int32 i = 0;
 
+	TArray<AJetLandscapeMesh*> CurrentNeighborLandscapes;
+
+	TArray<AJetLandscapeMesh*> NewNeighborLandscapes;
+
+	CurrentNeighborLandscapes.Add(this);
+
 	for (i = 0; i < NeighborSpawnRadius; i++)
 	{
-		int32 MaxDirection = (int32)ECardinalDirection::Northwest;
-		int32 dir = 0;
-
-		for (dir = 0; dir < MaxDirection + 1; dir++)
+		for (AJetLandscapeMesh* CurrentNeighbor : CurrentNeighborLandscapes)
 		{
-			AJetLandscapeMesh* NeighborLandscape = GetNeighborLandscape((ECardinalDirection) dir);
-
-			if (!NeighborLandscape)
+			if (!CurrentNeighbor)
 			{
 				continue;
 			}
 
-			if (OutLandscapes.Contains(NeighborLandscape))
-			{
-				continue;
-			}
+			int32 MaxDirection = (int32)ECardinalDirection::Northwest;
+			int32 dir = 0;
 
-			OutLandscapes.Add(NeighborLandscape);
+			for (dir = 0; dir < MaxDirection + 1; dir++)
+			{
+				AJetLandscapeMesh* NeighborLandscape = CurrentNeighbor->GetNeighborLandscape((ECardinalDirection)dir);
+
+				if (!NeighborLandscape)
+				{
+					continue;
+				}
+
+				NewNeighborLandscapes.Add(NeighborLandscape);
+
+				if (OutLandscapes.Contains(NeighborLandscape))
+				{
+					continue;
+				}
+
+				OutLandscapes.Add(NeighborLandscape);
+			}
 		}
+		CurrentNeighborLandscapes.Empty();
+		CurrentNeighborLandscapes = NewNeighborLandscapes;
+		NewNeighborLandscapes.Empty();
 	}
 
 	return OutLandscapes;
@@ -229,6 +262,16 @@ AJetLandscapeMesh* AJetLandscapeMesh::SpawnNeighborLandscape(ECardinalDirection 
 	AJetLandscapeMesh* NeighborLandscape = GetNeighborLandscape(InNeighborDirection);
 
 	if (NeighborLandscape)
+	{
+		/*if (bReturnExisting)
+		{
+			return NeighborLandscape;
+		}*/
+
+		return nullptr;
+	}
+
+	if (InNeighborDirection == ECardinalDirection::None)
 	{
 		return nullptr;
 	}
@@ -251,7 +294,7 @@ AJetLandscapeMesh* AJetLandscapeMesh::SpawnNeighborLandscape(ECardinalDirection 
 
 		if (DataPtr)
 		{
-			return SpawnLandscapeWithData(this, *DataPtr, LandscapeSize, TileSize, HeightVariation);
+			return SpawnLandscapeWithData(this, *DataPtr, LandscapeSize, TileSize, HeightVariation, NeighborSpawnRadius);
 		}
 	}
 
@@ -279,6 +322,7 @@ AJetLandscapeMesh* AJetLandscapeMesh::SpawnNeighboringLandscapeWithData(const FP
 	SpawnedActor->LandscapeSize = LandscapeSize;
 	SpawnedActor->TileSize = TileSize;
 	SpawnedActor->HeightVariation = HeightVariation;
+	SpawnedActor->NeighborSpawnRadius = NeighborSpawnRadius;
 
 	SpawnedActor->ProcMeshData = InNeighborData;
 
@@ -315,7 +359,7 @@ AJetLandscapeMesh* AJetLandscapeMesh::SpawnNeighboringLandscapeWithData(const FP
 	return SpawnedActor;
 }
 
-AJetLandscapeMesh* AJetLandscapeMesh::SpawnLandscapeWithData(UObject* WorldContextObject, const FProcMeshData& InProcMeshData, int32 InLandscapeSize, int32 InTileSize, int32 InHeightVariation)
+AJetLandscapeMesh* AJetLandscapeMesh::SpawnLandscapeWithData(UObject* WorldContextObject, const FProcMeshData& InProcMeshData, int32 InLandscapeSize, int32 InTileSize, int32 InHeightVariation, int32 InNeighborSpawnRadius)
 {
 	FActorSpawnParameters ActorSpawnParams = FActorSpawnParameters();
 	UClass* LandscapeClass = WorldContextObject->GetClass();
@@ -332,6 +376,7 @@ AJetLandscapeMesh* AJetLandscapeMesh::SpawnLandscapeWithData(UObject* WorldConte
 	SpawnedActor->LandscapeSize = InLandscapeSize;
 	SpawnedActor->TileSize = InTileSize;
 	SpawnedActor->HeightVariation = InHeightVariation;
+	//SpawnedActor->NeighborSpawnRadius
 
 	SpawnedActor->ProcMeshData = InProcMeshData;
 
