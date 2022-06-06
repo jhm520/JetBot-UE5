@@ -26,6 +26,31 @@ enum class ECardinalDirection : uint8
 	Northwest
 };
 
+USTRUCT(BlueprintType)
+struct FLandscapeProperties
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite, Category = "Landscape")
+	int32 LandscapeSize = 4;
+
+	UPROPERTY(BlueprintReadWrite, Category = "Landscape")
+	int32 HeightVariation = 50;
+
+	UPROPERTY(BlueprintReadWrite, Category = "Landscape")
+	int32 TileSize = 100;
+
+	UPROPERTY(BlueprintReadWrite, Category = "Landscape")
+	int32 NeighborSpawnRadius = 1;
+	
+	int32 GetVectorScale() const
+	{
+		return TileSize * LandscapeSize;
+	}
+
+	FLandscapeProperties() {}
+};
+
 UCLASS()
 class JETBOT_API AJetLandscapeMesh : public AJetProcMesh
 {
@@ -54,6 +79,9 @@ public:
 	bool bAutoCreateLandscape = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
+	FLandscapeProperties LandscapeProperties;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
 	int32 LandscapeSize = 4;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
@@ -72,15 +100,17 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
 	static FProcMeshData CreateLandscapeData(const FTransform& InSpawnTransform, int32 InLandscapeSize, int32 InTileSize, int32 InHeightVariation);
 
-	void ZipLandscapeDataWithNeighbors(FProcMeshData& InOutLandscapeData);
+	UFUNCTION(meta = (WorldContext = "WorldContextObject"))
+	static void ZipLandscapeDataWithNeighbors(UObject* WorldContextObject, FProcMeshData& InOutLandscapeData, const FLandscapeProperties& InLandscapeProperties);
 
-	void ZipLandscapeDataWithNeighbor(ECardinalDirection InNeighborDirection, FProcMeshData& InOutLandscapeData);
+	UFUNCTION(meta = (WorldContext = "WorldContextObject"))
+	static void ZipLandscapeDataWithNeighbor(UObject* WorldContextObject, ECardinalDirection InNeighborDirection, FProcMeshData& InOutLandscapeData, const FLandscapeProperties& InLandscapeProperties);
 
 	UFUNCTION(BlueprintCallable,BlueprintPure, BlueprintNativeEvent, Category = "Procedural Mesh")
 	AJetLandscapeMesh* GetNeighborLandscape(ECardinalDirection InNeighborDirection);
 
-	UFUNCTION(BlueprintCallable,BlueprintPure, Category = "Procedural Mesh")
-	bool GetNeighborLandscapeData(ECardinalDirection InNeighborDirection, FProcMeshData& OutProcMeshData);
+	UFUNCTION(BlueprintCallable,BlueprintPure, meta = (WorldContext = "WorldContextObject"), Category = "Procedural Mesh")
+	static bool GetNeighborLandscapeData(UObject* WorldContextObject, const FProcMeshData& InLandscapeData, ECardinalDirection InNeighborDirection, FProcMeshData& OutProcMeshData, int32 InVectorScale);
 
 	UFUNCTION(BlueprintCallable,BlueprintPure, meta = (WorldContext = "WorldContextObject"), Category = "Procedural Mesh")
 	static bool Static_GetNeighborLandscapeData(UObject* WorldContextObject, const FProcMeshData& InLandscapeData, ECardinalDirection InNeighborDirection, FProcMeshData& OutNeighborData, int32 InVectorScale);
@@ -103,8 +133,8 @@ public:
 		AJetLandscapeMesh* SpawnNeighborLandscape(ECardinalDirection InNeighborDirection);
 
 	//Spawn a landscape neighboring this landscape
-	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
-	bool CreateNewNeighborLandscapeData(ECardinalDirection InNeighborDirection, FProcMeshData& OutProcMeshData);
+	UFUNCTION(BlueprintCallable, meta = (WorldContext = "WorldContextObject"), Category = "Procedural Mesh")
+	static bool CreateNewNeighborLandscapeData(UObject* WorldContextObject, const FProcMeshData& InLandscape, ECardinalDirection InNeighborDirection, FProcMeshData& OutProcMeshData, const FLandscapeProperties& InLandscapeProperties);
 
 private:
 	//Spawn a landscape neighboring this landscape with data
