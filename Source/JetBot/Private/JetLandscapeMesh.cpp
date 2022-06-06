@@ -186,7 +186,7 @@ void AJetLandscapeMesh::SpawnNeighborLandscapesInRadius()
 
 				bool bHasNeighbor = n->GetNeighborLandscapeExists(CardDir);
 
-				if (!bHasNeighbor)
+				if (!CurrentNeighbor)
 				{
 					CurrentNeighbor = n->SpawnNeighborLandscape(CardDir);
 				}
