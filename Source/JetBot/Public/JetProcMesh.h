@@ -45,6 +45,11 @@ struct FProcMeshData
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Mesh")
 	bool bIsActive = false;
 
+	FVector GetMapKey() const
+	{
+		return SpawnTransform.GetLocation() * FVector(1, 1, 0);
+	}
+
 
 	FProcMeshData() {}
 };

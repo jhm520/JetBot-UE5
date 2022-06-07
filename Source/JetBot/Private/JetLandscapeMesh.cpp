@@ -331,6 +331,12 @@ void AJetLandscapeMesh::SpawnNeighborLandscapesInRadius()
 	TArray<FProcMeshData> NeighborLandscapeDatas;
 	TArray<FProcMeshData> NewNeighborLandscapeDatas;
 
+	TArray<FProcMeshData> LandscapeIteratorArray;
+
+	TArray<FProcMeshData> LandscapeSpawnQueue;
+
+	TMap<FVector, FProcMeshData> LandscapeMap;
+
 	NeighborLandscapeDatas.Add(ProcMeshData);
 
 	for (i = 0; i < NeighborSpawnRadius; i++)
@@ -352,26 +358,56 @@ void AJetLandscapeMesh::SpawnNeighborLandscapesInRadius()
 
 				FProcMeshData NewNeighborLandscape;
 				bool bCreatedNewNeighbor = false;
-				bCreatedNewNeighbor = CreateNewNeighborLandscapeData(this, n, CardDir, NewNeighborLandscape, LandscapeProperties);
-					//CurrentNeighbor = n->SpawnNeighborLandscape(CardDir);
+
+				bool bFoundNeighbor = GetNeighborLandscapeData(this, n, CardDir, NewNeighborLandscape, LandscapeProperties.GetVectorScale());
+
+				if (bFoundNeighbor)
+				{
+					LandscapeIteratorArray.Add(NewNeighborLandscape);
+				}
+				else
+				{
+					bCreatedNewNeighbor = CreateNewNeighborLandscapeData(this, n, CardDir, NewNeighborLandscape, LandscapeProperties);
+				}
+				//CurrentNeighbor = n->SpawnNeighborLandscape(CardDir);
+
+				//FProcMeshData* LandscapePtr = LandscapeMap.Find(NewNeighborLandscape.GetMapKey());
 
 				if (bCreatedNewNeighbor)
 				{
 					/*if (!NewNeighborLandscapeDatas.Contains(n))
 					{*/
-						NewNeighborLandscapeDatas.Add(n);
+					LandscapeIteratorArray.Add(NewNeighborLandscape);
+					NewNeighborLandscapeDatas.Add(NewNeighborLandscape);
+
+					NewNeighborLandscape.bIsActive = true;
+					OnLandscapeDataCreated(this, NewNeighborLandscape);
+
+						
 					/*}*/
+				}
+				else
+				{
+					//
 				}
 			}
 		}
 
 		NeighborLandscapeDatas.Empty();
-		NeighborLandscapeDatas = NewNeighborLandscapeDatas;
+		NeighborLandscapeDatas = LandscapeIteratorArray;
+
+		LandscapeSpawnQueue.Append(NewNeighborLandscapeDatas);
 		NewNeighborLandscapeDatas.Empty();
+
+		LandscapeIteratorArray.Empty();
 	}
 
 
 	// Spawn all of the new neighbors
+	for (const FProcMeshData& Landscape : LandscapeSpawnQueue)
+	{
+		SpawnLandscapeWithData(this, Landscape, LandscapeSize, TileSize, HeightVariation, NeighborSpawnRadius);
+	}
 
 	bHasSpawnedNeighborLandscapes = true;
 }
@@ -499,7 +535,10 @@ bool AJetLandscapeMesh::CreateNewNeighborLandscapeData(UObject* WorldContextObje
 
 	if (bFoundNeighbor)
 	{
-		return false;
+		if (OutProcMeshData.bIsActive)
+		{
+			return false;
+		}
 	}
 
 	if (InNeighborDirection == ECardinalDirection::None)
@@ -540,6 +579,18 @@ bool AJetLandscapeMesh::CreateNewNeighborLandscapeData(UObject* WorldContextObje
 	//ZipLandscapeDataWithNeighbors(NewLandscapeData);
 }
 
+
+void AJetLandscapeMesh::OnLandscapeDataCreated(UObject* WorldContextObject, const FProcMeshData& InLandscape)
+{
+	AJetGameState* GameState = Cast<AJetGameState>(WorldContextObject->GetWorld()->GetGameState());
+
+	if (!GameState)
+	{
+		return;
+	}
+
+	GameState->LandscapeDataMap.Add(InLandscape.GetMapKey(), InLandscape);
+}
 
 AJetLandscapeMesh* AJetLandscapeMesh::SpawnNeighboringLandscapeWithData(const FProcMeshData& InNeighborData)
 {
@@ -614,6 +665,11 @@ AJetLandscapeMesh* AJetLandscapeMesh::SpawnLandscapeWithData(UObject* WorldConte
 	SpawnedActor->TileSize = InTileSize;
 	SpawnedActor->HeightVariation = InHeightVariation;
 	SpawnedActor->NeighborSpawnRadius = InNeighborSpawnRadius;
+
+	SpawnedActor->LandscapeProperties.LandscapeSize = InLandscapeSize;
+	SpawnedActor->LandscapeProperties.TileSize = InTileSize;
+	SpawnedActor->LandscapeProperties.HeightVariation = InHeightVariation;
+	SpawnedActor->LandscapeProperties.NeighborSpawnRadius = InNeighborSpawnRadius;
 
 	SpawnedActor->ProcMeshData = InProcMeshData;
 
@@ -1038,6 +1094,7 @@ void AJetLandscapeMesh::BeginPlay()
 		LandscapeProperties.LandscapeSize = LandscapeSize;
 		LandscapeProperties.TileSize = TileSize;
 		LandscapeProperties.HeightVariation = HeightVariation;
+		LandscapeProperties.NeighborSpawnRadius = NeighborSpawnRadius;
 		ProcMeshData = CreateLandscapeData(GetActorTransform(), LandscapeSize, TileSize, HeightVariation);
 
 		//CreateLandscape(LandscapeSize);
