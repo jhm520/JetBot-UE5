@@ -107,7 +107,7 @@ public:
 	static void ZipLandscapeDataWithNeighbor(UObject* WorldContextObject, ECardinalDirection InNeighborDirection, FProcMeshData& InOutLandscapeData, const FLandscapeProperties& InLandscapeProperties);
 
 	UFUNCTION(BlueprintCallable,BlueprintPure, BlueprintNativeEvent, Category = "Procedural Mesh")
-	AJetLandscapeMesh* GetNeighborLandscape(ECardinalDirection InNeighborDirection);
+	AJetLandscapeMesh* GetNeighborLandscape(ECardinalDirection InNeighborDirection, const FLandscapeProperties& InLandscapeProperties);
 
 	UFUNCTION(BlueprintCallable,BlueprintPure, meta = (WorldContext = "WorldContextObject"), Category = "Procedural Mesh")
 	static bool GetNeighborLandscapeData(UObject* WorldContextObject, const FProcMeshData& InLandscapeData, ECardinalDirection InNeighborDirection, FProcMeshData& OutProcMeshData, int32 InVectorScale);

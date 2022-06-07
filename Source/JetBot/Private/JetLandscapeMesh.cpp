@@ -260,7 +260,7 @@ void AJetLandscapeMesh::ZipLandscapeDataWithNeighbor(UObject* WorldContextObject
 	}*/
 }
 
-AJetLandscapeMesh* AJetLandscapeMesh::GetNeighborLandscape_Implementation(ECardinalDirection InNeighborDirection)
+AJetLandscapeMesh* AJetLandscapeMesh::GetNeighborLandscape_Implementation(ECardinalDirection InNeighborDirection, const FLandscapeProperties& InLandscapeProperties)
 {
 	FTransform* TransPtr = LandscapeStatics::NeighborSpawnTransformMap.Find(InNeighborDirection);
 
@@ -272,7 +272,7 @@ AJetLandscapeMesh* AJetLandscapeMesh::GetNeighborLandscape_Implementation(ECardi
 	const FTransform& TransRef = *TransPtr;
 	FHitResult HitResult;
 
-	const FVector& NeighborLocation = GetActorLocation() + TransRef.GetLocation();
+	const FVector& NeighborLocation = GetActorLocation() + (TransRef.GetLocation() * InLandscapeProperties.GetVectorScale());
 
 	FVector TraceStart = NeighborLocation - FVector(0,0,200.0f+(HeightVariation*2));
 
@@ -454,7 +454,7 @@ TArray<AJetLandscapeMesh*> AJetLandscapeMesh::GetAllNeighborLandscapes()
 
 			for (dir = 0; dir < MaxDirection + 1; dir++)
 			{
-				AJetLandscapeMesh* NeighborLandscape = CurrentNeighbor->GetNeighborLandscape((ECardinalDirection)dir);
+				AJetLandscapeMesh* NeighborLandscape = CurrentNeighbor->GetNeighborLandscape((ECardinalDirection)dir, LandscapeProperties);
 
 				if (!NeighborLandscape)
 				{
@@ -482,7 +482,7 @@ TArray<AJetLandscapeMesh*> AJetLandscapeMesh::GetAllNeighborLandscapes()
 AJetLandscapeMesh* AJetLandscapeMesh::SpawnNeighborLandscape(ECardinalDirection InNeighborDirection)
 {
 	//if the neighbor landscape already exists, we don't need to spawn it, return
-	AJetLandscapeMesh* NeighborLandscape = GetNeighborLandscape(InNeighborDirection);
+	AJetLandscapeMesh* NeighborLandscape = GetNeighborLandscape(InNeighborDirection, LandscapeProperties);
 
 	if (NeighborLandscape)
 	{
@@ -625,7 +625,7 @@ AJetLandscapeMesh* AJetLandscapeMesh::SpawnNeighboringLandscapeWithData(const FP
 	for (dir = 0; dir < MaxDirection + 1; dir++)
 	{
 		ECardinalDirection CardDir = (ECardinalDirection)dir;
-		AJetLandscapeMesh* CurrentNeighbor = SpawnedActor->GetNeighborLandscape(CardDir);
+		AJetLandscapeMesh* CurrentNeighbor = SpawnedActor->GetNeighborLandscape(CardDir, LandscapeProperties);
 
 		if (CurrentNeighbor)
 		{
