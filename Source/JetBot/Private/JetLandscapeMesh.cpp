@@ -65,6 +65,7 @@ void AJetLandscapeMesh::OnPlayerEnteredLandscape(ACharacter* InPlayer)
 
 void AJetLandscapeMesh::OnPlayerExitedLandscape(ACharacter* InPlayer, AJetLandscapeMesh* NewLandscape)
 {
+
 	if (!InPlayer || !InPlayer->IsLocallyControlled())
 	{
 		return;
@@ -361,7 +362,7 @@ void AJetLandscapeMesh::SpawnNeighborLandscapesInRadius()
 
 				bool bFoundNeighbor = GetNeighborLandscapeData(this, n, CardDir, NewNeighborLandscape, LandscapeProperties.GetVectorScale());
 
-				if (bFoundNeighbor)
+				if (bFoundNeighbor && NewNeighborLandscape.bIsActive)
 				{
 					LandscapeIteratorArray.Add(NewNeighborLandscape);
 				}
