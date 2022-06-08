@@ -94,7 +94,71 @@ void AJetGameState::Tick(const float DeltaSeconds)
 
 void AJetGameState::TickSpawnLandscape()
 {
-	if (LandscapeSpawnQueue.Num() == 0)
+	if (LandscapeSpawnTransformQueue.Num() == 0)
+	{
+		return;
+	}
+
+	const FTransform& FirstLandscapeTransform = LandscapeSpawnTransformQueue[0];
+
+	FProcMeshData Landscape;
+
+	FVector MapKey = FVector(FirstLandscapeTransform.GetLocation());
+
+	bool bFoundLandscape = AJetLandscapeMesh::FindLandscapeData(this, MapKey, Landscape, LandscapeSpawnProperties);
+
+	if (bFoundLandscape)
+	{
+		if (Landscape.bIsActive)
+		{
+			LandscapeSpawnTransformQueue.RemoveAt(0);
+			return;
+		}
+		else
+		{
+			int32 sixnine = 69;
+		}
+	}
+	else
+	{
+		FTransform NewTileSpawnTransform = FTransform(MapKey);
+
+		Landscape = AJetLandscapeMesh::CreateLandscapeData(NewTileSpawnTransform, LandscapeSpawnProperties);
+	}
+
+	
+
+
+	/*if (x > 0)
+	{
+		ZipLandscapeDataWithNeighbor(this, ECardinalDirection::South, Landscape, LandscapeSpawnProperties);
+	}
+	else
+	{
+		ZipLandscapeDataWithNeighbor(this, ECardinalDirection::North, Landscape, LandscapeSpawnProperties);
+	}
+
+	if (y > 0)
+	{
+		ZipLandscapeDataWithNeighbor(this, ECardinalDirection::West, Landscape, LandscapeSpawnProperties);
+	}
+	else
+	{
+		ZipLandscapeDataWithNeighbor(this, ECardinalDirection::East, Landscape, LandscapeSpawnProperties);
+	}*/
+
+	Landscape.bIsActive = true;
+
+	AJetLandscapeMesh::OnLandscapeDataCreated(this, Landscape);
+
+	AJetLandscapeMesh::SpawnLandscapeWithData(this, Landscape, LandscapeSpawnProperties);
+
+	LandscapeSpawnTransformQueue.RemoveAt(0);
+
+
+	/*LocalLandscapeSpawnQueue.Add(Landscape);*/
+
+	/*if (LandscapeSpawnQueue.Num() == 0)
 	{
 		return;
 	}
@@ -103,6 +167,6 @@ void AJetGameState::TickSpawnLandscape()
 
 	AJetLandscapeMesh::SpawnLandscapeWithData(this, FirstLandscape, LandscapeSpawnProperties);
 
-	LandscapeSpawnQueue.RemoveAt(0);
+	LandscapeSpawnQueue.RemoveAt(0);*/
 
 }

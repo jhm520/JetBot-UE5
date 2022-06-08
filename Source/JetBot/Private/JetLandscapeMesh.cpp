@@ -111,6 +111,19 @@ void AJetLandscapeMesh::AppendLandscapeSpawnQueue(const TArray<FProcMeshData>& I
 	GameState->LandscapeSpawnQueue.Append(InLandscapeNeighborSpawnQueue);
 }
 
+void AJetLandscapeMesh::AppendLandscapeSpawnQueue_Transform(const TArray<FTransform>& InLandscapeSpawnQueue)
+{
+	AJetGameState* GameState = Cast<AJetGameState>(GetWorld()->GetGameState());
+
+	if (!GameState)
+	{
+		return;
+	}
+
+	GameState->LandscapeSpawnProperties = LandscapeProperties;
+	GameState->LandscapeSpawnTransformQueue.Append(InLandscapeSpawnQueue);
+}
+
 FProcMeshData AJetLandscapeMesh::CreateLandscapeData(const FTransform& InSpawnTransform, const FLandscapeProperties& InLandscapeProperties)
 {
 	FProcMeshData OutProcMeshData;
@@ -436,6 +449,8 @@ void AJetLandscapeMesh::SpawnNeighborLandscapesInRadius()
 
 	int32 Modifier = xDim/2;
 
+	TArray<FTransform> LocalSpawnTransformQueue;
+
 	for (y = 0; y < yDim; y++)
 	{
 		for (x = 0; x < xDim; x++)
@@ -453,16 +468,19 @@ void AJetLandscapeMesh::SpawnNeighborLandscapesInRadius()
 
 			MapKey = MapKey * FVector(1, 1, 0);
 
-			bool bFoundLandscape = FindLandscapeData(this, MapKey, Landscape, LandscapeProperties);
 
+			/*bool bFoundLandscape = FindLandscapeData(this, MapKey, Landscape, LandscapeProperties);
 
 			if (bFoundLandscape && Landscape.bIsActive)
 			{
 				continue;
-			}
+			}*/
 
+			LocalSpawnTransformQueue.Add(FTransform(MapKey));
 
-			FTransform NewTileSpawnTransform = FTransform(MapKey);
+			/*FTransform NewTileSpawnTransform = FTransform(MapKey);
+
+			SpawnTransformQueue.Add(NewTileSpawnTransform);
 
 			Landscape = CreateLandscapeData(NewTileSpawnTransform, LandscapeProperties);
 
@@ -488,7 +506,7 @@ void AJetLandscapeMesh::SpawnNeighborLandscapesInRadius()
 
 			OnLandscapeDataCreated(this, Landscape);
 
-			LocalLandscapeSpawnQueue.Add(Landscape);
+			LocalLandscapeSpawnQueue.Add(Landscape);*/
 		}
 	}
 
@@ -559,8 +577,8 @@ void AJetLandscapeMesh::SpawnNeighborLandscapesInRadius()
 	//	LandscapeIteratorArray.Empty();
 	//}
 
-
-	AppendLandscapeSpawnQueue(LocalLandscapeSpawnQueue);
+	AppendLandscapeSpawnQueue_Transform(LocalSpawnTransformQueue);
+	/*AppendLandscapeSpawnQueue(LocalLandscapeSpawnQueue);*/
 	// Spawn all of the new neighbors
 	/*for (FProcMeshData& Landscape : LocalLandscapeSpawnQueue)
 	{

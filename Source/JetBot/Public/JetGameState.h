@@ -29,6 +29,9 @@ public:
 	TArray<FProcMeshData> LandscapeSpawnQueue;
 
 	UPROPERTY()
+	TArray<FTransform> LandscapeSpawnTransformQueue;
+
+	UPROPERTY()
 	FLandscapeProperties LandscapeSpawnProperties;
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Procedural Mesh")

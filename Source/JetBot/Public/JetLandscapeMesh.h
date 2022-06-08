@@ -96,6 +96,9 @@ public:
 	UFUNCTION()
 	void AppendLandscapeSpawnQueue(const TArray<FProcMeshData>& InLandscapeNeighborSpawnQueue);
 
+	UFUNCTION()
+	void AppendLandscapeSpawnQueue_Transform(const TArray<FTransform>& InLandscapeSpawnQueue);
+
 	//the radius at which the player's tile spawns its neighbors.
 	//A radius of 1 will spawn 8 tiles around the origin tile, 2 will spawn 8 tiles,
 	//then another 16 around the 8, 3 will do another layer, and so on
