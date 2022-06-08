@@ -262,25 +262,32 @@ void AJetLandscapeMesh::ZipNewLandscape(UObject* WorldContextObject, FProcMeshDa
 	{
 		case ECardinalDirection::North:
 		{
+			ZipLandscapeDataWithNeighbor(WorldContextObject, ECardinalDirection::West, InOutLandscapeData, InLandscapeProperties);
 			ZipLandscapeDataWithNeighbor(WorldContextObject, ECardinalDirection::South, InOutLandscapeData, InLandscapeProperties);
+			ZipLandscapeDataWithNeighbor(WorldContextObject, ECardinalDirection::East, InOutLandscapeData, InLandscapeProperties);
 			break;
 		}
 		case ECardinalDirection::South:
 		{
 			ZipLandscapeDataWithNeighbor(WorldContextObject, ECardinalDirection::East, InOutLandscapeData, InLandscapeProperties);
 			ZipLandscapeDataWithNeighbor(WorldContextObject, ECardinalDirection::North, InOutLandscapeData, InLandscapeProperties);
+			ZipLandscapeDataWithNeighbor(WorldContextObject, ECardinalDirection::West, InOutLandscapeData, InLandscapeProperties);
 			break;
 		}
 		case ECardinalDirection::East:
 		{
 			ZipLandscapeDataWithNeighbor(WorldContextObject, ECardinalDirection::North, InOutLandscapeData, InLandscapeProperties);
 			ZipLandscapeDataWithNeighbor(WorldContextObject, ECardinalDirection::West, InOutLandscapeData, InLandscapeProperties);
+			ZipLandscapeDataWithNeighbor(WorldContextObject, ECardinalDirection::South, InOutLandscapeData, InLandscapeProperties);
+
 			break;
 		}
 		case ECardinalDirection::West:
 		{
 			ZipLandscapeDataWithNeighbor(WorldContextObject, ECardinalDirection::South, InOutLandscapeData, InLandscapeProperties);
 			ZipLandscapeDataWithNeighbor(WorldContextObject, ECardinalDirection::East, InOutLandscapeData, InLandscapeProperties);
+			ZipLandscapeDataWithNeighbor(WorldContextObject, ECardinalDirection::North, InOutLandscapeData, InLandscapeProperties);
+
 			break;
 		}
 		case ECardinalDirection::Northeast:
@@ -417,9 +424,17 @@ void AJetLandscapeMesh::SpawnNeighborLandscapesInRadius()
 
 				bool bFoundNeighbor = GetNeighborLandscapeData(this, n, CardDir, NewNeighborLandscape, LandscapeProperties.GetVectorScale());
 
-				if (bFoundNeighbor && NewNeighborLandscape.bIsActive)
+				if (bFoundNeighbor)
 				{
+					if (!NewNeighborLandscape.bIsActive)
+					{
+						NewNeighborLandscape.bIsActive = true;
+						OnLandscapeDataCreated(this, NewNeighborLandscape);
+						NewNeighborLandscapeDatas.Add(NewNeighborLandscape);
+					}
+
 					LandscapeIteratorArray.Add(NewNeighborLandscape);
+					/*}*/
 				}
 				else
 				{
