@@ -45,6 +45,25 @@ struct FProcMeshData
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Mesh")
 	bool bIsActive = false;
 
+	int32 GetVertexIndex(const FVector& InVectorKey, int32 InFaceIndex = 0) const
+	{
+		if (!FaceVertexMapArray.IsValidIndex(InFaceIndex))
+		{
+			return -1;
+		}
+		const FProcMeshFaceVertexMap& FaceVertexMap = FaceVertexMapArray[InFaceIndex];
+
+		const int32* IndexPtr = FaceVertexMap.VertexIndexMap.Find(InVectorKey);
+
+		if (!IndexPtr)
+		{
+			return -1;
+		}
+
+		return *IndexPtr;
+
+	}
+
 	FVector GetMapKey() const
 	{
 		return SpawnTransform.GetLocation() * FVector(1, 1, 0);
