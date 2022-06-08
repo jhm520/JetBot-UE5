@@ -42,6 +42,9 @@ struct FLandscapeProperties
 
 	UPROPERTY(BlueprintReadWrite, Category = "Landscape")
 	int32 NeighborSpawnRadius = 1;
+
+	UPROPERTY(BlueprintReadWrite, Category = "Landscape")
+	TSubclassOf<AJetLandscapeMesh> LandscapeClass;
 	
 	int32 GetVectorScale() const
 	{
@@ -89,6 +92,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
 	int32 TileSize = 100;
+
+	UFUNCTION()
+	void SetLandscapeSpawnQueue(const TArray<FProcMeshData>& InLandscapeNeighborSpawnQueue);
 
 	//the radius at which the player's tile spawns its neighbors.
 	//A radius of 1 will spawn 8 tiles around the origin tile, 2 will spawn 8 tiles,
@@ -149,8 +155,10 @@ private:
 	AJetLandscapeMesh* SpawnNeighboringLandscapeWithData(const FProcMeshData& InNeighborData);
 public:
 
+
+
 	UFUNCTION(BlueprintCallable, meta = (WorldContext = "WorldContextObject"), Category = "Procedural Mesh")
-	static AJetLandscapeMesh* SpawnLandscapeWithData(UObject* WorldContextObject, const FProcMeshData& InProcMeshData, int32 InLandscapeSize, int32 InTileSize, int32 InHeightVariation, int32 InNeighborSpawnRadius);
+	static AJetLandscapeMesh* SpawnLandscapeWithData(UObject* WorldContextObject, const FProcMeshData& InProcMeshData, const FLandscapeProperties& InLandscapeProperties);
 
 	//"Zip" Landscape two to be congruent with landscape one
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")

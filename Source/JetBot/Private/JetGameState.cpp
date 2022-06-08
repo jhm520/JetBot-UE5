@@ -70,3 +70,25 @@ bool AJetGameState::Static_GameState_GetNeighborLandscapeData(const FProcMeshDat
 }
 
 PRAGMA_ENABLE_OPTIMIZATION
+
+void AJetGameState::Tick(const float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	TickSpawnLandscape();
+}
+
+void AJetGameState::TickSpawnLandscape()
+{
+	if (LandscapeSpawnQueue.Num() == 0)
+	{
+		return;
+	}
+
+	const FProcMeshData& FirstLandscape = LandscapeSpawnQueue[0];
+
+	AJetLandscapeMesh::SpawnLandscapeWithData(this, FirstLandscape, LandscapeSpawnProperties);
+
+	LandscapeSpawnQueue.RemoveAt(0);
+
+}
