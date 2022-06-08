@@ -24,6 +24,20 @@ void AJetGameState::OnLandscapeDestroyed_Implementation(AJetLandscapeMesh* InLan
 
 }
 
+bool AJetGameState::GameState_FindLandscapeData(const FVector& InVectorKey, FProcMeshData& OutProcMeshData, const FLandscapeProperties& InLandscapeProperties)
+{
+	FProcMeshData* DataPtr = LandscapeDataMap.Find(InVectorKey);
+
+	if (!DataPtr)
+	{
+		return false;
+	}
+
+	OutProcMeshData = *DataPtr;
+
+	return true;
+}
+
 bool AJetGameState::GameState_GetNeighborLandscapeData(const FProcMeshData& InLandscapeData, ECardinalDirection InNeighborDirection, FProcMeshData& OutNeighborData, int32 InVectorScale)
 {
 	/*if (!InLandscape)

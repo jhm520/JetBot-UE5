@@ -38,6 +38,9 @@ public:
 	void OnLandscapeDestroyed(AJetLandscapeMesh* InLandscape, const FProcMeshData& InProcMesh);
 
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
+	bool GameState_FindLandscapeData(const FVector& InVectorKey, FProcMeshData& OutProcMeshData, const FLandscapeProperties& InLandscapeProperties);
+
+	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
 	bool GameState_GetNeighborLandscapeData(const FProcMeshData& InLandscapeData, ECardinalDirection InNeighborDirection, FProcMeshData& OutNeighborData, int32 InVectorScale);
 	
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")

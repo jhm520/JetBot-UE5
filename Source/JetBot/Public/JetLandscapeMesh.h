@@ -79,7 +79,7 @@ public:
 	bool bHasSpawnedNeighborLandscapes = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Landscape")
-	bool bAutoCreateLandscape = true;
+	bool bAutoCreateLandscape = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
 	FLandscapeProperties LandscapeProperties;
@@ -94,7 +94,7 @@ public:
 	int32 TileSize = 100;
 
 	UFUNCTION()
-	void SetLandscapeSpawnQueue(const TArray<FProcMeshData>& InLandscapeNeighborSpawnQueue);
+	void AppendLandscapeSpawnQueue(const TArray<FProcMeshData>& InLandscapeNeighborSpawnQueue);
 
 	//the radius at which the player's tile spawns its neighbors.
 	//A radius of 1 will spawn 8 tiles around the origin tile, 2 will spawn 8 tiles,
@@ -102,9 +102,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
 	int32 NeighborSpawnRadius = 1;
 
+	/*UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
+	int32 WorldDimensions = 1;*/
+
 	//Creates data needed to make a landscape
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
-	static FProcMeshData CreateLandscapeData(const FTransform& InSpawnTransform, int32 InLandscapeSize, int32 InTileSize, int32 InHeightVariation);
+	static FProcMeshData CreateLandscapeData(const FTransform& InSpawnTransform, const FLandscapeProperties& InLandscapeProperties);
 
 	UFUNCTION(meta = (WorldContext = "WorldContextObject"))
 	static void ZipLandscapeDataWithNeighbors(UObject* WorldContextObject, FProcMeshData& InOutLandscapeData, const FLandscapeProperties& InLandscapeProperties);
@@ -121,6 +124,9 @@ public:
 
 	UFUNCTION(BlueprintCallable,BlueprintPure, meta = (WorldContext = "WorldContextObject"), Category = "Procedural Mesh")
 	static bool GetNeighborLandscapeData(UObject* WorldContextObject, const FProcMeshData& InLandscapeData, ECardinalDirection InNeighborDirection, FProcMeshData& OutProcMeshData, int32 InVectorScale);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (WorldContext = "WorldContextObject"), Category = "Procedural Mesh")
+	static bool FindLandscapeData(UObject* WorldContextObject, const FVector& InVectorKey, FProcMeshData& OutProcMeshData, const FLandscapeProperties& InLandscapeProperties);
 
 	UFUNCTION(BlueprintCallable,BlueprintPure, meta = (WorldContext = "WorldContextObject"), Category = "Procedural Mesh")
 	static bool Static_GetNeighborLandscapeData(UObject* WorldContextObject, const FProcMeshData& InLandscapeData, ECardinalDirection InNeighborDirection, FProcMeshData& OutNeighborData, int32 InVectorScale);
