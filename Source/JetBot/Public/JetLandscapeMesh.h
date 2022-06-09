@@ -79,7 +79,7 @@ public:
 	bool bHasSpawnedNeighborLandscapes = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Landscape")
-	bool bAutoCreateLandscape = false;
+	bool bAutoCreateLandscape = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
 	FLandscapeProperties LandscapeProperties;
@@ -104,6 +104,9 @@ public:
 	//then another 16 around the 8, 3 will do another layer, and so on
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
 	int32 NeighborSpawnRadius = 1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
+	int32 WorldRadius = 10;
 
 	/*UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
 	int32 WorldDimensions = 1;*/

@@ -432,14 +432,7 @@ void AJetLandscapeMesh::SpawnNeighborLandscapesInRadius()
 
 	int32 i = 0;
 
-	TArray<FProcMeshData> NeighborLandscapeDatas;
-	TArray<FProcMeshData> NewNeighborLandscapeDatas;
-
-	TArray<FProcMeshData> LandscapeIteratorArray;
-
 	TArray<FProcMeshData> LocalLandscapeSpawnQueue;
-
-	NeighborLandscapeDatas.Add(ProcMeshData);
 
 	int32 x = 0;
 	int32 y = 0;
@@ -455,12 +448,6 @@ void AJetLandscapeMesh::SpawnNeighborLandscapesInRadius()
 	{
 		for (x = 0; x < xDim; x++)
 		{
-			/*if (x == NeighborSpawnRadius && y == NeighborSpawnRadius)
-			{
-				FProcMeshData MiddleLandscape;
-				bool bFoundLandscape = FindLandscapeData(this, FVector(x, y, 0) * LandscapeProperties.GetVectorScale(), MiddleLandscape, LandscapeProperties);
-				continue;
-			}*/
 
 			FProcMeshData Landscape;
 
@@ -469,18 +456,21 @@ void AJetLandscapeMesh::SpawnNeighborLandscapesInRadius()
 			MapKey = MapKey * FVector(1, 1, 0);
 
 
-			/*bool bFoundLandscape = FindLandscapeData(this, MapKey, Landscape, LandscapeProperties);
+			bool bFoundLandscape = FindLandscapeData(this, MapKey, Landscape, LandscapeProperties);
 
-			if (bFoundLandscape && Landscape.bIsActive)
+			if (bFoundLandscape)
 			{
+				if (!Landscape.bIsActive)
+				{
+					Landscape.bIsActive = true;
+
+					LocalLandscapeSpawnQueue.Add(Landscape);
+				}
+
 				continue;
-			}*/
+			}
 
-			LocalSpawnTransformQueue.Add(FTransform(MapKey));
-
-			/*FTransform NewTileSpawnTransform = FTransform(MapKey);
-
-			SpawnTransformQueue.Add(NewTileSpawnTransform);
+			FTransform NewTileSpawnTransform = FTransform(MapKey);
 
 			Landscape = CreateLandscapeData(NewTileSpawnTransform, LandscapeProperties);
 
@@ -506,84 +496,15 @@ void AJetLandscapeMesh::SpawnNeighborLandscapesInRadius()
 
 			OnLandscapeDataCreated(this, Landscape);
 
-			LocalLandscapeSpawnQueue.Add(Landscape);*/
+			LocalLandscapeSpawnQueue.Add(Landscape);
 		}
 	}
 
-	//for (i = 0; i < NeighborSpawnRadius; i++)
-	//{
-	//	for (const FProcMeshData& n : NeighborLandscapeDatas)
-	//	{
-	//		int32 MaxDirection = (int32)ECardinalDirection::Northwest;
-	//		int32 dir = 0;
-
-	//		for (dir = 0; dir < MaxDirection + 1; dir++)
-	//		{
-	//			ECardinalDirection CardDir = (ECardinalDirection)dir;
-
-	//			//AJetLandscapeMesh* CurrentNeighbor = n->GetNeighborLandscape(CardDir);
-
-	//			AJetLandscapeMesh* CurrentNeighbor = nullptr;
-
-	//			FProcMeshData NewNeighborLandscape;
-	//			bool bCreatedNewNeighbor = false;
-
-	//			bool bFoundNeighbor = GetNeighborLandscapeData(this, n, CardDir, NewNeighborLandscape, LandscapeProperties.GetVectorScale());
-
-	//			if (bFoundNeighbor)
-	//			{
-	//				if (!NewNeighborLandscape.bIsActive)
-	//				{
-	//					NewNeighborLandscape.bIsActive = true;
-	//					OnLandscapeDataCreated(this, NewNeighborLandscape);
-	//					NewNeighborLandscapeDatas.Add(NewNeighborLandscape);
-	//				}
-
-	//				LandscapeIteratorArray.Add(NewNeighborLandscape);
-	//			}
-	//			else
-	//			{
-	//				bCreatedNewNeighbor = CreateNewNeighborLandscapeData(this, n, CardDir, NewNeighborLandscape, LandscapeProperties);
-	//			}
-	//			
-	//			if (bCreatedNewNeighbor)
-	//			{
-	//				ZipNewLandscape(this, NewNeighborLandscape, CardDir, LandscapeProperties);
-
-	//				LandscapeIteratorArray.Add(NewNeighborLandscape);
-	//				NewNeighborLandscapeDatas.Add(NewNeighborLandscape);
-
-	//				NewNeighborLandscape.bIsActive = true;
-
-	//				//ZipLandscapeDataWithNeighbors(this, NewNeighborLandscape, LandscapeProperties);
-	//				OnLandscapeDataCreated(this, NewNeighborLandscape);
-
-	//					
-	//				/*}*/
-	//			}
-	//			else
-	//			{
-	//				//
-	//			}
-	//		}
-	//	}
-
-	//	NeighborLandscapeDatas.Empty();
-	//	NeighborLandscapeDatas = LandscapeIteratorArray;
-
-	//	LocalLandscapeSpawnQueue.Append(NewNeighborLandscapeDatas);
-	//	NewNeighborLandscapeDatas.Empty();
-
-	//	LandscapeIteratorArray.Empty();
-	//}
-
-	AppendLandscapeSpawnQueue_Transform(LocalSpawnTransformQueue);
-	/*AppendLandscapeSpawnQueue(LocalLandscapeSpawnQueue);*/
 	// Spawn all of the new neighbors
-	/*for (FProcMeshData& Landscape : LocalLandscapeSpawnQueue)
+	for (FProcMeshData& Landscape : LocalLandscapeSpawnQueue)
 	{
 		SpawnLandscapeWithData(this, Landscape, LandscapeProperties);
-	}*/
+	}
 
 	bHasSpawnedNeighborLandscapes = true;
 }
@@ -1269,24 +1190,29 @@ void AJetLandscapeMesh::BeginPlay()
 	LandscapeProperties.NeighborSpawnRadius = NeighborSpawnRadius;
 	LandscapeProperties.LandscapeClass = GetClass();
 
+	AJetGameState* GameState = Cast<AJetGameState>(GetWorld()->GetGameState());
+
 	if (bAutoCreateLandscape)
 	{
 		
-		ProcMeshData = CreateLandscapeData(GetActorTransform(), LandscapeProperties);
+		//ProcMeshData = CreateLandscapeData(GetActorTransform(), LandscapeProperties);
 
-		//CreateLandscape(LandscapeSize);
+		////CreateLandscape(LandscapeSize);
 
-		AddLandscapeFeature(FVector(0, 0, 0), FeatureArray);
+		//AddLandscapeFeature(FVector(0, 0, 0), FeatureArray);
 
-		AddLandscapeFeature(FVector(2, 2, 0), FeatureArray);
+		//AddLandscapeFeature(FVector(2, 2, 0), FeatureArray);
 
-		CreateMesh();
+		//CreateMesh();
 
-		AJetGameState* GameState = Cast<AJetGameState>(GetWorld()->GetGameState());
+		//if (GameState)
+		//{
+		//	GameState->OnLandscapeSpawned(this, ProcMeshData);
+		//}
 
 		if (GameState)
 		{
-			GameState->OnLandscapeSpawned(this, ProcMeshData);
+			GameState->CreateWorldLandscapes(GetActorLocation(), WorldRadius, LandscapeProperties);
 		}
 	}
 

@@ -83,6 +83,53 @@ bool AJetGameState::Static_GameState_GetNeighborLandscapeData(const FProcMeshDat
 	return false;
 }
 
+void AJetGameState::CreateWorldLandscapes(FVector InWorldOrigin, int32 InWorldDimensions, const FLandscapeProperties& InLandscapeProperties)
+{
+	int32 x = 0;
+	int32 y = 0;
+
+	int32 xDim = (InWorldDimensions * 2) + 1;
+	int32 yDim = xDim;
+
+	int32 Modifier = xDim / 2;
+
+	for (y = 0; y < yDim; y++)
+	{
+		for (x = 0; x < xDim; x++)
+		{
+			FProcMeshData Landscape;
+
+			FVector MapKey = FVector(InWorldOrigin + (InLandscapeProperties.GetVectorScale() * (FVector(x - Modifier, y - Modifier, 0))));
+
+			MapKey = MapKey * FVector(1, 1, 0);
+
+			FTransform NewTileSpawnTransform = FTransform(MapKey);
+
+			Landscape = AJetLandscapeMesh::CreateLandscapeData(NewTileSpawnTransform, InLandscapeProperties);
+
+			if (x > 0)
+			{
+				AJetLandscapeMesh::ZipLandscapeDataWithNeighbor(this, ECardinalDirection::South, Landscape, InLandscapeProperties);
+			}
+			else
+			{
+				AJetLandscapeMesh::ZipLandscapeDataWithNeighbor(this, ECardinalDirection::North, Landscape, InLandscapeProperties);
+			}
+
+			if (y > 0)
+			{
+				AJetLandscapeMesh::ZipLandscapeDataWithNeighbor(this, ECardinalDirection::West, Landscape, InLandscapeProperties);
+			}
+			else
+			{
+				AJetLandscapeMesh::ZipLandscapeDataWithNeighbor(this, ECardinalDirection::East, Landscape, InLandscapeProperties);
+			}
+			
+			AJetLandscapeMesh::OnLandscapeDataCreated(this, Landscape);
+		}
+	}
+}
+
 PRAGMA_ENABLE_OPTIMIZATION
 
 void AJetGameState::Tick(const float DeltaSeconds)
@@ -113,10 +160,6 @@ void AJetGameState::TickSpawnLandscape()
 		{
 			LandscapeSpawnTransformQueue.RemoveAt(0);
 			return;
-		}
-		else
-		{
-			int32 sixnine = 69;
 		}
 	}
 	else
