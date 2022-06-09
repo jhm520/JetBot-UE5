@@ -142,6 +142,9 @@ public:
 	void SpawnNeighborLandscapesInRadius();
 
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
+	void QueueSpawnNeighborLandscapesInRadius();
+
+	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
 	TArray<AJetLandscapeMesh*> GetNeighborLandscapesInRadius();
 
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")

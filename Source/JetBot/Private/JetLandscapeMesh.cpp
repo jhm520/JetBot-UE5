@@ -60,7 +60,8 @@ void AJetLandscapeMesh::OnPlayerEnteredLandscape(ACharacter* InPlayer)
 		return;
 	}
 
-	SpawnNeighborLandscapesInRadius();
+	//SpawnNeighborLandscapesInRadius();
+	QueueSpawnNeighborLandscapesInRadius();
 }
 
 void AJetLandscapeMesh::OnPlayerExitedLandscape(ACharacter* InPlayer, AJetLandscapeMesh* NewLandscape)
@@ -505,6 +506,52 @@ void AJetLandscapeMesh::SpawnNeighborLandscapesInRadius()
 	{
 		SpawnLandscapeWithData(this, Landscape, LandscapeProperties);
 	}
+
+	bHasSpawnedNeighborLandscapes = true;
+}
+
+void AJetLandscapeMesh::QueueSpawnNeighborLandscapesInRadius()
+{
+	if (bHasSpawnedNeighborLandscapes)
+	{
+		return;
+	}
+
+	int32 i = 0;
+
+	int32 x = 0;
+	int32 y = 0;
+
+	int32 xDim = (NeighborSpawnRadius * 2) + 1;
+	int32 yDim = xDim;
+
+	int32 Modifier = xDim / 2;
+
+	TArray<FTransform> LocalSpawnTransformQueue;
+
+	for (y = 0; y < yDim; y++)
+	{
+		for (x = 0; x < xDim; x++)
+		{
+			FProcMeshData Landscape;
+
+			FVector MapKey = FVector(GetActorLocation() + (LandscapeProperties.GetVectorScale() * (FVector(x - Modifier, y - Modifier, 0))));
+
+			MapKey = MapKey * FVector(1, 1, 0);
+
+			FTransform NewTileSpawnTransform = FTransform(MapKey);
+
+			LocalSpawnTransformQueue.Add(NewTileSpawnTransform);
+		}
+	}
+
+	AppendLandscapeSpawnQueue_Transform(LocalSpawnTransformQueue);
+
+	//// Spawn all of the new neighbors
+	//for (FProcMeshData& Landscape : LocalLandscapeSpawnQueue)
+	//{
+	//	SpawnLandscapeWithData(this, Landscape, LandscapeProperties);
+	//}
 
 	bHasSpawnedNeighborLandscapes = true;
 }
@@ -1221,6 +1268,7 @@ void AJetLandscapeMesh::BeginPlay()
 	//OnLandscapeDataCreated(this, ProcMeshData);
 	if (bSpawnNeighborLandscapesAtBeginPlay)
 	{
+		//SpawnNeighborLandscapesInRadius();
 		SpawnNeighborLandscapesInRadius();
 	}
 }
