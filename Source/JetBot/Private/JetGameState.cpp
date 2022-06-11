@@ -194,7 +194,7 @@ void AJetGameState::TickSpawnLandscape()
 
 	AJetLandscapeMesh::OnLandscapeDataCreated(this, Landscape);
 
-	AJetLandscapeMesh::SpawnLandscapeWithData(this, Landscape, LandscapeSpawnProperties);
+	AJetLandscapeMesh::SpawnLandscapeWithData(this, Landscape, LandscapeSpawnProperties, nullptr);
 
 	LandscapeSpawnTransformQueue.RemoveAt(0);
 

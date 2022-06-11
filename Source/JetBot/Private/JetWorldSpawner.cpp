@@ -28,7 +28,7 @@ void AJetWorldSpawner::BeginPlay()
 
 	if (bSpawnWorldAtBeginPlay)
 	{
-
+		AJetLandscapeMesh::SpawnNeighborLandscapesInRadius(this, GetActorLocation(), LandscapeProperties, this);
 	}
 }
 

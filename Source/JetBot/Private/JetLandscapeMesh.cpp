@@ -61,7 +61,7 @@ void AJetLandscapeMesh::OnPlayerEnteredLandscape(ACharacter* InPlayer)
 	}
 
 	//SpawnNeighborLandscapesInRadius();
-	SpawnNeighborLandscapesInRadius(this, GetActorLocation(), NeighborSpawnRadius, LandscapeProperties);
+	SpawnNeighborLandscapesInRadius(this, GetActorLocation(), LandscapeProperties, WorldSpawner);
 }
 
 void AJetLandscapeMesh::OnPlayerExitedLandscape(ACharacter* InPlayer, AJetLandscapeMesh* NewLandscape)
@@ -424,7 +424,7 @@ bool AJetLandscapeMesh::Static_GetNeighborLandscapeData(UObject* WorldContextObj
 
 }
 
-void AJetLandscapeMesh::SpawnNeighborLandscapesInRadius(UObject* WorldContextObject, const FVector& InLocation, int32 InNeighborSpawnRadius, const FLandscapeProperties& InLandscapeProperties)
+void AJetLandscapeMesh::SpawnNeighborLandscapesInRadius(UObject* WorldContextObject, const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, AJetWorldSpawner* InWorldSpawner)
 {
 	/*if (bHasSpawnedNeighborLandscapes)
 	{
@@ -438,7 +438,7 @@ void AJetLandscapeMesh::SpawnNeighborLandscapesInRadius(UObject* WorldContextObj
 	int32 x = 0;
 	int32 y = 0;
 
-	int32 xDim = (InNeighborSpawnRadius * 2) + 1;
+	int32 xDim = (InLandscapeProperties.NeighborSpawnRadius * 2) + 1;
 	int32 yDim = xDim;
 
 	int32 Modifier = xDim/2;
@@ -463,8 +463,6 @@ void AJetLandscapeMesh::SpawnNeighborLandscapesInRadius(UObject* WorldContextObj
 			{
 				if (!Landscape.bIsActive)
 				{
-					Landscape.bIsActive = true;
-
 					LocalLandscapeSpawnQueue.Add(Landscape);
 				}
 
@@ -493,10 +491,6 @@ void AJetLandscapeMesh::SpawnNeighborLandscapesInRadius(UObject* WorldContextObj
 				ZipLandscapeDataWithNeighbor(WorldContextObject, ECardinalDirection::East, Landscape, InLandscapeProperties);
 			}
 
-			Landscape.bIsActive = true;
-
-			OnLandscapeDataCreated(WorldContextObject, Landscape);
-
 			LocalLandscapeSpawnQueue.Add(Landscape);
 		}
 	}
@@ -504,7 +498,11 @@ void AJetLandscapeMesh::SpawnNeighborLandscapesInRadius(UObject* WorldContextObj
 	// Spawn all of the new neighbors
 	for (FProcMeshData& Landscape : LocalLandscapeSpawnQueue)
 	{
-		SpawnLandscapeWithData(WorldContextObject, Landscape, InLandscapeProperties);
+		SpawnLandscapeWithData(WorldContextObject, Landscape, InLandscapeProperties, InWorldSpawner);
+
+		Landscape.bIsActive = true;
+		OnLandscapeDataCreated(WorldContextObject, Landscape);
+
 	}
 
 	//bHasSpawnedNeighborLandscapes = true;
@@ -661,7 +659,7 @@ AJetLandscapeMesh* AJetLandscapeMesh::SpawnNeighborLandscape(ECardinalDirection 
 
 		if (DataPtr)
 		{
-			return SpawnLandscapeWithData(this, *DataPtr, LandscapeProperties);
+			return SpawnLandscapeWithData(this, *DataPtr, LandscapeProperties, WorldSpawner);
 		}
 	}
 
@@ -791,7 +789,7 @@ AJetLandscapeMesh* AJetLandscapeMesh::SpawnNeighboringLandscapeWithData(const FP
 	return SpawnedActor;
 }
 
-AJetLandscapeMesh* AJetLandscapeMesh::SpawnLandscapeWithData(UObject* WorldContextObject, const FProcMeshData& InProcMeshData, const FLandscapeProperties& InLandscapeProperties)
+AJetLandscapeMesh* AJetLandscapeMesh::SpawnLandscapeWithData(UObject* WorldContextObject, const FProcMeshData& InProcMeshData, const FLandscapeProperties& InLandscapeProperties, AJetWorldSpawner* InWorldSpawner)
 {
 	FActorSpawnParameters ActorSpawnParams = FActorSpawnParameters();
 	UClass* LandscapeClass = InLandscapeProperties.LandscapeClass;
@@ -811,6 +809,7 @@ AJetLandscapeMesh* AJetLandscapeMesh::SpawnLandscapeWithData(UObject* WorldConte
 	SpawnedActor->NeighborSpawnRadius = InLandscapeProperties.NeighborSpawnRadius;
 
 	SpawnedActor->LandscapeProperties = InLandscapeProperties;
+	SpawnedActor->WorldSpawner = InWorldSpawner;
 
 
 	SpawnedActor->ProcMeshData = InProcMeshData;
@@ -1257,20 +1256,20 @@ void AJetLandscapeMesh::BeginPlay()
 		//	GameState->OnLandscapeSpawned(this, ProcMeshData);
 		//}
 
-		if (GameState)
+		/*if (GameState)
 		{
 			GameState->CreateWorldLandscapes(GetActorLocation(), WorldRadius, LandscapeProperties);
-		}
+		}*/
 	}
 
 	Super::BeginPlay();
 
 	//OnLandscapeDataCreated(this, ProcMeshData);
-	if (bSpawnNeighborLandscapesAtBeginPlay)
-	{
-		//SpawnNeighborLandscapesInRadius();
-		SpawnNeighborLandscapesInRadius(this, GetActorLocation(), NeighborSpawnRadius, LandscapeProperties);
-	}
+	//if (bSpawnNeighborLandscapesAtBeginPlay)
+	//{
+	//	//SpawnNeighborLandscapesInRadius();
+	//	SpawnNeighborLandscapesInRadius(this, GetActorLocation(), NeighborSpawnRadius, LandscapeProperties);
+	//}
 }
 
 void AJetLandscapeMesh::EndPlay(const EEndPlayReason::Type EndPlayReason)
