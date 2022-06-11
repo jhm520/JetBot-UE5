@@ -138,8 +138,8 @@ public:
 	static bool Static_GetNeighborLandscapeData(UObject* WorldContextObject, const FProcMeshData& InLandscapeData, ECardinalDirection InNeighborDirection, FProcMeshData& OutNeighborData, int32 InVectorScale);
 
 
-	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
-	void SpawnNeighborLandscapesInRadius();
+	UFUNCTION(BlueprintCallable, meta = (WorldContext = "WorldContextObject"), Category = "Procedural Mesh")
+	static void SpawnNeighborLandscapesInRadius(UObject* WorldContextObject, const FVector& InLocation, int32 InNeighborSpawnRadius, const FLandscapeProperties& InLandscapeProperties);
 
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
 	void QueueSpawnNeighborLandscapesInRadius();

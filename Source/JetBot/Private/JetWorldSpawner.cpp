@@ -2,6 +2,7 @@
 
 
 #include "JetWorldSpawner.h"
+#include "JetGameState.h"
 
 // Sets default values
 AJetWorldSpawner::AJetWorldSpawner()
@@ -15,7 +16,20 @@ AJetWorldSpawner::AJetWorldSpawner()
 void AJetWorldSpawner::BeginPlay()
 {
 	Super::BeginPlay();
+
+	AJetGameState* GameState = Cast<AJetGameState>(GetWorld()->GetGameState());
+
+	if (!GameState)
+	{
+		return;
+	}
 	
+	GameState->CreateWorldLandscapes(GetActorLocation(), WorldRadius, LandscapeProperties);
+
+	if (bSpawnWorldAtBeginPlay)
+	{
+
+	}
 }
 
 // Called every frame
