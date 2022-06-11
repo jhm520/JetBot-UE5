@@ -61,7 +61,7 @@ void AJetLandscapeMesh::OnPlayerEnteredLandscape(ACharacter* InPlayer)
 	}
 
 	//SpawnNeighborLandscapesInRadius();
-	QueueSpawnNeighborLandscapesInRadius();
+	SpawnNeighborLandscapesInRadius();
 }
 
 void AJetLandscapeMesh::OnPlayerExitedLandscape(ACharacter* InPlayer, AJetLandscapeMesh* NewLandscape)

@@ -33,7 +33,7 @@ AJetProcMesh::AJetProcMesh()
 
 }
 
-int32 AJetProcMesh::GetVertexIndex(TMap<FVector, int32> InVertexIndexMap, const FVector& InVertexLocation, const FVector& InDimensions)
+int32 AJetProcMesh::GetVertexIndex(const TMap<FVector, int32>& InVertexIndexMap, const FVector& InVertexLocation, const FVector& InDimensions)
 {
 	FVector AdjVertexLocation = InVertexLocation;
 
@@ -65,7 +65,7 @@ int32 AJetProcMesh::GetVertexIndex(TMap<FVector, int32> InVertexIndexMap, const 
 		AdjVertexLocation.Z = 0;
 	}
 
-	int32* IndexPtr = InVertexIndexMap.Find(AdjVertexLocation);
+	const int32* IndexPtr = InVertexIndexMap.Find(AdjVertexLocation);
 
 	if (IndexPtr)
 	{
