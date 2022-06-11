@@ -498,11 +498,9 @@ void AJetLandscapeMesh::SpawnNeighborLandscapesInRadius(UObject* WorldContextObj
 	// Spawn all of the new neighbors
 	for (FProcMeshData& Landscape : LocalLandscapeSpawnQueue)
 	{
-		SpawnLandscapeWithData(WorldContextObject, Landscape, InLandscapeProperties, InWorldSpawner);
-
 		Landscape.bIsActive = true;
 		OnLandscapeDataCreated(WorldContextObject, Landscape);
-
+		SpawnLandscapeWithData(WorldContextObject, Landscape, InLandscapeProperties, InWorldSpawner);
 	}
 
 	//bHasSpawnedNeighborLandscapes = true;
