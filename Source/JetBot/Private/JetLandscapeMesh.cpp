@@ -5,6 +5,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "../JetBot.h"
 #include "JetGameState.h"
+#include "JetWorldSpawner.h"
 #include "Components/SphereComponent.h"
 
 PRAGMA_DISABLE_OPTIMIZATION
@@ -67,8 +68,12 @@ void AJetLandscapeMesh::OnPlayerEnteredLandscape(ACharacter* InPlayer)
 		return;
 	}
 
+	if (WorldSpawner)
+	{
+		WorldSpawner->WorldSpawner_OnPlayerEnteredLandscape(this, InPlayer);
+	}
 	//SpawnNeighborLandscapesInRadius();
-	SpawnNeighborLandscapesInRadius(this, GetActorLocation(), LandscapeProperties, WorldSpawner, GameState->LandscapeDataMap);
+	//SpawnNeighborLandscapesInRadius(this, GetActorLocation(), LandscapeProperties, WorldSpawner, GameState->LandscapeDataMap);
 }
 
 void AJetLandscapeMesh::OnPlayerExitedLandscape(ACharacter* InPlayer, AJetLandscapeMesh* NewLandscape)
@@ -536,6 +541,71 @@ void AJetLandscapeMesh::SpawnNeighborLandscapesInRadius(UObject* WorldContextObj
 	}
 
 	//bHasSpawnedNeighborLandscapes = true;
+}
+
+void AJetLandscapeMesh::CreateLandscapesInRadius(const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, TArray<FProcMeshData>& InOutLandscapeDataArray, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap)
+{
+	int32 i = 0;
+
+	int32 x = 0;
+	int32 y = 0;
+
+	int32 xDim = (InLandscapeProperties.NeighborSpawnRadius * 2) + 1;
+	int32 yDim = xDim;
+
+	int32 Modifier = xDim / 2;
+
+	for (y = 0; y < yDim; y++)
+	{
+		for (x = 0; x < xDim; x++)
+		{
+
+			FProcMeshData Landscape;
+
+			FVector MapKey = FVector(InLocation + (InLandscapeProperties.GetVectorScale() * (FVector(x - Modifier, y - Modifier, 0))));
+
+			MapKey = MapKey * FVector(1, 1, 0);
+
+
+			bool bFoundLandscape = FindLandscapeData(InOutLandscapeDataMap, MapKey, Landscape, InLandscapeProperties);
+
+			if (bFoundLandscape)
+			{
+				if (!Landscape.bIsActive)
+				{
+					InOutLandscapeDataArray.Add(Landscape);
+				}
+
+				continue;
+			}
+
+			FTransform NewTileSpawnTransform = FTransform(MapKey);
+
+			Landscape = CreateLandscapeData(NewTileSpawnTransform, InLandscapeProperties);
+
+			if (x > 0)
+			{
+				ZipLandscapeDataWithNeighbor(ECardinalDirection::South, Landscape, InLandscapeProperties, InOutLandscapeDataMap);
+			}
+			else
+			{
+				ZipLandscapeDataWithNeighbor(ECardinalDirection::North, Landscape, InLandscapeProperties, InOutLandscapeDataMap);
+			}
+
+			if (y > 0)
+			{
+				ZipLandscapeDataWithNeighbor(ECardinalDirection::West, Landscape, InLandscapeProperties, InOutLandscapeDataMap);
+			}
+			else
+			{
+				ZipLandscapeDataWithNeighbor(ECardinalDirection::East, Landscape, InLandscapeProperties, InOutLandscapeDataMap);
+			}
+
+			InOutLandscapeDataArray.Add(Landscape);
+			InOutLandscapeDataMap.Add(Landscape.SpawnTransform.GetLocation() * FVector(1, 1, 0), Landscape);
+		}
+	}
+
 }
 
 void AJetLandscapeMesh::QueueSpawnNeighborLandscapesInRadius()

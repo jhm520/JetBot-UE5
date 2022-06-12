@@ -24,44 +24,6 @@ struct FOnLandscapeDataCreatedResult
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLandscapeDataCreatedDelegate, const struct FOnLandscapeDataCreatedResult&, OnLandscapeDataCreatedResult);
 
-//class FCreateLandscapeDataTask : public FNonAbandonableTask
-//{
-//	friend class FAutoDeleteAsyncTask<FCreateLandscapeDataTask>;
-//	public:
-//		FCreateLandscapeDataTask(const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, AJetWorldSpawner* InWorldSpawner, const TMap<FVector, FProcMeshData>& InLandscapeDataMap) : Location(InLocation), LandscapeProperties(InLandscapeProperties), WorldSpawner(InWorldSpawner), LandscapeDataMap(InLandscapeDataMap){}
-//
-//	protected:
-//		const FVector Location;
-//		const FLandscapeProperties LandscapeProperties;
-//		const AJetWorldSpawner* WorldSpawner;
-//		FOnLandscapeDataCreatedDelegate OnLandscapeDataCreated;
-//		TMap<FVector, FProcMeshData> LandscapeDataMap;
-//
-//	void DoWork()
-//	{ // Place the Async Code here. This function runs automatically.
-//
-//		//TArray<FProcMeshData> OutLandscapeArray;
-//		//TMap<FVector, FProcMeshData> OutLandscapeDataMap;
-//
-//		//FOnLandscapeDataCreatedResult LandscapeResult;
-//
-//
-//		//LandscapeResult.LandscapeArray = OutLandscapeArray;
-//		//LandscapeResult.LandscapeDataMap = OutLandscapeDataMap;
-//
-//		////OnLandscapeDataCreated.BindStatic(&AJetWorldSpawner::OnLandscapeDataCreated);
-//		//OnLandscapeDataCreated.Execute(LandscapeResult);
-//	}
-//
-//		// This next section of code needs to be here. Not important as to why.
-//
-//	FORCEINLINE TStatId GetStatId() const
-//	{
-//		RETURN_QUICK_DECLARE_CYCLE_STAT(FMyTaskName, STATGROUP_ThreadPoolAsyncTasks);
-//	}
-//
-//};
-
 UCLASS()
 class JETBOT_API AJetWorldSpawner : public AActor
 {
@@ -93,6 +55,11 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-     static void AsyncCreateLandscapeData(FOnLandscapeDataCreatedDelegate Out, const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, TWeakObjectPtr<AJetWorldSpawner> InWorldSpawner, const TMap<FVector, FProcMeshData>& InLandscapeDataMap);
+    static void AsyncCreateLandscapeData(FOnLandscapeDataCreatedDelegate Out, const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, TWeakObjectPtr<AJetWorldSpawner> InWorldSpawner, const TMap<FVector, FProcMeshData>& InLandscapeDataMap);
 
+
+	void WorldSpawner_OnPlayerEnteredLandscape(AJetLandscapeMesh* InLandscape, ACharacter* InPlayer);
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "World Spawner")
+	void OnWorldSpawned();
 };

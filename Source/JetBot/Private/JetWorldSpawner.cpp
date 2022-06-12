@@ -5,6 +5,7 @@
 #include "JetGameState.h"
 #include "Async/Async.h"
 
+PRAGMA_DISABLE_OPTIMIZATION
 // Sets default values
 AJetWorldSpawner::AJetWorldSpawner()
 {
@@ -17,7 +18,25 @@ void AJetWorldSpawner::OnLandscapeDataCreated(const FOnLandscapeDataCreatedResul
 {
 	//do stuff
 
-	int32 sixnine = 69;
+	int32 sixnine = InLandscapeData.LandscapeArray.Num();
+
+	TArray<FVector> VectorArray;
+	InLandscapeData.LandscapeDataMap.GenerateKeyArray(VectorArray);
+
+	int32 sixninetwo = VectorArray.Num();
+
+	int32 sixninethree = 6969696;
+
+	// Spawn all of the new neighbors
+	for (const FProcMeshData& Landscape : InLandscapeData.LandscapeArray)
+	{
+		/*Landscape.bIsActive = true;
+		OnLandscapeDataCreated(WorldContextObject, Landscape);*/
+		AJetLandscapeMesh::SpawnLandscapeWithData(this, Landscape, LandscapeProperties, this);
+	}
+
+	OnWorldSpawned();
+
 }
 
 // Called when the game starts or when spawned
@@ -34,20 +53,17 @@ void AJetWorldSpawner::BeginPlay()
 
 	LandscapeCreatedDelegate.AddDynamic(this, &AJetWorldSpawner::OnLandscapeDataCreated);
 	
-	GameState->CreateWorldLandscapes(GetActorLocation(), WorldRadius, LandscapeProperties);
+	//GameState->CreateWorldLandscapes(GetActorLocation(), WorldRadius, LandscapeProperties);
 
 	if (bSpawnWorldAtBeginPlay)
 	{
-		AJetLandscapeMesh::SpawnNeighborLandscapesInRadius(this, GetActorLocation(), LandscapeProperties, this, GameState->LandscapeDataMap);
+		/*FProcMeshData FirstLandscape = AJetLandscapeMesh::CreateLandscapeData(FTransform(GetActorLocation()), LandscapeProperties);
+
+		AJetLandscapeMesh::SpawnLandscapeWithData(this, FirstLandscape, LandscapeProperties, this);*/
+
+		//AJetLandscapeMesh::SpawnNeighborLandscapesInRadius(this, GetActorLocation(), LandscapeProperties, this, GameState->LandscapeDataMap);
 
 		AsyncCreateLandscapeData(LandscapeCreatedDelegate, GetActorLocation(), LandscapeProperties, this, GameState->LandscapeDataMap);
-		//FAutoDeleteAsyncTask<FCreateLandscapeDataTask>* CreateLandscapeDataTask = new FAutoDeleteAsyncTask<FCreateLandscapeDataTask>(GetActorLocation(), LandscapeProperties, GameState->LandscapeDataMap);
-
-		//if (CreateLandscapeDataTask)
-		//{
-		//	//CreateLandscapeDataTask->Task.OnLandscapeDataCreated.BindStatic(&AJetWorldSpawner::OnLandscapeDataCreated);
-		//	CreateLandscapeDataTask->StartBackgroundTask();
-		//}
 	}
 }
 
@@ -60,14 +76,43 @@ void AJetWorldSpawner::Tick(float DeltaTime)
 
 void AJetWorldSpawner::AsyncCreateLandscapeData(FOnLandscapeDataCreatedDelegate Out, const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, TWeakObjectPtr<AJetWorldSpawner> InWorldSpawner, const TMap<FVector, FProcMeshData>& InLandscapeDataMap)
 {
-	AsyncTask(ENamedThreads::AnyHiPriThreadNormalTask, [Out, InLocation, InLandscapeProperties, InWorldSpawner]()
+	AsyncTask(ENamedThreads::AnyHiPriThreadNormalTask, [Out, InLocation, InLandscapeProperties, InWorldSpawner, InLandscapeDataMap]()
 	{
 		FOnLandscapeDataCreatedResult OutLandscapeResult;
+
+		OutLandscapeResult.LandscapeDataMap = InLandscapeDataMap;
+
+		AJetLandscapeMesh::CreateLandscapesInRadius(InLocation, InLandscapeProperties, OutLandscapeResult.LandscapeArray, OutLandscapeResult.LandscapeDataMap);
+
 		AsyncTask(ENamedThreads::GameThread, [Out, OutLandscapeResult]()
 		{
+
 			// We execute the delegate along with the param
 			Out.Broadcast(OutLandscapeResult);
 		});
 	});
 }
 
+void AJetWorldSpawner::WorldSpawner_OnPlayerEnteredLandscape(AJetLandscapeMesh* InLandscape, ACharacter* InPlayer)
+{
+	if (!InLandscape)
+	{
+		return;
+	}
+
+	if (!InPlayer)
+	{
+		return;
+	}
+
+	AJetGameState* GameState = Cast<AJetGameState>(GetWorld()->GetGameState());
+
+	if (!GameState)
+	{
+		return;
+	}
+
+	TWeakObjectPtr<AJetWorldSpawner> WeakPtr = this;
+	AsyncCreateLandscapeData(LandscapeCreatedDelegate, InLandscape->GetActorLocation(), LandscapeProperties, WeakPtr, GameState->LandscapeDataMap);
+}
+PRAGMA_ENABLE_OPTIMIZATION
