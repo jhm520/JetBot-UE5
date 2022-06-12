@@ -120,8 +120,8 @@ public:
 	UFUNCTION(meta = (WorldContext = "WorldContextObject"))
 	static void ZipLandscapeDataWithNeighbors(UObject* WorldContextObject, FProcMeshData& InOutLandscapeData, const FLandscapeProperties& InLandscapeProperties);
 
-	UFUNCTION(meta = (WorldContext = "WorldContextObject"))
-	static void ZipLandscapeDataWithNeighbor(UObject* WorldContextObject, ECardinalDirection InNeighborDirection, FProcMeshData& InOutLandscapeData, const FLandscapeProperties& InLandscapeProperties);
+	UFUNCTION()
+	static void ZipLandscapeDataWithNeighbor(ECardinalDirection InNeighborDirection, FProcMeshData& InOutLandscapeData, const FLandscapeProperties& InLandscapeProperties, TMap<FVector, FProcMeshData>& InLandscapeDataMap);
 
 	UFUNCTION(meta = (WorldContext = "WorldContextObject"))
 	static void ZipNewLandscape(UObject* WorldContextObject, FProcMeshData& InOutLandscapeData, ECardinalDirection InNeighborDirection,  const FLandscapeProperties& InLandscapeProperties);
@@ -130,8 +130,8 @@ public:
 	UFUNCTION(BlueprintCallable,BlueprintPure, BlueprintNativeEvent, Category = "Procedural Mesh")
 	AJetLandscapeMesh* GetNeighborLandscape(ECardinalDirection InNeighborDirection, const FLandscapeProperties& InLandscapeProperties);
 
-	UFUNCTION(BlueprintCallable,BlueprintPure, meta = (WorldContext = "WorldContextObject"), Category = "Procedural Mesh")
-	static bool GetNeighborLandscapeData(UObject* WorldContextObject, const FProcMeshData& InLandscapeData, ECardinalDirection InNeighborDirection, FProcMeshData& OutProcMeshData, int32 InVectorScale);
+	UFUNCTION(BlueprintCallable,BlueprintPure, Category = "Procedural Mesh")
+	static bool GetNeighborLandscapeData(const FProcMeshData& InLandscapeData, ECardinalDirection InNeighborDirection, FProcMeshData& OutProcMeshData, int32 InVectorScale, TMap<FVector, FProcMeshData>& InLandscapeDataMap);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (WorldContext = "WorldContextObject"), Category = "Procedural Mesh")
 	static bool FindLandscapeData(const TMap<FVector, FProcMeshData>& InLandscapeDataMap, const FVector& InVectorKey, FProcMeshData& OutProcMeshData, const FLandscapeProperties& InLandscapeProperties);
@@ -141,7 +141,7 @@ public:
 
 
 	UFUNCTION(BlueprintCallable, meta = (WorldContext = "WorldContextObject"), Category = "Procedural Mesh")
-	static void SpawnNeighborLandscapesInRadius(UObject* WorldContextObject, const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, AJetWorldSpawner* InWorldSpawner, const TMap<FVector, FProcMeshData>& InLandscapeDataMap);
+	static void SpawnNeighborLandscapesInRadius(UObject* WorldContextObject, const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, AJetWorldSpawner* InWorldSpawner, TMap<FVector, FProcMeshData>& InLandscapeDataMap);
 
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
 	void QueueSpawnNeighborLandscapesInRadius();

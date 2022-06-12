@@ -109,20 +109,20 @@ void AJetGameState::CreateWorldLandscapes(FVector InWorldOrigin, int32 InWorldDi
 
 			if (x > 0)
 			{
-				AJetLandscapeMesh::ZipLandscapeDataWithNeighbor(this, ECardinalDirection::South, Landscape, InLandscapeProperties);
+				AJetLandscapeMesh::ZipLandscapeDataWithNeighbor(ECardinalDirection::South, Landscape, InLandscapeProperties, LandscapeDataMap);
 			}
 			else
 			{
-				AJetLandscapeMesh::ZipLandscapeDataWithNeighbor(this, ECardinalDirection::North, Landscape, InLandscapeProperties);
+				AJetLandscapeMesh::ZipLandscapeDataWithNeighbor(ECardinalDirection::North, Landscape, InLandscapeProperties, LandscapeDataMap);
 			}
 
 			if (y > 0)
 			{
-				AJetLandscapeMesh::ZipLandscapeDataWithNeighbor(this, ECardinalDirection::West, Landscape, InLandscapeProperties);
+				AJetLandscapeMesh::ZipLandscapeDataWithNeighbor(ECardinalDirection::West, Landscape, InLandscapeProperties, LandscapeDataMap);
 			}
 			else
 			{
-				AJetLandscapeMesh::ZipLandscapeDataWithNeighbor(this, ECardinalDirection::East, Landscape, InLandscapeProperties);
+				AJetLandscapeMesh::ZipLandscapeDataWithNeighbor(ECardinalDirection::East, Landscape, InLandscapeProperties, LandscapeDataMap);
 			}
 			
 			AJetLandscapeMesh::OnLandscapeDataCreated(this, Landscape);

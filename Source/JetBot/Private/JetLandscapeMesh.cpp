@@ -153,15 +153,22 @@ void AJetLandscapeMesh::ZipLandscapeDataWithNeighbors(UObject* WorldContextObjec
 	int32 MaxDirection = (int32)ECardinalDirection::Northwest;
 	int32 dir = 0;
 
+	AJetGameState* GameState = Cast<AJetGameState>(WorldContextObject->GetWorld()->GetGameState());
+
+	if (!GameState)
+	{
+		return;
+	}
+
 	for (dir = 0; dir < MaxDirection + 1; dir++)
 	{
 		ECardinalDirection CardDir = (ECardinalDirection)dir;
 
-		ZipLandscapeDataWithNeighbor(WorldContextObject, CardDir, InOutLandscapeData, InLandscapeProperties);
+		ZipLandscapeDataWithNeighbor(CardDir, InOutLandscapeData, InLandscapeProperties, GameState->LandscapeDataMap);
 	}
 }
 
-void AJetLandscapeMesh::ZipLandscapeDataWithNeighbor(UObject* WorldContextObject, ECardinalDirection InNeighborDirection, FProcMeshData& InOutLandscapeData, const FLandscapeProperties& InLandscapeProperties)
+void AJetLandscapeMesh::ZipLandscapeDataWithNeighbor(ECardinalDirection InNeighborDirection, FProcMeshData& InOutLandscapeData, const FLandscapeProperties& InLandscapeProperties, TMap<FVector, FProcMeshData>& InLandscapeDataMap)
 {
 	FVector2D ZippeeVector;
 	FVector2D ZipperVector;
@@ -169,7 +176,8 @@ void AJetLandscapeMesh::ZipLandscapeDataWithNeighbor(UObject* WorldContextObject
 	bool bCorner = false;
 
 	FProcMeshData ZipperData;
-	bool bGotNeighborData = GetNeighborLandscapeData(WorldContextObject, InOutLandscapeData, InNeighborDirection, ZipperData, InLandscapeProperties.GetVectorScale());
+
+	bool bGotNeighborData = GetNeighborLandscapeData(InOutLandscapeData, InNeighborDirection, ZipperData, InLandscapeProperties.GetVectorScale(), InLandscapeDataMap);
 
 	if (!bGotNeighborData)
 	{
@@ -292,65 +300,73 @@ void AJetLandscapeMesh::ZipLandscapeDataWithNeighbor(UObject* WorldContextObject
 
 void AJetLandscapeMesh::ZipNewLandscape(UObject* WorldContextObject, FProcMeshData& InOutLandscapeData, ECardinalDirection InNeighborDirection, const FLandscapeProperties& InLandscapeProperties)
 {
+	AJetGameState* GameState = Cast<AJetGameState>(WorldContextObject->GetWorld()->GetGameState());
+
+	if (!GameState)
+	{
+		return;
+	}
+
+
 	switch (InNeighborDirection)
 	{
 		case ECardinalDirection::North:
 		{
-			ZipLandscapeDataWithNeighbor(WorldContextObject, ECardinalDirection::West, InOutLandscapeData, InLandscapeProperties);
-			ZipLandscapeDataWithNeighbor(WorldContextObject, ECardinalDirection::South, InOutLandscapeData, InLandscapeProperties);
-			ZipLandscapeDataWithNeighbor(WorldContextObject, ECardinalDirection::East, InOutLandscapeData, InLandscapeProperties);
+			ZipLandscapeDataWithNeighbor(ECardinalDirection::West, InOutLandscapeData, InLandscapeProperties, GameState->LandscapeDataMap);
+			ZipLandscapeDataWithNeighbor(ECardinalDirection::South, InOutLandscapeData, InLandscapeProperties, GameState->LandscapeDataMap);
+			ZipLandscapeDataWithNeighbor(ECardinalDirection::East, InOutLandscapeData, InLandscapeProperties, GameState->LandscapeDataMap);
 			break;
 		}
 		case ECardinalDirection::South:
 		{
-			ZipLandscapeDataWithNeighbor(WorldContextObject, ECardinalDirection::East, InOutLandscapeData, InLandscapeProperties);
-			ZipLandscapeDataWithNeighbor(WorldContextObject, ECardinalDirection::North, InOutLandscapeData, InLandscapeProperties);
-			ZipLandscapeDataWithNeighbor(WorldContextObject, ECardinalDirection::West, InOutLandscapeData, InLandscapeProperties);
+			ZipLandscapeDataWithNeighbor(ECardinalDirection::East, InOutLandscapeData, InLandscapeProperties, GameState->LandscapeDataMap);
+			ZipLandscapeDataWithNeighbor(ECardinalDirection::North, InOutLandscapeData, InLandscapeProperties, GameState->LandscapeDataMap);
+			ZipLandscapeDataWithNeighbor(ECardinalDirection::West, InOutLandscapeData, InLandscapeProperties, GameState->LandscapeDataMap);
 			break;
 		}
 		case ECardinalDirection::East:
 		{
-			ZipLandscapeDataWithNeighbor(WorldContextObject, ECardinalDirection::North, InOutLandscapeData, InLandscapeProperties);
-			ZipLandscapeDataWithNeighbor(WorldContextObject, ECardinalDirection::West, InOutLandscapeData, InLandscapeProperties);
-			ZipLandscapeDataWithNeighbor(WorldContextObject, ECardinalDirection::South, InOutLandscapeData, InLandscapeProperties);
+			ZipLandscapeDataWithNeighbor(ECardinalDirection::North, InOutLandscapeData, InLandscapeProperties, GameState->LandscapeDataMap);
+			ZipLandscapeDataWithNeighbor(ECardinalDirection::West, InOutLandscapeData, InLandscapeProperties, GameState->LandscapeDataMap);
+			ZipLandscapeDataWithNeighbor(ECardinalDirection::South, InOutLandscapeData, InLandscapeProperties, GameState->LandscapeDataMap);
 
 			break;
 		}
 		case ECardinalDirection::West:
 		{
-			ZipLandscapeDataWithNeighbor(WorldContextObject, ECardinalDirection::South, InOutLandscapeData, InLandscapeProperties);
-			ZipLandscapeDataWithNeighbor(WorldContextObject, ECardinalDirection::East, InOutLandscapeData, InLandscapeProperties);
-			ZipLandscapeDataWithNeighbor(WorldContextObject, ECardinalDirection::North, InOutLandscapeData, InLandscapeProperties);
+			ZipLandscapeDataWithNeighbor(ECardinalDirection::South, InOutLandscapeData, InLandscapeProperties, GameState->LandscapeDataMap);
+			ZipLandscapeDataWithNeighbor(ECardinalDirection::East, InOutLandscapeData, InLandscapeProperties, GameState->LandscapeDataMap);
+			ZipLandscapeDataWithNeighbor(ECardinalDirection::North, InOutLandscapeData, InLandscapeProperties, GameState->LandscapeDataMap);
 
 			break;
 		}
 		case ECardinalDirection::Northeast:
 		{
-			ZipLandscapeDataWithNeighbor(WorldContextObject, ECardinalDirection::West, InOutLandscapeData, InLandscapeProperties);
-			ZipLandscapeDataWithNeighbor(WorldContextObject, ECardinalDirection::Southwest, InOutLandscapeData, InLandscapeProperties);
-			ZipLandscapeDataWithNeighbor(WorldContextObject, ECardinalDirection::South, InOutLandscapeData, InLandscapeProperties);
+			ZipLandscapeDataWithNeighbor(ECardinalDirection::West, InOutLandscapeData, InLandscapeProperties, GameState->LandscapeDataMap);
+			ZipLandscapeDataWithNeighbor(ECardinalDirection::Southwest, InOutLandscapeData, InLandscapeProperties, GameState->LandscapeDataMap);
+			ZipLandscapeDataWithNeighbor(ECardinalDirection::South, InOutLandscapeData, InLandscapeProperties, GameState->LandscapeDataMap);
 
 		}
 		case ECardinalDirection::Southeast:
 		{
-			ZipLandscapeDataWithNeighbor(WorldContextObject, ECardinalDirection::North, InOutLandscapeData, InLandscapeProperties);
-			ZipLandscapeDataWithNeighbor(WorldContextObject, ECardinalDirection::Northwest, InOutLandscapeData, InLandscapeProperties);
-			ZipLandscapeDataWithNeighbor(WorldContextObject, ECardinalDirection::West, InOutLandscapeData, InLandscapeProperties);
+			ZipLandscapeDataWithNeighbor(ECardinalDirection::North, InOutLandscapeData, InLandscapeProperties, GameState->LandscapeDataMap);
+			ZipLandscapeDataWithNeighbor(ECardinalDirection::Northwest, InOutLandscapeData, InLandscapeProperties, GameState->LandscapeDataMap);
+			ZipLandscapeDataWithNeighbor(ECardinalDirection::West, InOutLandscapeData, InLandscapeProperties, GameState->LandscapeDataMap);
 			//ZipLandscapeDataWithNeighbor(WorldContextObject, ECardinalDirection::South, InOutLandscapeData, InLandscapeProperties);
 
 		}
 		case ECardinalDirection::Southwest:
 		{
-			ZipLandscapeDataWithNeighbor(WorldContextObject, ECardinalDirection::East, InOutLandscapeData, InLandscapeProperties);
-			ZipLandscapeDataWithNeighbor(WorldContextObject, ECardinalDirection::Northeast, InOutLandscapeData, InLandscapeProperties);
-			ZipLandscapeDataWithNeighbor(WorldContextObject, ECardinalDirection::North, InOutLandscapeData, InLandscapeProperties);
+			ZipLandscapeDataWithNeighbor(ECardinalDirection::East, InOutLandscapeData, InLandscapeProperties, GameState->LandscapeDataMap);
+			ZipLandscapeDataWithNeighbor(ECardinalDirection::Northeast, InOutLandscapeData, InLandscapeProperties, GameState->LandscapeDataMap);
+			ZipLandscapeDataWithNeighbor(ECardinalDirection::North, InOutLandscapeData, InLandscapeProperties, GameState->LandscapeDataMap);
 
 		}
 		case ECardinalDirection::Northwest:
 		{
-			ZipLandscapeDataWithNeighbor(WorldContextObject, ECardinalDirection::South, InOutLandscapeData, InLandscapeProperties);
-			ZipLandscapeDataWithNeighbor(WorldContextObject, ECardinalDirection::Southeast, InOutLandscapeData, InLandscapeProperties);
-			ZipLandscapeDataWithNeighbor(WorldContextObject, ECardinalDirection::East, InOutLandscapeData, InLandscapeProperties);
+			ZipLandscapeDataWithNeighbor(ECardinalDirection::South, InOutLandscapeData, InLandscapeProperties, GameState->LandscapeDataMap);
+			ZipLandscapeDataWithNeighbor(ECardinalDirection::Southeast, InOutLandscapeData, InLandscapeProperties, GameState->LandscapeDataMap);
+			ZipLandscapeDataWithNeighbor(ECardinalDirection::East, InOutLandscapeData, InLandscapeProperties, GameState->LandscapeDataMap);
 			//ZipLandscapeDataWithNeighbor(WorldContextObject, ECardinalDirection::South, InOutLandscapeData, InLandscapeProperties);
 
 		}
@@ -390,17 +406,25 @@ AJetLandscapeMesh* AJetLandscapeMesh::GetNeighborLandscape_Implementation(ECardi
 	return Cast<AJetLandscapeMesh>(HitResult.GetActor());
 }
 
-bool AJetLandscapeMesh::GetNeighborLandscapeData(UObject* WorldContextObject, const FProcMeshData& InLandscapeData, ECardinalDirection InNeighborDirection, FProcMeshData& OutProcMeshData, int32 InVectorScale)
+bool AJetLandscapeMesh::GetNeighborLandscapeData(const FProcMeshData& InLandscapeData, ECardinalDirection InNeighborDirection, FProcMeshData& OutProcMeshData, int32 InVectorScale, TMap<FVector, FProcMeshData>& InLandscapeDataMap)
 {
-	AJetGameState* GameState = Cast<AJetGameState>(WorldContextObject->GetWorld()->GetGameState());
 
-	if (!GameState)
+	if (InNeighborDirection == ECardinalDirection::None)
 	{
 		return false;
 	}
 
-	return GameState->GameState_GetNeighborLandscapeData(InLandscapeData, InNeighborDirection, OutProcMeshData, InVectorScale);
+	const FTransform MapTransform = AJetLandscapeMesh::GetNeighborLandscapeSpawnTransform(InNeighborDirection, InVectorScale);
 
+	FProcMeshData* DataPtr = InLandscapeDataMap.Find((InLandscapeData.SpawnTransform.GetLocation() + MapTransform.GetLocation()) * FVector(1, 1, 0));
+
+	if (DataPtr)
+	{
+		OutProcMeshData = *DataPtr;
+		return true;
+	}
+
+	return false;
 }
 
 bool AJetLandscapeMesh::FindLandscapeData(const TMap<FVector, FProcMeshData>& InLandscapeDataMap, const FVector& InVectorKey, FProcMeshData& OutProcMeshData, const FLandscapeProperties& InLandscapeProperties)
@@ -430,7 +454,7 @@ bool AJetLandscapeMesh::Static_GetNeighborLandscapeData(UObject* WorldContextObj
 
 }
 
-void AJetLandscapeMesh::SpawnNeighborLandscapesInRadius(UObject* WorldContextObject, const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, AJetWorldSpawner* InWorldSpawner, const TMap<FVector, FProcMeshData>& InLandscapeDataMap)
+void AJetLandscapeMesh::SpawnNeighborLandscapesInRadius(UObject* WorldContextObject, const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, AJetWorldSpawner* InWorldSpawner, TMap<FVector, FProcMeshData>& InLandscapeDataMap)
 {
 	/*if (bHasSpawnedNeighborLandscapes)
 	{
@@ -483,20 +507,20 @@ void AJetLandscapeMesh::SpawnNeighborLandscapesInRadius(UObject* WorldContextObj
 
 			if (x > 0)
 			{
-				ZipLandscapeDataWithNeighbor(WorldContextObject, ECardinalDirection::South, Landscape, InLandscapeProperties);
+				ZipLandscapeDataWithNeighbor(ECardinalDirection::South, Landscape, InLandscapeProperties, InLandscapeDataMap);
 			}
 			else
 			{
-				ZipLandscapeDataWithNeighbor(WorldContextObject, ECardinalDirection::North, Landscape, InLandscapeProperties);
+				ZipLandscapeDataWithNeighbor(ECardinalDirection::North, Landscape, InLandscapeProperties, InLandscapeDataMap);
 			}
 
 			if (y > 0)
 			{
-				ZipLandscapeDataWithNeighbor(WorldContextObject, ECardinalDirection::West, Landscape, InLandscapeProperties);
+				ZipLandscapeDataWithNeighbor(ECardinalDirection::West, Landscape, InLandscapeProperties, InLandscapeDataMap);
 			}
 			else
 			{
-				ZipLandscapeDataWithNeighbor(WorldContextObject, ECardinalDirection::East, Landscape, InLandscapeProperties);
+				ZipLandscapeDataWithNeighbor(ECardinalDirection::East, Landscape, InLandscapeProperties, InLandscapeDataMap);
 			}
 
 			LocalLandscapeSpawnQueue.Add(Landscape);
@@ -678,8 +702,16 @@ AJetLandscapeMesh* AJetLandscapeMesh::SpawnNeighborLandscape(ECardinalDirection 
 
 bool AJetLandscapeMesh::CreateNewNeighborLandscapeData(UObject* WorldContextObject, const FProcMeshData& InLandscape, ECardinalDirection InNeighborDirection, FProcMeshData& OutProcMeshData, const FLandscapeProperties& InLandscapeProperties)
 {
+	//Search for the previously spawned landscape, spawn with that data if found
+	AJetGameState* GameState = Cast<AJetGameState>(WorldContextObject->GetWorld()->GetGameState());
+
+	if (!GameState)
+	{
+		return false;
+	}
+
 	//if the neighbor landscape already exists, we don't need to spawn it, return
-	bool bFoundNeighbor = GetNeighborLandscapeData(WorldContextObject, InLandscape, InNeighborDirection, OutProcMeshData, InLandscapeProperties.GetVectorScale());
+	bool bFoundNeighbor = GetNeighborLandscapeData(InLandscape, InNeighborDirection, OutProcMeshData, InLandscapeProperties.GetVectorScale(), GameState->LandscapeDataMap);
 
 	if (bFoundNeighbor)
 	{
