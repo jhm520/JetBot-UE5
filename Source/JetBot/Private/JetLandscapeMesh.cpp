@@ -60,8 +60,15 @@ void AJetLandscapeMesh::OnPlayerEnteredLandscape(ACharacter* InPlayer)
 		return;
 	}
 
+	AJetGameState* GameState = Cast<AJetGameState>(GetWorld()->GetGameState());
+
+	if (!GameState)
+	{
+		return;
+	}
+
 	//SpawnNeighborLandscapesInRadius();
-	SpawnNeighborLandscapesInRadius(this, GetActorLocation(), LandscapeProperties, WorldSpawner);
+	SpawnNeighborLandscapesInRadius(this, GetActorLocation(), LandscapeProperties, WorldSpawner, GameState->LandscapeDataMap);
 }
 
 void AJetLandscapeMesh::OnPlayerExitedLandscape(ACharacter* InPlayer, AJetLandscapeMesh* NewLandscape)
@@ -396,19 +403,18 @@ bool AJetLandscapeMesh::GetNeighborLandscapeData(UObject* WorldContextObject, co
 
 }
 
-bool AJetLandscapeMesh::FindLandscapeData(UObject* WorldContextObject, const FVector& InVectorKey, FProcMeshData& OutProcMeshData, const FLandscapeProperties& InLandscapeProperties)
+bool AJetLandscapeMesh::FindLandscapeData(const TMap<FVector, FProcMeshData>& InLandscapeDataMap, const FVector& InVectorKey, FProcMeshData& OutProcMeshData, const FLandscapeProperties& InLandscapeProperties)
 {
-	AJetGameState* GameState = Cast<AJetGameState>(WorldContextObject->GetWorld()->GetGameState());
+	const FProcMeshData* DataPtr = InLandscapeDataMap.Find(InVectorKey);
 
-	if (!GameState)
+	if (!DataPtr)
 	{
 		return false;
 	}
 
+	OutProcMeshData = *DataPtr;
 
-	return GameState->GameState_FindLandscapeData(InVectorKey, OutProcMeshData, InLandscapeProperties);
-
-
+	return true;
 }
 
 bool AJetLandscapeMesh::Static_GetNeighborLandscapeData(UObject* WorldContextObject, const FProcMeshData& InLandscapeData, ECardinalDirection InNeighborDirection, FProcMeshData& OutNeighborData, int32 InVectorScale)
@@ -424,7 +430,7 @@ bool AJetLandscapeMesh::Static_GetNeighborLandscapeData(UObject* WorldContextObj
 
 }
 
-void AJetLandscapeMesh::SpawnNeighborLandscapesInRadius(UObject* WorldContextObject, const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, AJetWorldSpawner* InWorldSpawner)
+void AJetLandscapeMesh::SpawnNeighborLandscapesInRadius(UObject* WorldContextObject, const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, AJetWorldSpawner* InWorldSpawner, const TMap<FVector, FProcMeshData>& InLandscapeDataMap)
 {
 	/*if (bHasSpawnedNeighborLandscapes)
 	{
@@ -432,6 +438,8 @@ void AJetLandscapeMesh::SpawnNeighborLandscapesInRadius(UObject* WorldContextObj
 	}*/
 
 	int32 i = 0;
+
+	TMap<FVector, FProcMeshData> OutProcMeshData;
 
 	TArray<FProcMeshData> LocalLandscapeSpawnQueue;
 
@@ -457,7 +465,7 @@ void AJetLandscapeMesh::SpawnNeighborLandscapesInRadius(UObject* WorldContextObj
 			MapKey = MapKey * FVector(1, 1, 0);
 
 
-			bool bFoundLandscape = FindLandscapeData(WorldContextObject, MapKey, Landscape, InLandscapeProperties);
+			bool bFoundLandscape = FindLandscapeData(InLandscapeDataMap, MapKey, Landscape, InLandscapeProperties);
 
 			if (bFoundLandscape)
 			{

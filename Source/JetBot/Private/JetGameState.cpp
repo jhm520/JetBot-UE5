@@ -152,7 +152,7 @@ void AJetGameState::TickSpawnLandscape()
 
 	FVector MapKey = FVector(FirstLandscapeTransform.GetLocation());
 
-	bool bFoundLandscape = AJetLandscapeMesh::FindLandscapeData(this, MapKey, Landscape, LandscapeSpawnProperties);
+	bool bFoundLandscape = AJetLandscapeMesh::FindLandscapeData(LandscapeDataMap, MapKey, Landscape, LandscapeSpawnProperties);
 
 	if (bFoundLandscape)
 	{
