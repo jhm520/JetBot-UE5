@@ -4,6 +4,7 @@
 #include "JetGameState.h"
 #include "../JetBot.h"
 #include "JetLandscapeMesh.h"
+#include "JetWorldSpawner.h"
 
 PRAGMA_DISABLE_OPTIMIZATION
 void AJetGameState::OnLandscapeSpawned_Implementation(AJetLandscapeMesh* InLandscape, const FProcMeshData& InProcMesh)
@@ -22,6 +23,11 @@ void AJetGameState::OnLandscapeDestroyed_Implementation(AJetLandscapeMesh* InLan
 	NewProcMesh.bIsActive = false;
 	LandscapeDataMap.Add(NewProcMesh.SpawnTransform.GetLocation() * FVector(1, 1, 0), NewProcMesh);
 
+}
+
+void AJetGameState::AppendLandscapeSpawnQueue(const TArray<FProcMeshData> InLandscapeQueue)
+{
+	LandscapeSpawnQueue.Append(InLandscapeQueue);
 }
 
 bool AJetGameState::GameState_FindLandscapeData(const FVector& InVectorKey, FProcMeshData& OutProcMeshData, const FLandscapeProperties& InLandscapeProperties)
@@ -139,7 +145,7 @@ void AJetGameState::Tick(const float DeltaSeconds)
 	TickSpawnLandscape();
 }
 
-void AJetGameState::TickSpawnLandscape()
+void AJetGameState::TickSpawnLandscapeTransform()
 {
 	if (LandscapeSpawnTransformQueue.Num() == 0)
 	{
@@ -211,5 +217,30 @@ void AJetGameState::TickSpawnLandscape()
 	AJetLandscapeMesh::SpawnLandscapeWithData(this, FirstLandscape, LandscapeSpawnProperties);
 
 	LandscapeSpawnQueue.RemoveAt(0);*/
+
+}
+
+void AJetGameState::TickSpawnLandscape()
+{
+	if (!WorldSpawner)
+	{
+		return;
+	}
+
+	if (LandscapeSpawnQueue.Num() == 0)
+	{
+		return;
+	}
+
+	FProcMeshData& FirstLandscape = LandscapeSpawnQueue[0];
+
+	AJetLandscapeMesh::SpawnLandscapeWithData(this, FirstLandscape, WorldSpawner->LandscapeProperties, WorldSpawner);
+
+	LandscapeSpawnQueue.RemoveAt(0);
+
+	if (LandscapeSpawnQueue.Num() == 0)
+	{
+		WorldSpawner->OnLandscapesFinishedSpawning();
+	}
 
 }

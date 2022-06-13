@@ -57,9 +57,17 @@ public:
 
     static void AsyncCreateLandscapeData(FOnLandscapeDataCreatedDelegate Out, const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, TWeakObjectPtr<AJetWorldSpawner> InWorldSpawner, const TMap<FVector, FProcMeshData>& InLandscapeDataMap);
 
+	UPROPERTY()
+	TArray<AJetLandscapeMesh*> PlayerEnteredLandscapeQueue;
+
+	UPROPERTY(Transient)
+	bool bCreatingLandscapeData = false;
 
 	void WorldSpawner_OnPlayerEnteredLandscape(AJetLandscapeMesh* InLandscape, ACharacter* InPlayer);
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "World Spawner")
 	void OnWorldSpawned();
+
+	UFUNCTION()
+	void OnLandscapesFinishedSpawning();
 };

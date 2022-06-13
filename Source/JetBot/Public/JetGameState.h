@@ -13,6 +13,7 @@
  */
 struct FProcMeshData;
 struct FLandscapeProperties;
+class AJetWorldSpawner;
 UCLASS()
 class JETBOT_API AJetGameState : public AGameState
 {
@@ -33,6 +34,9 @@ public:
 
 	UPROPERTY()
 	FLandscapeProperties LandscapeSpawnProperties;
+
+	UFUNCTION()
+	void AppendLandscapeSpawnQueue(const TArray<FProcMeshData> InLandscapeQueue);
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Procedural Mesh")
 	void OnLandscapeSpawned(AJetLandscapeMesh* InLandscape, const FProcMeshData& InProcMesh);
@@ -56,5 +60,11 @@ public:
 	virtual void Tick(const float DeltaSeconds) override;
 
 	UFUNCTION()
+	void TickSpawnLandscapeTransform();
+
+	UFUNCTION()
 	void TickSpawnLandscape();
+
+	UPROPERTY()
+	AJetWorldSpawner* WorldSpawner = nullptr;
 };

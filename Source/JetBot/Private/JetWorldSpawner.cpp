@@ -16,26 +16,51 @@ AJetWorldSpawner::AJetWorldSpawner()
 
 void AJetWorldSpawner::OnLandscapeDataCreated(const FOnLandscapeDataCreatedResult& InLandscapeData)
 {
-	//do stuff
-
-	int32 sixnine = InLandscapeData.LandscapeArray.Num();
+	//bCreatingLandscapeData = false;
 
 	TArray<FVector> VectorArray;
 	InLandscapeData.LandscapeDataMap.GenerateKeyArray(VectorArray);
 
-	int32 sixninetwo = VectorArray.Num();
+	AJetGameState* GameState = Cast<AJetGameState>(GetWorld()->GetGameState());
 
-	int32 sixninethree = 6969696;
-
-	// Spawn all of the new neighbors
-	for (const FProcMeshData& Landscape : InLandscapeData.LandscapeArray)
+	if (!GameState)
 	{
-		/*Landscape.bIsActive = true;
-		OnLandscapeDataCreated(WorldContextObject, Landscape);*/
-		AJetLandscapeMesh::SpawnLandscapeWithData(this, Landscape, LandscapeProperties, this);
+		return;
 	}
 
+
+	if (InLandscapeData.LandscapeArray.Num() == 0)
+	{
+		OnLandscapesFinishedSpawning();
+	}
+
+	GameState->AppendLandscapeSpawnQueue(InLandscapeData.LandscapeArray);
+
+	//// Spawn all of the new neighbors
+	//for (const FProcMeshData& Landscape : InLandscapeData.LandscapeArray)
+	//{
+	//	/*Landscape.bIsActive = true;
+	//	OnLandscapeDataCreated(WorldContextObject, Landscape);*/
+	//	AJetLandscapeMesh::SpawnLandscapeWithData(this, Landscape, LandscapeProperties, this);
+	//}
+
 	OnWorldSpawned();
+
+	/*if (PlayerEnteredLandscapeQueue.Num() == 0)
+	{
+		return;
+	}
+
+	AJetLandscapeMesh* EnteredLandscape = PlayerEnteredLandscapeQueue[0];
+
+	if (!EnteredLandscape)
+	{
+		return;
+	}
+
+	WorldSpawner_OnPlayerEnteredLandscape(EnteredLandscape, nullptr);
+
+	PlayerEnteredLandscapeQueue.RemoveAt(0);*/
 
 }
 
@@ -51,6 +76,8 @@ void AJetWorldSpawner::BeginPlay()
 		return;
 	}
 
+	GameState->WorldSpawner = this;
+
 	LandscapeCreatedDelegate.AddDynamic(this, &AJetWorldSpawner::OnLandscapeDataCreated);
 	
 	//GameState->CreateWorldLandscapes(GetActorLocation(), WorldRadius, LandscapeProperties);
@@ -62,7 +89,7 @@ void AJetWorldSpawner::BeginPlay()
 		AJetLandscapeMesh::SpawnLandscapeWithData(this, FirstLandscape, LandscapeProperties, this);*/
 
 		//AJetLandscapeMesh::SpawnNeighborLandscapesInRadius(this, GetActorLocation(), LandscapeProperties, this, GameState->LandscapeDataMap);
-
+		bCreatingLandscapeData = true;
 		AsyncCreateLandscapeData(LandscapeCreatedDelegate, GetActorLocation(), LandscapeProperties, this, GameState->LandscapeDataMap);
 	}
 }
@@ -76,6 +103,7 @@ void AJetWorldSpawner::Tick(float DeltaTime)
 
 void AJetWorldSpawner::AsyncCreateLandscapeData(FOnLandscapeDataCreatedDelegate Out, const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, TWeakObjectPtr<AJetWorldSpawner> InWorldSpawner, const TMap<FVector, FProcMeshData>& InLandscapeDataMap)
 {
+
 	AsyncTask(ENamedThreads::AnyHiPriThreadNormalTask, [Out, InLocation, InLandscapeProperties, InWorldSpawner, InLandscapeDataMap]()
 	{
 		FOnLandscapeDataCreatedResult OutLandscapeResult;
@@ -100,8 +128,9 @@ void AJetWorldSpawner::WorldSpawner_OnPlayerEnteredLandscape(AJetLandscapeMesh* 
 		return;
 	}
 
-	if (!InPlayer)
+	if (bCreatingLandscapeData)
 	{
+		PlayerEnteredLandscapeQueue.Add(InLandscape);
 		return;
 	}
 
@@ -113,6 +142,28 @@ void AJetWorldSpawner::WorldSpawner_OnPlayerEnteredLandscape(AJetLandscapeMesh* 
 	}
 
 	TWeakObjectPtr<AJetWorldSpawner> WeakPtr = this;
+	bCreatingLandscapeData = true;
 	AsyncCreateLandscapeData(LandscapeCreatedDelegate, InLandscape->GetActorLocation(), LandscapeProperties, WeakPtr, GameState->LandscapeDataMap);
 }
 PRAGMA_ENABLE_OPTIMIZATION
+
+void AJetWorldSpawner::OnLandscapesFinishedSpawning()
+{
+	bCreatingLandscapeData = false;
+
+	if (PlayerEnteredLandscapeQueue.Num() == 0)
+	{
+		return;
+	}
+
+	AJetLandscapeMesh* EnteredLandscape = PlayerEnteredLandscapeQueue[0];
+
+	if (!EnteredLandscape)
+	{
+		return;
+	}
+
+	WorldSpawner_OnPlayerEnteredLandscape(EnteredLandscape, nullptr);
+
+	PlayerEnteredLandscapeQueue.RemoveAt(0);
+}

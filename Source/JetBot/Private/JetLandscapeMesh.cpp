@@ -579,7 +579,7 @@ void AJetLandscapeMesh::CreateLandscapesInRadius(const FVector& InLocation, cons
 				continue;
 			}
 
-			FTransform NewTileSpawnTransform = FTransform(MapKey);
+			FTransform NewTileSpawnTransform = FTransform(MapKey + (InLocation*FVector(0,0,1)));
 
 			Landscape = CreateLandscapeData(NewTileSpawnTransform, InLandscapeProperties);
 
