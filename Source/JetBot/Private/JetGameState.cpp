@@ -30,6 +30,11 @@ void AJetGameState::AppendLandscapeSpawnQueue(const TArray<FProcMeshData> InLand
 	LandscapeSpawnQueue.Append(InLandscapeQueue);
 }
 
+void AJetGameState::AppendLandscapeDestroyQueue(const TArray<AJetLandscapeMesh*> InLandscapeQueue)
+{
+	LandscapeDestroyQueue.Append(InLandscapeQueue);
+}
+
 bool AJetGameState::GameState_FindLandscapeData(const FVector& InVectorKey, FProcMeshData& OutProcMeshData, const FLandscapeProperties& InLandscapeProperties)
 {
 	FProcMeshData* DataPtr = LandscapeDataMap.Find(InVectorKey);
@@ -143,6 +148,7 @@ void AJetGameState::Tick(const float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 
 	TickSpawnLandscape();
+	TickDestroyLandscape();
 }
 
 void AJetGameState::TickSpawnLandscapeTransform()
@@ -243,4 +249,31 @@ void AJetGameState::TickSpawnLandscape()
 		WorldSpawner->OnLandscapesFinishedSpawning();
 	}
 
+}
+
+void AJetGameState::TickDestroyLandscape()
+{
+	if (!WorldSpawner)
+	{
+		return;
+	}
+
+	if (LandscapeDestroyQueue.Num() == 0)
+	{
+		return;
+	}
+
+	AJetLandscapeMesh* FirstLandscape = LandscapeDestroyQueue[0];
+
+	LandscapeDestroyQueue.RemoveAt(0);
+
+	if (FirstLandscape)
+	{
+		FirstLandscape->Destroy();
+	}
+
+
+	/*if (LandscapeDestroyQueue.Num() == 0)
+	{
+	}*/
 }

@@ -71,7 +71,10 @@ void AJetLandscapeMesh::OnPlayerEnteredLandscape(ACharacter* InPlayer)
 	if (WorldSpawner)
 	{
 		WorldSpawner->WorldSpawner_OnPlayerEnteredLandscape(this, InPlayer);
+
 	}
+
+
 	//SpawnNeighborLandscapesInRadius();
 	//SpawnNeighborLandscapesInRadius(this, GetActorLocation(), LandscapeProperties, WorldSpawner, GameState->LandscapeDataMap);
 }
@@ -102,13 +105,22 @@ void AJetLandscapeMesh::OnPlayerExitedLandscape(ACharacter* InPlayer, AJetLandsc
 		OldNeighbors.Remove(Land);
 	}
 
-	for (AJetLandscapeMesh* OldNeighbor : OldNeighbors)
+	AJetGameState* GameState = Cast<AJetGameState>(GetWorld()->GetGameState());
+
+	if (!GameState)
+	{
+		return;
+	}
+
+	GameState->AppendLandscapeDestroyQueue(OldNeighbors);
+
+	/*for (AJetLandscapeMesh* OldNeighbor : OldNeighbors)
 	{
 		if (OldNeighbor)
 		{
 			OldNeighbor->Destroy();
 		}
-	}
+	}*/
 }
 
 void AJetLandscapeMesh::AppendLandscapeSpawnQueue(const TArray<FProcMeshData>& InLandscapeNeighborSpawnQueue)
@@ -378,7 +390,7 @@ void AJetLandscapeMesh::ZipNewLandscape(UObject* WorldContextObject, FProcMeshDa
 	}
 }
 
-AJetLandscapeMesh* AJetLandscapeMesh::GetNeighborLandscape_Implementation(ECardinalDirection InNeighborDirection, const FLandscapeProperties& InLandscapeProperties)
+AJetLandscapeMesh* AJetLandscapeMesh::GetNeighborLandscapeWithCardinalDirection_Implementation(ECardinalDirection InNeighborDirection, const FLandscapeProperties& InLandscapeProperties)
 {
 	FTransform* TransPtr = LandscapeStatics::NeighborSpawnTransformMap.Find(InNeighborDirection);
 
@@ -400,6 +412,31 @@ AJetLandscapeMesh* AJetLandscapeMesh::GetNeighborLandscape_Implementation(ECardi
 	COQP.AddObjectTypesToQuery(ECC_GameTraceChannel2);
 	FCollisionQueryParams CQP = FCollisionQueryParams();
 	CQP.AddIgnoredActor(this);
+
+	bool bGotHit = GetWorld()->LineTraceSingleByObjectType(HitResult, TraceStart, TraceEnd, COQP, CQP);
+
+	if (!bGotHit)
+	{
+		return nullptr;
+	}
+
+	return Cast<AJetLandscapeMesh>(HitResult.GetActor());
+}
+
+AJetLandscapeMesh* AJetLandscapeMesh::GetNeighborLandscapeWithRelativeOffset(const FVector& InOffset, const FLandscapeProperties& InLandscapeProperties)
+{
+	const FVector& NeighborLocation = GetActorLocation() + InOffset;
+
+	FVector TraceStart = NeighborLocation - FVector(0, 0, 200.0f + (InLandscapeProperties.HeightVariation * 2));
+
+	FVector TraceEnd = NeighborLocation + FVector(0, 0, 200.0f + (InLandscapeProperties.HeightVariation * 2));
+
+	FCollisionObjectQueryParams COQP = FCollisionObjectQueryParams();
+	COQP.AddObjectTypesToQuery(ECC_GameTraceChannel2);
+	FCollisionQueryParams CQP = FCollisionQueryParams();
+	CQP.AddIgnoredActor(this);
+
+	FHitResult HitResult;
 
 	bool bGotHit = GetWorld()->LineTraceSingleByObjectType(HitResult, TraceStart, TraceEnd, COQP, CQP);
 
@@ -696,7 +733,7 @@ TArray<AJetLandscapeMesh*> AJetLandscapeMesh::GetAllNeighborLandscapes()
 
 			for (dir = 0; dir < MaxDirection + 1; dir++)
 			{
-				AJetLandscapeMesh* NeighborLandscape = CurrentNeighbor->GetNeighborLandscape((ECardinalDirection)dir, LandscapeProperties);
+				AJetLandscapeMesh* NeighborLandscape = CurrentNeighbor->GetNeighborLandscapeWithCardinalDirection((ECardinalDirection)dir, LandscapeProperties);
 
 				if (!NeighborLandscape)
 				{
@@ -724,7 +761,7 @@ TArray<AJetLandscapeMesh*> AJetLandscapeMesh::GetAllNeighborLandscapes()
 AJetLandscapeMesh* AJetLandscapeMesh::SpawnNeighborLandscape(ECardinalDirection InNeighborDirection)
 {
 	//if the neighbor landscape already exists, we don't need to spawn it, return
-	AJetLandscapeMesh* NeighborLandscape = GetNeighborLandscape(InNeighborDirection, LandscapeProperties);
+	AJetLandscapeMesh* NeighborLandscape = GetNeighborLandscapeWithCardinalDirection(InNeighborDirection, LandscapeProperties);
 
 	if (NeighborLandscape)
 	{
@@ -875,7 +912,7 @@ AJetLandscapeMesh* AJetLandscapeMesh::SpawnNeighboringLandscapeWithData(const FP
 	for (dir = 0; dir < MaxDirection + 1; dir++)
 	{
 		ECardinalDirection CardDir = (ECardinalDirection)dir;
-		AJetLandscapeMesh* CurrentNeighbor = SpawnedActor->GetNeighborLandscape(CardDir, LandscapeProperties);
+		AJetLandscapeMesh* CurrentNeighbor = SpawnedActor->GetNeighborLandscapeWithCardinalDirection(CardDir, LandscapeProperties);
 
 		if (CurrentNeighbor)
 		{

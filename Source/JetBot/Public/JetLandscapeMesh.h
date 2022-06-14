@@ -128,7 +128,11 @@ public:
 
 
 	UFUNCTION(BlueprintCallable,BlueprintPure, BlueprintNativeEvent, Category = "Procedural Mesh")
-	AJetLandscapeMesh* GetNeighborLandscape(ECardinalDirection InNeighborDirection, const FLandscapeProperties& InLandscapeProperties);
+	AJetLandscapeMesh* GetNeighborLandscapeWithCardinalDirection(ECardinalDirection InNeighborDirection, const FLandscapeProperties& InLandscapeProperties);
+
+	UFUNCTION(BlueprintCallable,BlueprintPure, Category = "Procedural Mesh")
+	AJetLandscapeMesh* GetNeighborLandscapeWithRelativeOffset(const FVector& InOffset, const FLandscapeProperties& InLandscapeProperties);
+
 
 	UFUNCTION(BlueprintCallable,BlueprintPure, Category = "Procedural Mesh")
 	static bool GetNeighborLandscapeData(const FProcMeshData& InLandscapeData, ECardinalDirection InNeighborDirection, FProcMeshData& OutProcMeshData, int32 InVectorScale, TMap<FVector, FProcMeshData>& InLandscapeDataMap);

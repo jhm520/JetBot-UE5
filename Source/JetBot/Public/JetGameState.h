@@ -30,6 +30,9 @@ public:
 	TArray<FProcMeshData> LandscapeSpawnQueue;
 
 	UPROPERTY()
+	TArray<AJetLandscapeMesh*> LandscapeDestroyQueue;
+
+	UPROPERTY()
 	TArray<FTransform> LandscapeSpawnTransformQueue;
 
 	UPROPERTY()
@@ -37,6 +40,10 @@ public:
 
 	UFUNCTION()
 	void AppendLandscapeSpawnQueue(const TArray<FProcMeshData> InLandscapeQueue);
+
+	UFUNCTION()
+	void AppendLandscapeDestroyQueue(const TArray<AJetLandscapeMesh*> InLandscapeQueue);
+
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Procedural Mesh")
 	void OnLandscapeSpawned(AJetLandscapeMesh* InLandscape, const FProcMeshData& InProcMesh);
@@ -64,6 +71,9 @@ public:
 
 	UFUNCTION()
 	void TickSpawnLandscape();
+
+	UFUNCTION()
+	void TickDestroyLandscape();
 
 	UPROPERTY()
 	AJetWorldSpawner* WorldSpawner = nullptr;

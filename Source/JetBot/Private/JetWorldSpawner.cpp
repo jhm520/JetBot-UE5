@@ -44,8 +44,6 @@ void AJetWorldSpawner::OnLandscapeDataCreated(const FOnLandscapeDataCreatedResul
 	//	AJetLandscapeMesh::SpawnLandscapeWithData(this, Landscape, LandscapeProperties, this);
 	//}
 
-	OnWorldSpawned();
-
 	/*if (PlayerEnteredLandscapeQueue.Num() == 0)
 	{
 		return;
@@ -127,6 +125,14 @@ void AJetWorldSpawner::WorldSpawner_OnPlayerEnteredLandscape(AJetLandscapeMesh* 
 	{
 		return;
 	}
+
+	if (!bHasWorldSpawned)
+	{
+		OnWorldSpawned();
+
+		bHasWorldSpawned = true;
+	}
+
 
 	if (bCreatingLandscapeData)
 	{

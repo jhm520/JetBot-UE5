@@ -68,6 +68,8 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "World Spawner")
 	void OnWorldSpawned();
 
+	bool bHasWorldSpawned = false;
+
 	UFUNCTION()
 	void OnLandscapesFinishedSpawning();
 };
