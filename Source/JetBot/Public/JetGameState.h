@@ -27,6 +27,9 @@ public:
 	TMap<FVector, FProcMeshData> LandscapeDataMap;
 
 	UPROPERTY()
+	TArray<AJetLandscapeMesh*> LandscapeObjectArray;
+
+	UPROPERTY()
 	TArray<FProcMeshData> LandscapeSpawnQueue;
 
 	UPROPERTY()

@@ -14,6 +14,8 @@ void AJetGameState::OnLandscapeSpawned_Implementation(AJetLandscapeMesh* InLands
 
 	NewProcMesh.bIsActive = true;
 	LandscapeDataMap.Add(NewProcMesh.SpawnTransform.GetLocation()*FVector(1,1,0), NewProcMesh);
+
+	LandscapeObjectArray.AddUnique(InLandscape);
 }
 
 void AJetGameState::OnLandscapeDestroyed_Implementation(AJetLandscapeMesh* InLandscape, const FProcMeshData& InProcMesh)
@@ -33,6 +35,11 @@ void AJetGameState::AppendLandscapeSpawnQueue(const TArray<FProcMeshData> InLand
 void AJetGameState::AppendLandscapeDestroyQueue(const TArray<AJetLandscapeMesh*> InLandscapeQueue)
 {
 	LandscapeDestroyQueue.Append(InLandscapeQueue);
+
+	for (AJetLandscapeMesh* Neighbor : InLandscapeQueue)
+	{
+		LandscapeObjectArray.Remove(Neighbor);
+	}
 }
 
 bool AJetGameState::GameState_FindLandscapeData(const FVector& InVectorKey, FProcMeshData& OutProcMeshData, const FLandscapeProperties& InLandscapeProperties)

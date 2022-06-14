@@ -92,7 +92,31 @@ void AJetLandscapeMesh::OnPlayerExitedLandscape(ACharacter* InPlayer, AJetLandsc
 		return;
 	}
 
-	TArray<AJetLandscapeMesh*> OldNeighbors = GetAllNeighborLandscapes();
+	AJetGameState* GameState = Cast<AJetGameState>(GetWorld()->GetGameState());
+
+	if (!GameState)
+	{
+		return;
+	}
+
+	TArray<AJetLandscapeMesh*> OldNeighbors;
+
+	int32 MaxDist = LandscapeProperties.NeighborSpawnRadius * LandscapeProperties.GetVectorScale();
+	for (AJetLandscapeMesh* LandscapeMesh : GameState->LandscapeObjectArray)
+	{
+		FVector Dist = NewLandscape->GetActorLocation() - LandscapeMesh->GetActorLocation();
+
+		if (FMath::Abs(Dist.X) > MaxDist)
+		{
+			OldNeighbors.Add(LandscapeMesh);
+		}
+		else if (FMath::Abs(Dist.Y) > MaxDist)
+		{
+			OldNeighbors.Add(LandscapeMesh);
+		}
+	}
+
+	/*TArray<AJetLandscapeMesh*> OldNeighbors = GetAllNeighborLandscapes();
 
 	TArray<AJetLandscapeMesh*> NewNeighbors = NewLandscape->GetAllNeighborLandscapes();
 
@@ -103,14 +127,7 @@ void AJetLandscapeMesh::OnPlayerExitedLandscape(ACharacter* InPlayer, AJetLandsc
 	for (AJetLandscapeMesh* Land : NewNeighbors)
 	{
 		OldNeighbors.Remove(Land);
-	}
-
-	AJetGameState* GameState = Cast<AJetGameState>(GetWorld()->GetGameState());
-
-	if (!GameState)
-	{
-		return;
-	}
+	}*/
 
 	GameState->AppendLandscapeDestroyQueue(OldNeighbors);
 
