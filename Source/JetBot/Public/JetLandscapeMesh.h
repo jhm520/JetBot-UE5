@@ -42,6 +42,15 @@ struct FLandscapeProperties
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
 	int32 NeighborSpawnRadius = 1;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
+	int32 MaximumHeightDifference = 50.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
+	int32 MaximumSlopeDifference = 10.0f;
+
+	/*UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
+	int32 MaximumHeightDifference = 50.0f;*/
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
 	TSubclassOf<AJetLandscapeMesh> LandscapeClass;
@@ -206,7 +215,7 @@ public:
 	static ECardinalDirection GetNeighborDataCardinality(const FProcMeshData& InLandscapeDataOne, const FProcMeshData& InLandscapeDataTwo);
 
 
-	static TArray<FVector> CreateLandscapeVertexArray(int32 InLandscapeSize, int32 InTileSize, int32 InHeightVariation, FProcMeshFaceVertexMap& OutLandscapeVertexMap);
+	static TArray<FVector> CreateLandscapeVertexArray(const FLandscapeProperties& InLandscapeProperties, FProcMeshData& InOutProcMeshData);
 
 	static TArray<FVector2D> CreateLandscapeUVArray(int32 InLandscapeSize, int32 InTileSize, int32 InHeightVariation);
 

@@ -171,13 +171,14 @@ FProcMeshData AJetLandscapeMesh::CreateLandscapeData(const FTransform& InSpawnTr
 	FProcMeshData OutProcMeshData;
 
 	FProcMeshFaceVertexMap LandscapeVertexMap;
-	OutProcMeshData.SpawnTransform = InSpawnTransform;
-	OutProcMeshData.Vertices = CreateLandscapeVertexArray(InLandscapeProperties.LandscapeSize, InLandscapeProperties.TileSize, InLandscapeProperties.HeightVariation, LandscapeVertexMap);
 	OutProcMeshData.FaceVertexMapArray.Add(LandscapeVertexMap);
+
+	OutProcMeshData.SpawnTransform = InSpawnTransform;
+	OutProcMeshData.Vertices = CreateLandscapeVertexArray(InLandscapeProperties, OutProcMeshData);
 
 	OutProcMeshData.UVs = CreateLandscapeUVArray(InLandscapeProperties.LandscapeSize, InLandscapeProperties.TileSize, InLandscapeProperties.HeightVariation);
 
-	OutProcMeshData.Triangles = CreateLandscapeTriangleArray(LandscapeVertexMap.VertexIndexMap, InLandscapeProperties.LandscapeSize, InLandscapeProperties.TileSize, InLandscapeProperties.HeightVariation);
+	OutProcMeshData.Triangles = CreateLandscapeTriangleArray(OutProcMeshData.FaceVertexMapArray[0].VertexIndexMap, InLandscapeProperties.LandscapeSize, InLandscapeProperties.TileSize, InLandscapeProperties.HeightVariation);
 
 	return OutProcMeshData;
 }
@@ -1216,17 +1217,22 @@ ECardinalDirection AJetLandscapeMesh::GetNeighborDataCardinality(const FProcMesh
 	return ECardinalDirection::None;
 }
 
-TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArray(int32 InLandscapeSize, int32 InTileSize, int32 InHeightVariation, FProcMeshFaceVertexMap& OutLandscapeVertexMap)
+TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArray(const FLandscapeProperties& InLandscapeProperties, FProcMeshData& InOutProcMeshData)
 {
-	int32 VertexNum = (InLandscapeSize + 1) * (InLandscapeSize + 1);
+	if (!InOutProcMeshData.FaceVertexMapArray.IsValidIndex(0))
+	{
+		return TArray<FVector>();
+	}
+
+	int32 VertexNum = (InLandscapeProperties.LandscapeSize + 1) * (InLandscapeProperties.LandscapeSize + 1);
 
 	int32 x = 0;
 	int32 y = 0;
 
 	TArray<FVector> OutVertexArray;
 
-	int32 XDim = InLandscapeSize + 1;
-	int32 YDim = InLandscapeSize + 1;
+	int32 XDim = InLandscapeProperties.LandscapeSize + 1;
+	int32 YDim = InLandscapeProperties.LandscapeSize + 1;
 
 	int32 i = 0;
 
@@ -1234,21 +1240,25 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArray(int32 InLandscapeS
 	{
 		for (x = 0; x < XDim; x++)
 		{
-			int32 RandInt = FMath::RandRange(-InHeightVariation, InHeightVariation);
+			int32 RandInt = FMath::RandRange(-InLandscapeProperties.HeightVariation, InLandscapeProperties.HeightVariation);
 
 			int32 HeightMod = RandInt;
 			if (x > 0 && y > 0)
 			{
-				int32 xPre = GetVertexIndex(OutLandscapeVertexMap.VertexIndexMap, FVector(x - 1, y, 0), FVector(InLandscapeSize, InLandscapeSize, 0));
+				int32 xPre = InOutProcMeshData.GetVertexIndex(FVector(x - 1, y, 0), 0);
 
-				int32 yPre = GetVertexIndex(OutLandscapeVertexMap.VertexIndexMap, FVector(x, y-1, 0), FVector(InLandscapeSize, InLandscapeSize, 0));
+				int32 yPre = InOutProcMeshData.GetVertexIndex(FVector(x, y-1, 0), 0);
 
-				HeightMod = HeightMod + ((OutVertexArray[xPre].Z + OutVertexArray[yPre].Z) / 2);
+				bool bHavexPre = xPre > -1;
+
+				bool bHaveyPre = yPre > -1;
+
+				HeightMod = HeightMod + (((bHavexPre ? OutVertexArray[xPre].Z : 0) + (bHaveyPre ? OutVertexArray[yPre].Z : 0)) / ((bHavexPre ? 1 : 0) + (bHaveyPre ? 1 : 0)));
 			}
 
-			OutVertexArray.Add(FVector(x * InTileSize, y * InTileSize, RandInt));
+			OutVertexArray.Add(FVector(x * InLandscapeProperties.TileSize, y * InLandscapeProperties.TileSize, RandInt));
 
-			OutLandscapeVertexMap.VertexIndexMap.Add(FVector(x, y, 0), i);
+			InOutProcMeshData.FaceVertexMapArray[0].VertexIndexMap.Add(FVector(x, y, 0), i);
 			//VertexIndexMap.Add(FVector2D(x, y), i);
 
 			i++;
