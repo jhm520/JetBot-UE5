@@ -222,18 +222,6 @@ void AJetLandscapeMesh::ZipLandscapeDataWithNeighbor(ECardinalDirection InNeighb
 
 	if (InNeighborDirection == ECardinalDirection::West)
 	{
-		int32 Sum = 0;
-		for (int32 i = 0; i < InLandscapeProperties.LandscapeSize + 1; i++)
-		{
-			int32 VertexIndex = ZipperData.GetVertexIndex(FVector(i, InLandscapeProperties.LandscapeSize, 0));
-
-			Sum += ZipperData.Vertices[VertexIndex].Z;
-		}
-
-		int32 AvgHeight = Sum / (InLandscapeProperties.LandscapeSize + 1);
-		FVector CurrentVector = InOutLandscapeData.SpawnTransform.GetLocation();
-		InOutLandscapeData.SpawnTransform.SetLocation(FVector(CurrentVector.X, CurrentVector.Y, ZipperData.SpawnTransform.GetLocation().Z + AvgHeight));
-
 		for (int32 i = 0; i < InLandscapeProperties.LandscapeSize + 1; i++)
 		{
 			int32 ZippeeIndex = InOutLandscapeData.GetVertexIndex(FVector(i, 0, 0));
@@ -249,18 +237,6 @@ void AJetLandscapeMesh::ZipLandscapeDataWithNeighbor(ECardinalDirection InNeighb
 	}
 	else if (InNeighborDirection == ECardinalDirection::East)
 	{
-		int32 Sum = 0;
-		for (int32 i = 0; i < InLandscapeProperties.LandscapeSize + 1; i++)
-		{
-			int32 VertexIndex = ZipperData.GetVertexIndex(FVector(i, 0, 0));
-
-			Sum += ZipperData.Vertices[VertexIndex].Z;
-		}
-
-		int32 AvgHeight = Sum / (InLandscapeProperties.LandscapeSize + 1);
-		FVector CurrentVector = InOutLandscapeData.SpawnTransform.GetLocation();
-		InOutLandscapeData.SpawnTransform.SetLocation(FVector(CurrentVector.X, CurrentVector.Y, ZipperData.SpawnTransform.GetLocation().Z + AvgHeight));
-
 		for (int32 i = 0; i < InLandscapeProperties.LandscapeSize + 1; i++)
 		{
 			int32 ZippeeIndex = InOutLandscapeData.GetVertexIndex(FVector(i, InLandscapeProperties.LandscapeSize, 0));
@@ -278,18 +254,6 @@ void AJetLandscapeMesh::ZipLandscapeDataWithNeighbor(ECardinalDirection InNeighb
 	}
 	else if (InNeighborDirection == ECardinalDirection::North)
 	{
-		int32 Sum = 0;
-		for (int32 i = 0; i < InLandscapeProperties.LandscapeSize + 1; i++)
-		{
-			int32 VertexIndex = ZipperData.GetVertexIndex(FVector(0, i, 0));
-
-			Sum += ZipperData.Vertices[VertexIndex].Z;
-		}
-
-		int32 AvgHeight = Sum / (InLandscapeProperties.LandscapeSize + 1);
-		FVector CurrentVector = InOutLandscapeData.SpawnTransform.GetLocation();
-		InOutLandscapeData.SpawnTransform.SetLocation(FVector(CurrentVector.X, CurrentVector.Y, ZipperData.SpawnTransform.GetLocation().Z + AvgHeight));
-
 		for (int32 i = 0; i < InLandscapeProperties.LandscapeSize + 1; i++)
 		{
 
@@ -306,18 +270,6 @@ void AJetLandscapeMesh::ZipLandscapeDataWithNeighbor(ECardinalDirection InNeighb
 	}
 	else if (InNeighborDirection == ECardinalDirection::South)
 	{
-		int32 Sum = 0;
-		for (int32 i = 0; i < InLandscapeProperties.LandscapeSize + 1; i++)
-		{
-			int32 VertexIndex = ZipperData.GetVertexIndex(FVector(InLandscapeProperties.LandscapeSize, i, 0));
-
-			Sum += ZipperData.Vertices[VertexIndex].Z;
-		}
-
-		int32 AvgHeight = Sum / (InLandscapeProperties.LandscapeSize + 1);
-		FVector CurrentVector = InOutLandscapeData.SpawnTransform.GetLocation();
-		InOutLandscapeData.SpawnTransform.SetLocation(FVector(CurrentVector.X, CurrentVector.Y, ZipperData.SpawnTransform.GetLocation().Z + AvgHeight));
-
 		for (int32 i = 0; i < InLandscapeProperties.LandscapeSize + 1; i++)
 		{
 
@@ -649,8 +601,6 @@ void AJetLandscapeMesh::SpawnNeighborLandscapesInRadius(UObject* WorldContextObj
 
 void AJetLandscapeMesh::CreateLandscapesInRadius(const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, TArray<FProcMeshData>& InOutLandscapeDataArray, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap)
 {
-	int32 i = 0;
-
 	int32 x = 0;
 	int32 y = 0;
 
@@ -686,6 +636,108 @@ void AJetLandscapeMesh::CreateLandscapesInRadius(const FVector& InLocation, cons
 			FTransform NewTileSpawnTransform = FTransform(MapKey + (InLocation*FVector(0,0,1)));
 
 			Landscape = CreateLandscapeData(NewTileSpawnTransform, InLandscapeProperties, InOutLandscapeDataMap);
+
+			//TODO: Make "SetLandscapeHeight" function which does the height setting step within ZipLandscape.
+			//It should set the height to the average adjacent edge height of its neighbors
+			
+			FProcMeshData ZipperData;
+
+			int32 NumNeighbors = 0;
+			int32 SumHeight = 0;
+
+			if (x > 0)
+			{
+				bool bGotNeighborData = GetNeighborLandscapeData(Landscape, ECardinalDirection::South, ZipperData, InLandscapeProperties.GetVectorScale(), InOutLandscapeDataMap);
+
+				if (bGotNeighborData)
+				{
+					NumNeighbors++;
+
+					int32 Sum = 0;
+					for (int32 i = 0; i < InLandscapeProperties.LandscapeSize + 1; i++)
+					{
+						int32 VertexIndex = ZipperData.GetVertexIndex(FVector(InLandscapeProperties.LandscapeSize, i, 0));
+
+						Sum += ZipperData.Vertices[VertexIndex].Z;
+					}
+
+					int32 AvgHeight = Sum / (InLandscapeProperties.LandscapeSize + 1);
+
+					SumHeight += AvgHeight;
+				}
+			}
+			else
+			{
+				bool bGotNeighborData = GetNeighborLandscapeData(Landscape, ECardinalDirection::North, ZipperData, InLandscapeProperties.GetVectorScale(), InOutLandscapeDataMap);
+
+				if (bGotNeighborData)
+				{
+					NumNeighbors++;
+
+					int32 Sum = 0;
+					for (int32 i = 0; i < InLandscapeProperties.LandscapeSize + 1; i++)
+					{
+						int32 VertexIndex = ZipperData.GetVertexIndex(FVector(0, i, 0));
+
+						Sum += ZipperData.Vertices[VertexIndex].Z;
+					}
+
+					int32 AvgHeight = Sum / (InLandscapeProperties.LandscapeSize + 1);
+
+					SumHeight += AvgHeight;
+				}
+			}
+
+			if (y > 0)
+			{
+				bool bGotNeighborData = GetNeighborLandscapeData(Landscape, ECardinalDirection::West, ZipperData, InLandscapeProperties.GetVectorScale(), InOutLandscapeDataMap);
+
+				if (bGotNeighborData)
+				{
+					NumNeighbors++;
+
+					int32 Sum = 0;
+					for (int32 i = 0; i < InLandscapeProperties.LandscapeSize + 1; i++)
+					{
+						int32 VertexIndex = ZipperData.GetVertexIndex(FVector(i, InLandscapeProperties.LandscapeSize, 0));
+
+						Sum += ZipperData.Vertices[VertexIndex].Z;
+					}
+
+					int32 AvgHeight = Sum / (InLandscapeProperties.LandscapeSize + 1);
+
+					SumHeight += AvgHeight;
+				}
+			}
+			else
+			{
+				bool bGotNeighborData = GetNeighborLandscapeData(Landscape, ECardinalDirection::East, ZipperData, InLandscapeProperties.GetVectorScale(), InOutLandscapeDataMap);
+
+				if (bGotNeighborData)
+				{
+					NumNeighbors++;
+
+					int32 Sum = 0;
+					for (int32 i = 0; i < InLandscapeProperties.LandscapeSize + 1; i++)
+					{
+						int32 VertexIndex = ZipperData.GetVertexIndex(FVector(i, 0, 0));
+
+						Sum += ZipperData.Vertices[VertexIndex].Z;
+					}
+
+					int32 AvgHeight = Sum / (InLandscapeProperties.LandscapeSize + 1);
+
+					SumHeight += AvgHeight;
+				}
+			}
+
+			if (NumNeighbors > 0)
+			{
+				int32 HeightAdjust = SumHeight / NumNeighbors;
+
+				FVector CurrentVector = Landscape.SpawnTransform.GetLocation();
+				Landscape.SpawnTransform.SetLocation(FVector(CurrentVector.X, CurrentVector.Y, InLocation.Z + HeightAdjust));
+			}
 
 			if (x > 0)
 			{
