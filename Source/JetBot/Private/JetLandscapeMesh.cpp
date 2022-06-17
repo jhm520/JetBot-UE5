@@ -1259,7 +1259,9 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArray(const FLandscapePr
 
 				int32 RandHeightDiff = FMath::RandRange(AvgPreHeight - InLandscapeProperties.MaximumHeightDifference, AvgPreHeight + InLandscapeProperties.MaximumHeightDifference);
 
-				HeightMod = HeightMod + AvgPreHeight;
+				//HeightMod = HeightMod + AvgPreHeight;
+
+				HeightMod = RandHeightDiff;
 
 			}
 
