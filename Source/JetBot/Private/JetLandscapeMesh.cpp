@@ -1550,6 +1550,103 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArray(const FLandscapePr
 				}
 			}
 		}
+		else if (bEasternNeighbor)
+		{
+			int32 iMinus = (XDim * YDim);
+			OutVertexArray.SetNumZeroed(iMinus);
+			iMinus--;
+			//backward
+			for (y = YDim-1; y > -1; y--)
+			{
+				for (x = 0; x < XDim; x++)
+				{
+					int32 RandInt = FMath::RandRange(-InLandscapeProperties.HeightVariation, InLandscapeProperties.HeightVariation);
+
+					int32 HeightMod = RandInt;
+					/*if (x > 0 && y > 0)
+					{*/
+					int32 xPost = InOutProcMeshData.GetVertexIndex(FVector(x + 1, y, 0), 0);
+
+					int32 xPre = InOutProcMeshData.GetVertexIndex(FVector(x - 1, y, 0), 0);
+
+					int32 yPost = InOutProcMeshData.GetVertexIndex(FVector(x, y + 1, 0), 0);
+
+					int32 yPre = InOutProcMeshData.GetVertexIndex(FVector(x, y - 1, 0), 0);
+
+
+					bool bHavexPre = xPre > -1;
+
+					bool bHavexPost = xPost > -1;
+
+					int32 xPreHeight = 0;
+
+					int32 yPreHeight = 0;
+
+					if (!bHavexPre)
+					{
+						if (bSouthernNeighbor)
+						{
+							int32* HeightPtr = SouthernNeighbor.FaceVertexMapArray[0].VertexIndexMap.Find(FVector(XDim-1, y, 0));
+
+							if (HeightPtr)
+							{
+								bHavexPre = true;
+								xPreHeight = SouthernNeighbor.Vertices[*HeightPtr].Z;
+							}
+						}
+					}
+					else
+					{
+						xPreHeight = OutVertexArray[xPre].Z;
+					}
+
+					bool bHaveyPost = yPost > -1;
+
+					bool bHaveyPre = yPre > -1;
+
+
+					if (!bHaveyPost)
+					{
+						if (bEasternNeighbor)
+						{
+							int32* HeightPtr = EasternNeighbor.FaceVertexMapArray[0].VertexIndexMap.Find(FVector(x, 0, 0));
+
+							if (HeightPtr)
+							{
+								bHaveyPost = true;
+								yPreHeight = EasternNeighbor.Vertices[*HeightPtr].Z;
+							}
+						}
+					}
+					else
+					{
+						yPreHeight = OutVertexArray[yPost].Z;
+					}
+
+					int32 Divisor = ((bHavexPre ? 1 : 0) + (bHaveyPost ? 1 : 0));
+
+					int32 AvgPreHeight = (xPreHeight + yPreHeight) / (Divisor > 0 ? Divisor : 1);
+
+					int32 RandHeightDiff = FMath::RandRange(AvgPreHeight - InLandscapeProperties.MaximumHeightDifference, AvgPreHeight + InLandscapeProperties.MaximumHeightDifference);
+
+					//HeightMod = HeightMod + AvgPreHeight;
+
+					HeightMod = RandHeightDiff;
+
+					/*}*/
+					iMinus = (y * YDim) + x;
+					//OutVertexArray.Add(FVector(x * InLandscapeProperties.TileSize, y * InLandscapeProperties.TileSize, HeightMod));
+					FVector NewLoc = FVector(x * InLandscapeProperties.TileSize, y * InLandscapeProperties.TileSize, HeightMod);
+
+					OutVertexArray[iMinus] = NewLoc;
+
+					InOutProcMeshData.FaceVertexMapArray[0].VertexIndexMap.Add(FVector(x, y, 0), iMinus);
+					//VertexIndexMap.Add(FVector2D(x, y), i);
+
+					//iMinus--;
+				}
+			}
+		}
 		
 	}
 
