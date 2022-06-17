@@ -647,7 +647,7 @@ void AJetLandscapeMesh::CreateLandscapesInRadius(const FVector& InLocation, cons
 
 			int32 SumNeighborHeight = 0;
 
-			if (x > 0)
+			/*if (x > 0)
 			{
 				bool bGotNeighborData = GetNeighborLandscapeData(Landscape, ECardinalDirection::South, ZipperData, InLandscapeProperties.GetVectorScale(), InOutLandscapeDataMap);
 
@@ -742,17 +742,19 @@ void AJetLandscapeMesh::CreateLandscapesInRadius(const FVector& InLocation, cons
 					SumNeighborHeight += ZipperData.SpawnTransform.GetLocation().Z;
 
 				}
-			}
+			}*/
 
-			if (NumNeighbors > 0)
+			/*if (NumNeighbors > 0)
 			{
 				int32 AvgVertexHeight = SumVertexHeight / NumNeighbors;
 
 				int32 AvgNeighborHeight = SumNeighborHeight / NumNeighbors;
 
 				FVector CurrentVector = Landscape.SpawnTransform.GetLocation();
-				Landscape.SpawnTransform.SetLocation(FVector(CurrentVector.X, CurrentVector.Y, InLocation.Z + AvgVertexHeight));
+				Landscape.SpawnTransform.SetLocation(FVector(CurrentVector.X, CurrentVector.Y, AvgNeighborHeight + AvgVertexHeight));
 			}
+
+			InOutLandscapeDataMap.Add(Landscape.SpawnTransform.GetLocation()* FVector(1, 1, 0), Landscape);*/
 
 			if (x > 0)
 			{
@@ -1385,6 +1387,7 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArray(const FLandscapePr
 
 						if (HeightPtr)
 						{
+							bHavexPre = true;
 							xPreHeight = SouthernNeighbor.Vertices[*HeightPtr].Z;
 						}
 					}
@@ -1407,6 +1410,7 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArray(const FLandscapePr
 
 						if (HeightPtr)
 						{
+							bHaveyPre = true;
 							yPreHeight = WesternNeighbor.Vertices[*HeightPtr].Z;
 						}
 					}
@@ -1416,7 +1420,7 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArray(const FLandscapePr
 					yPreHeight = OutVertexArray[yPre].Z;
 				}
 
-				int32 Divisor = 2/*((bHavexPre ? 1 : 0) + (bHaveyPre ? 1 : 0))*/;
+				int32 Divisor = ((bHavexPre ? 1 : 0) + (bHaveyPre ? 1 : 0));
 
 				int32 AvgPreHeight = (xPreHeight + yPreHeight) / (Divisor > 0 ? Divisor : 1);
 
