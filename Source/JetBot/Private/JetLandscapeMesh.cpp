@@ -1253,10 +1253,17 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArray(const FLandscapePr
 
 				bool bHaveyPre = yPre > -1;
 
-				HeightMod = HeightMod + (((bHavexPre ? OutVertexArray[xPre].Z : 0) + (bHaveyPre ? OutVertexArray[yPre].Z : 0)) / ((bHavexPre ? 1 : 0) + (bHaveyPre ? 1 : 0)));
+				int32 Divisor = ((bHavexPre ? 1 : 0) + (bHaveyPre ? 1 : 0));
+
+				int32 AvgPreHeight = (((bHavexPre ? OutVertexArray[xPre].Z : 0) + (bHaveyPre ? OutVertexArray[yPre].Z : 0)) / (Divisor > 0 ? Divisor : 1));
+
+				int32 RandHeightDiff = FMath::RandRange(AvgPreHeight - InLandscapeProperties.MaximumHeightDifference, AvgPreHeight + InLandscapeProperties.MaximumHeightDifference);
+
+				HeightMod = HeightMod + AvgPreHeight;
+
 			}
 
-			OutVertexArray.Add(FVector(x * InLandscapeProperties.TileSize, y * InLandscapeProperties.TileSize, RandInt));
+			OutVertexArray.Add(FVector(x * InLandscapeProperties.TileSize, y * InLandscapeProperties.TileSize, HeightMod));
 
 			InOutProcMeshData.FaceVertexMapArray[0].VertexIndexMap.Add(FVector(x, y, 0), i);
 			//VertexIndexMap.Add(FVector2D(x, y), i);

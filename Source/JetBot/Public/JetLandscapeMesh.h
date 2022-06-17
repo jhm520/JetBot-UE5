@@ -44,7 +44,7 @@ struct FLandscapeProperties
 	int32 NeighborSpawnRadius = 1;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
-	int32 MaximumHeightDifference = 50.0f;
+	int32 MaximumHeightDifference = 10.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
 	int32 MaximumSlopeDifference = 10.0f;
