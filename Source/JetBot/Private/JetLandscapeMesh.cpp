@@ -1382,11 +1382,6 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArray(const FLandscapePr
 		{
 			for (x = 0; x < XDim; x++)
 			{
-				int32 RandInt = FMath::RandRange(-InLandscapeProperties.HeightVariation, InLandscapeProperties.HeightVariation);
-
-				int32 HeightMod = RandInt;
-				/*if (x > 0 && y > 0)
-				{*/
 				int32 xPre = InOutProcMeshData.GetVertexIndex(FVector(x - 1, y, 0), 0);
 
 				int32 yPre = InOutProcMeshData.GetVertexIndex(FVector(x, y - 1, 0), 0);
@@ -1443,7 +1438,7 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArray(const FLandscapePr
 
 				//HeightMod = HeightMod + AvgPreHeight;
 
-				HeightMod = RandHeightDiff;
+				int32 HeightMod = RandHeightDiff;
 
 				/*}*/
 
@@ -1468,14 +1463,7 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArray(const FLandscapePr
 			{
 				for (x = XDim - 1; x > -1; x--)
 				{
-					int32 RandInt = FMath::RandRange(-InLandscapeProperties.HeightVariation, InLandscapeProperties.HeightVariation);
-
-					int32 HeightMod = RandInt;
-					/*if (x > 0 && y > 0)
-					{*/
 					int32 xPost = InOutProcMeshData.GetVertexIndex(FVector(x + 1, y, 0), 0);
-
-					int32 yPost = InOutProcMeshData.GetVertexIndex(FVector(x, y + 1, 0), 0);
 
 					int32 yPre = InOutProcMeshData.GetVertexIndex(FVector(x, y - 1, 0), 0);
 
@@ -1502,8 +1490,6 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArray(const FLandscapePr
 					{
 						xPreHeight = OutVertexArray[xPost].Z;
 					}
-
-					bool bHaveyPost = yPost > -1;
 
 					bool bHaveyPre = yPre > -1;
 
@@ -1534,7 +1520,7 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArray(const FLandscapePr
 
 					//HeightMod = HeightMod + AvgPreHeight;
 
-					HeightMod = RandHeightDiff;
+					int32 HeightMod = RandHeightDiff;
 
 					/*}*/
 					iMinus = (y * YDim) + x;
@@ -1560,23 +1546,11 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArray(const FLandscapePr
 			{
 				for (x = 0; x < XDim; x++)
 				{
-					int32 RandInt = FMath::RandRange(-InLandscapeProperties.HeightVariation, InLandscapeProperties.HeightVariation);
-
-					int32 HeightMod = RandInt;
-					/*if (x > 0 && y > 0)
-					{*/
-					int32 xPost = InOutProcMeshData.GetVertexIndex(FVector(x + 1, y, 0), 0);
-
 					int32 xPre = InOutProcMeshData.GetVertexIndex(FVector(x - 1, y, 0), 0);
 
 					int32 yPost = InOutProcMeshData.GetVertexIndex(FVector(x, y + 1, 0), 0);
 
-					int32 yPre = InOutProcMeshData.GetVertexIndex(FVector(x, y - 1, 0), 0);
-
-
 					bool bHavexPre = xPre > -1;
-
-					bool bHavexPost = xPost > -1;
 
 					int32 xPreHeight = 0;
 
@@ -1601,9 +1575,6 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArray(const FLandscapePr
 					}
 
 					bool bHaveyPost = yPost > -1;
-
-					bool bHaveyPre = yPre > -1;
-
 
 					if (!bHaveyPost)
 					{
@@ -1631,7 +1602,7 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArray(const FLandscapePr
 
 					//HeightMod = HeightMod + AvgPreHeight;
 
-					HeightMod = RandHeightDiff;
+					int32 HeightMod = RandHeightDiff;
 
 					/*}*/
 					iMinus = (y * YDim) + x;
