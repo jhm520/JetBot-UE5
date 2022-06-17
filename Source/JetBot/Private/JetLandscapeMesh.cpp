@@ -643,7 +643,9 @@ void AJetLandscapeMesh::CreateLandscapesInRadius(const FVector& InLocation, cons
 			FProcMeshData ZipperData;
 
 			int32 NumNeighbors = 0;
-			int32 SumHeight = 0;
+			int32 SumVertexHeight = 0;
+
+			int32 SumNeighborHeight = 0;
 
 			if (x > 0)
 			{
@@ -663,7 +665,9 @@ void AJetLandscapeMesh::CreateLandscapesInRadius(const FVector& InLocation, cons
 
 					int32 AvgHeight = Sum / (InLandscapeProperties.LandscapeSize + 1);
 
-					SumHeight += AvgHeight;
+					SumVertexHeight += AvgHeight;
+
+					SumNeighborHeight += ZipperData.SpawnTransform.GetLocation().Z;
 				}
 			}
 			else
@@ -684,7 +688,10 @@ void AJetLandscapeMesh::CreateLandscapesInRadius(const FVector& InLocation, cons
 
 					int32 AvgHeight = Sum / (InLandscapeProperties.LandscapeSize + 1);
 
-					SumHeight += AvgHeight;
+					SumVertexHeight += AvgHeight;
+
+					SumNeighborHeight += ZipperData.SpawnTransform.GetLocation().Z;
+
 				}
 			}
 
@@ -706,7 +713,10 @@ void AJetLandscapeMesh::CreateLandscapesInRadius(const FVector& InLocation, cons
 
 					int32 AvgHeight = Sum / (InLandscapeProperties.LandscapeSize + 1);
 
-					SumHeight += AvgHeight;
+					SumVertexHeight += AvgHeight;
+
+					SumNeighborHeight += ZipperData.SpawnTransform.GetLocation().Z;
+
 				}
 			}
 			else
@@ -727,16 +737,21 @@ void AJetLandscapeMesh::CreateLandscapesInRadius(const FVector& InLocation, cons
 
 					int32 AvgHeight = Sum / (InLandscapeProperties.LandscapeSize + 1);
 
-					SumHeight += AvgHeight;
+					SumVertexHeight += AvgHeight;
+
+					SumNeighborHeight += ZipperData.SpawnTransform.GetLocation().Z;
+
 				}
 			}
 
 			if (NumNeighbors > 0)
 			{
-				int32 HeightAdjust = SumHeight / NumNeighbors;
+				int32 AvgVertexHeight = SumVertexHeight / NumNeighbors;
+
+				int32 AvgNeighborHeight = SumNeighborHeight / NumNeighbors;
 
 				FVector CurrentVector = Landscape.SpawnTransform.GetLocation();
-				Landscape.SpawnTransform.SetLocation(FVector(CurrentVector.X, CurrentVector.Y, InLocation.Z + HeightAdjust));
+				Landscape.SpawnTransform.SetLocation(FVector(CurrentVector.X, CurrentVector.Y, InLocation.Z + AvgVertexHeight));
 			}
 
 			if (x > 0)
