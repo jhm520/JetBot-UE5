@@ -1301,11 +1301,20 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArray(const FLandscapePr
 
 				int32 yPre = InOutProcMeshData.GetVertexIndex(FVector(x, y - 1, 0), 0);
 
+				int32 xPost = InOutProcMeshData.GetVertexIndex(FVector(x + 1, y, 0), 0);
+
+				int32 yPost = InOutProcMeshData.GetVertexIndex(FVector(x, y + 1, 0), 0);
+
 				bool bHavexPre = xPre > -1;
+				bool bHaveyPre = yPre > -1;
+				bool bHavexPost = xPost > -1;
+				bool bHaveyPost = yPost > -1;
+
 
 				int32 xPreHeight = 0;
 
 				int32 yPreHeight = 0;
+
 
 				if (!bHavexPre)
 				{
@@ -1325,7 +1334,6 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArray(const FLandscapePr
 					xPreHeight = OutVertexArray[xPre].Z;
 				}
 
-				bool bHaveyPre = yPre > -1;
 
 				if (!bHaveyPre)
 				{
@@ -1344,6 +1352,49 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArray(const FLandscapePr
 				{
 					yPreHeight = OutVertexArray[yPre].Z;
 				}
+
+				if (!bHavexPost)
+				{
+					if (bEasternNeighbor)
+					{
+						int32* HeightPtr = EasternNeighbor.FaceVertexMapArray[0].VertexIndexMap.Find(FVector(x, 0, 0));
+
+						if (HeightPtr)
+						{
+							bHavexPost = true;
+							xPreHeight = EasternNeighbor.Vertices[*HeightPtr].Z;
+						}
+					}
+				}
+				else
+				{
+					if (xPreHeight == 0)
+					{
+						xPreHeight = OutVertexArray[yPost].Z;
+					}
+				}
+
+				if (!bHaveyPost)
+				{
+					if (bNorthernNeighbor)
+					{
+						int32* HeightPtr = NorthernNeighbor.FaceVertexMapArray[0].VertexIndexMap.Find(FVector(0, y, 0));
+
+						if (HeightPtr)
+						{
+							bHaveyPost = true;
+							yPreHeight = NorthernNeighbor.Vertices[*HeightPtr].Z;
+						}
+					}
+				}
+				else
+				{
+					if (yPreHeight == 0)
+					{
+						yPreHeight = OutVertexArray[yPost].Z;
+					}
+				}
+
 
 				int32 Divisor = ((bHavexPre ? 1 : 0) + (bHaveyPre ? 1 : 0));
 
@@ -1378,42 +1429,29 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArray(const FLandscapePr
 			{
 				for (x = XDim - 1; x > -1; x--)
 				{
-					int32 xPost = InOutProcMeshData.GetVertexIndex(FVector(x + 1, y, 0), 0);
+					int32 xPre = InOutProcMeshData.GetVertexIndex(FVector(x - 1, y, 0), 0);
 
 					int32 yPre = InOutProcMeshData.GetVertexIndex(FVector(x, y - 1, 0), 0);
 
+					int32 xPost = InOutProcMeshData.GetVertexIndex(FVector(x + 1, y, 0), 0);
+
+					int32 yPost = InOutProcMeshData.GetVertexIndex(FVector(x, y + 1, 0), 0);
+
+					bool bHavexPre = xPre > -1;
+					bool bHaveyPre = yPre > -1;
 					bool bHavexPost = xPost > -1;
+					bool bHaveyPost = yPost > -1;
 
 					int32 xPreHeight = 0;
 
 					int32 yPreHeight = 0;
-
-					if (!bHavexPost)
-					{
-						if (bNorthernNeighbor)
-						{
-							int32* HeightPtr = NorthernNeighbor.FaceVertexMapArray[0].VertexIndexMap.Find(FVector(0, y, 0));
-
-							if (HeightPtr)
-							{
-								bHavexPost = true;
-								xPreHeight = NorthernNeighbor.Vertices[*HeightPtr].Z;
-							}
-						}
-					}
-					else
-					{
-						xPreHeight = OutVertexArray[xPost].Z;
-					}
-
-					bool bHaveyPre = yPre > -1;
 
 
 					if (!bHaveyPre)
 					{
 						if (bWesternNeighbor)
 						{
-							int32* HeightPtr = WesternNeighbor.FaceVertexMapArray[0].VertexIndexMap.Find(FVector(x, YDim-1, 0));
+							int32* HeightPtr = WesternNeighbor.FaceVertexMapArray[0].VertexIndexMap.Find(FVector(x, YDim - 1, 0));
 
 							if (HeightPtr)
 							{
@@ -1425,6 +1463,66 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArray(const FLandscapePr
 					else
 					{
 						yPreHeight = OutVertexArray[yPre].Z;
+					}
+
+					if (!bHavexPost)
+					{
+						if (bEasternNeighbor)
+						{
+							int32* HeightPtr = EasternNeighbor.FaceVertexMapArray[0].VertexIndexMap.Find(FVector(x, 0, 0));
+
+							if (HeightPtr)
+							{
+								bHavexPost = true;
+								xPreHeight = EasternNeighbor.Vertices[*HeightPtr].Z;
+							}
+						}
+					}
+					else
+					{
+						xPreHeight = OutVertexArray[xPost].Z;
+					}
+
+					if (!bHaveyPost)
+					{
+						if (bNorthernNeighbor)
+						{
+							int32* HeightPtr = NorthernNeighbor.FaceVertexMapArray[0].VertexIndexMap.Find(FVector(0, y, 0));
+
+							if (HeightPtr)
+							{
+								bHaveyPost = true;
+								yPreHeight = NorthernNeighbor.Vertices[*HeightPtr].Z;
+							}
+						}
+					}
+					else
+					{
+						if (yPreHeight == 0)
+						{
+							yPreHeight = OutVertexArray[yPost].Z;
+						}
+					}
+
+					if (!bHavexPre)
+					{
+						if (bSouthernNeighbor)
+						{
+							int32* HeightPtr = SouthernNeighbor.FaceVertexMapArray[0].VertexIndexMap.Find(FVector(XDim - 1, y, 0));
+
+							if (HeightPtr)
+							{
+								bHavexPre = true;
+								xPreHeight = SouthernNeighbor.Vertices[*HeightPtr].Z;
+							}
+						}
+					}
+					else
+					{
+						if (xPreHeight == 0)
+						{
+							xPreHeight = OutVertexArray[xPre].Z;
+						}
 					}
 
 					int32 Divisor = ((bHavexPost ? 1 : 0) + (bHaveyPre ? 1 : 0));
@@ -1463,9 +1561,16 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArray(const FLandscapePr
 				{
 					int32 xPre = InOutProcMeshData.GetVertexIndex(FVector(x - 1, y, 0), 0);
 
+					int32 yPre = InOutProcMeshData.GetVertexIndex(FVector(x, y - 1, 0), 0);
+
+					int32 xPost = InOutProcMeshData.GetVertexIndex(FVector(x + 1, y, 0), 0);
+
 					int32 yPost = InOutProcMeshData.GetVertexIndex(FVector(x, y + 1, 0), 0);
 
 					bool bHavexPre = xPre > -1;
+					bool bHaveyPre = yPre > -1;
+					bool bHavexPost = xPost > -1;
+					bool bHaveyPost = yPost > -1;
 
 					int32 xPreHeight = 0;
 
@@ -1475,7 +1580,7 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArray(const FLandscapePr
 					{
 						if (bSouthernNeighbor)
 						{
-							int32* HeightPtr = SouthernNeighbor.FaceVertexMapArray[0].VertexIndexMap.Find(FVector(XDim-1, y, 0));
+							int32* HeightPtr = SouthernNeighbor.FaceVertexMapArray[0].VertexIndexMap.Find(FVector(XDim - 1, y, 0));
 
 							if (HeightPtr)
 							{
@@ -1489,9 +1594,47 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArray(const FLandscapePr
 						xPreHeight = OutVertexArray[xPre].Z;
 					}
 
-					bool bHaveyPost = yPost > -1;
-
 					if (!bHaveyPost)
+					{
+						if (bNorthernNeighbor)
+						{
+							int32* HeightPtr = NorthernNeighbor.FaceVertexMapArray[0].VertexIndexMap.Find(FVector(0, y, 0));
+
+							if (HeightPtr)
+							{
+								bHaveyPost = true;
+								yPreHeight = NorthernNeighbor.Vertices[*HeightPtr].Z;
+							}
+						}
+					}
+					else
+					{
+						yPreHeight = OutVertexArray[yPost].Z;
+					}
+
+
+					if (!bHaveyPre)
+					{
+						if (bWesternNeighbor)
+						{
+							int32* HeightPtr = WesternNeighbor.FaceVertexMapArray[0].VertexIndexMap.Find(FVector(x, YDim - 1, 0));
+
+							if (HeightPtr)
+							{
+								bHaveyPre = true;
+								yPreHeight = WesternNeighbor.Vertices[*HeightPtr].Z;
+							}
+						}
+					}
+					else
+					{
+						if (yPreHeight == 0)
+						{
+							yPreHeight = OutVertexArray[yPre].Z;
+						}
+					}
+
+					if (!bHavexPost)
 					{
 						if (bEasternNeighbor)
 						{
@@ -1499,14 +1642,17 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArray(const FLandscapePr
 
 							if (HeightPtr)
 							{
-								bHaveyPost = true;
-								yPreHeight = EasternNeighbor.Vertices[*HeightPtr].Z;
+								bHavexPost = true;
+								xPreHeight = EasternNeighbor.Vertices[*HeightPtr].Z;
 							}
 						}
 					}
 					else
 					{
-						yPreHeight = OutVertexArray[yPost].Z;
+						if (xPreHeight == 0)
+						{
+							xPreHeight = OutVertexArray[yPost].Z;
+						}
 					}
 
 					int32 Divisor = ((bHavexPre ? 1 : 0) + (bHaveyPost ? 1 : 0));
