@@ -609,57 +609,91 @@ void AJetLandscapeMesh::CreateLandscapesInRadius(const FVector& InLocation, cons
 
 	int32 Modifier = xDim / 2;
 
-	for (y = 0; y < yDim; y++)
+	bool bxEven = true;
+	bool byEven = true;
+
+	int32 xEven = 0;
+	int32 yEven = 0;
+
+	for (yEven = 0; yEven < 2; yEven++)
 	{
-		for (x = 0; x < xDim; x++)
+		for (y = 0; y < yDim; y++)
 		{
-
-			FProcMeshData Landscape;
-
-			FVector MapKey = FVector(InLocation + (InLandscapeProperties.GetVectorScale() * (FVector(x - Modifier, y - Modifier, 0))));
-
-			MapKey = MapKey * FVector(1, 1, 0);
-
-
-			bool bFoundLandscape = FindLandscapeData(InOutLandscapeDataMap, MapKey, Landscape, InLandscapeProperties);
-
-			if (bFoundLandscape)
+			if ((y % 2 == 0) != (yEven == 0))
 			{
-				if (!Landscape.bIsActive)
-				{
-					InOutLandscapeDataArray.Add(Landscape);
-				}
-
 				continue;
 			}
 
-			FTransform NewTileSpawnTransform = FTransform(MapKey + (InLocation*FVector(0,0,1)));
-
-			Landscape = CreateLandscapeData(NewTileSpawnTransform, InLandscapeProperties, InOutLandscapeDataMap);
-
-			if (x > 0)
+			for (xEven = 0; xEven < 2; xEven++)
 			{
-				ZipLandscapeDataWithNeighbor(ECardinalDirection::South, Landscape, InLandscapeProperties, InOutLandscapeDataMap);
-			}
-			else
-			{
-				ZipLandscapeDataWithNeighbor(ECardinalDirection::North, Landscape, InLandscapeProperties, InOutLandscapeDataMap);
-			}
+				for (x = 0; x < xDim; x++)
+				{
+					if ((x % 2 == 0) != (xEven == 0))
+					{
+						continue;
+					}
+					FProcMeshData Landscape;
 
-			if (y > 0)
-			{
-				ZipLandscapeDataWithNeighbor(ECardinalDirection::West, Landscape, InLandscapeProperties, InOutLandscapeDataMap);
-			}
-			else
-			{
-				ZipLandscapeDataWithNeighbor(ECardinalDirection::East, Landscape, InLandscapeProperties, InOutLandscapeDataMap);
-			}
+					FVector MapKey = FVector(InLocation + (InLandscapeProperties.GetVectorScale() * (FVector(x - Modifier, y - Modifier, 0))));
 
-			InOutLandscapeDataArray.Add(Landscape);
-			InOutLandscapeDataMap.Add(Landscape.SpawnTransform.GetLocation() * FVector(1, 1, 0), Landscape);
+					MapKey = MapKey * FVector(1, 1, 0);
+
+
+					bool bFoundLandscape = FindLandscapeData(InOutLandscapeDataMap, MapKey, Landscape, InLandscapeProperties);
+
+					if (bFoundLandscape)
+					{
+						if (!Landscape.bIsActive)
+						{
+							InOutLandscapeDataArray.Add(Landscape);
+						}
+
+						continue;
+					}
+
+					FTransform NewTileSpawnTransform = FTransform(MapKey + (InLocation * FVector(0, 0, 1)));
+
+					Landscape = CreateLandscapeData(NewTileSpawnTransform, InLandscapeProperties, InOutLandscapeDataMap);
+
+					FProcMeshData EasternNeighbor;
+					bool bEasternNeighbor = GetNeighborLandscapeData(Landscape, ECardinalDirection::East, EasternNeighbor, InLandscapeProperties.GetVectorScale(), InOutLandscapeDataMap);
+
+					FProcMeshData NorthernNeighbor;
+					bool bNorthernNeighbor = GetNeighborLandscapeData(Landscape, ECardinalDirection::North, NorthernNeighbor, InLandscapeProperties.GetVectorScale(), InOutLandscapeDataMap);
+
+					FProcMeshData SouthernNeighbor;
+					bool bSouthernNeighbor = GetNeighborLandscapeData(Landscape, ECardinalDirection::South, SouthernNeighbor, InLandscapeProperties.GetVectorScale(), InOutLandscapeDataMap);
+
+					FProcMeshData WesternNeighbor;
+					bool bWesternNeighbor = GetNeighborLandscapeData(Landscape, ECardinalDirection::West, WesternNeighbor, InLandscapeProperties.GetVectorScale(), InOutLandscapeDataMap);
+
+
+					if (bSouthernNeighbor)
+					{
+						ZipLandscapeDataWithNeighbor(ECardinalDirection::South, Landscape, InLandscapeProperties, InOutLandscapeDataMap);
+					}
+					
+					if (bNorthernNeighbor)
+					{
+						ZipLandscapeDataWithNeighbor(ECardinalDirection::North, Landscape, InLandscapeProperties, InOutLandscapeDataMap);
+					}
+
+					if (bWesternNeighbor)
+					{
+						ZipLandscapeDataWithNeighbor(ECardinalDirection::West, Landscape, InLandscapeProperties, InOutLandscapeDataMap);
+					}
+					
+					if (bEasternNeighbor)
+					{
+						ZipLandscapeDataWithNeighbor(ECardinalDirection::East, Landscape, InLandscapeProperties, InOutLandscapeDataMap);
+					}
+
+					InOutLandscapeDataArray.Add(Landscape);
+					InOutLandscapeDataMap.Add(Landscape.SpawnTransform.GetLocation() * FVector(1, 1, 0), Landscape);
+				}
+			}
 		}
 	}
-
 }
 
 void AJetLandscapeMesh::QueueSpawnNeighborLandscapesInRadius()
