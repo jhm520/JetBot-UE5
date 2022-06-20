@@ -7,6 +7,8 @@
 #include "JetGameState.h"
 #include "JetWorldSpawner.h"
 #include "Components/SphereComponent.h"
+#include "Kismet/KismetArrayLibrary.h"
+#include "Kismet/KismetMathLibrary.h"
 
 PRAGMA_DISABLE_OPTIMIZATION
 namespace LandscapeStatics
@@ -1681,6 +1683,55 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArray(const FLandscapePr
 		}
 		
 	}
+
+	return OutVertexArray;
+}
+
+TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArrayNew(const FLandscapeProperties& InLandscapeProperties, FProcMeshData& InOutProcMeshData, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap)
+{
+	int32 VertexNum = (InLandscapeProperties.LandscapeSize + 1) * (InLandscapeProperties.LandscapeSize + 1);
+
+	int32 x = 0;
+	int32 y = 0;
+
+	int32 XDim = InLandscapeProperties.LandscapeSize + 1;
+	int32 YDim = InLandscapeProperties.LandscapeSize + 1;
+
+	/*if (!InOutProcMeshData.FaceVertexMapArray.IsValidIndex(0))
+	{
+		return TArray<FVector>();
+	}*/
+
+	TArray<FVector> OutVertexArray;
+	TArray<FVector> TempVertices;
+
+	for (y = 0; y < YDim; y++)
+	{
+		for (x = 0; x < XDim; x++)
+		{
+			TempVertices.Add(FVector(x, y, 0));
+		}
+	}
+
+	const int32 TotalNumVertices = TempVertices.Num();
+
+	OutVertexArray.SetNumZeroed(TotalNumVertices);
+	int32 CurrentNumVertices = TempVertices.Num();
+
+
+	for (int32 i = 0; i < TotalNumVertices; i++)
+	{
+		int32 CurrentRandomVertexIndex = UKismetMathLibrary::RandomIntegerInRange(0, CurrentNumVertices-1);
+
+		const FVector& CurrentVertex = TempVertices[CurrentRandomVertexIndex];
+
+		//do stuff
+		OutVertexArray[CurrentVertex.X + (CurrentVertex.Y * (YDim))] = (CurrentVertex * InLandscapeProperties.GetVectorScale()) + FVector(0,0,i);
+
+		TempVertices.RemoveAt(CurrentRandomVertexIndex);
+		CurrentNumVertices--;
+	}
+
 
 	return OutVertexArray;
 }
