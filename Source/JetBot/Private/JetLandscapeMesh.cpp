@@ -1724,7 +1724,6 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArrayNew(const FLandscap
 		int32 CurrentRandomVertexIndex = UKismetMathLibrary::RandomIntegerInRange(0, CurrentNumVertices-1);
 
 		const FVector& CurrentVertex = TempVertices[CurrentRandomVertexIndex];
-
 		//do stuff
 		OutVertexArray[CurrentVertex.X + (CurrentVertex.Y * (YDim))] = (CurrentVertex * InLandscapeProperties.GetVectorScale()) + FVector(0,0,i);
 
@@ -1734,6 +1733,52 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArrayNew(const FLandscap
 
 
 	return OutVertexArray;
+}
+
+int32 AJetLandscapeMesh::FindAverageVertexNeighborHeight(const FVector& InVertex, const FLandscapeProperties& InLandscapeProperties, const FProcMeshData& InProcMeshData, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap)
+{
+	const int32 Radius = InLandscapeProperties.LandscapeSize + 1;
+
+	FProcMeshData EasternNeighbor;
+	bool bEasternNeighbor = GetNeighborLandscapeData(InProcMeshData, ECardinalDirection::East, EasternNeighbor, InLandscapeProperties.GetVectorScale(), InOutLandscapeDataMap);
+
+	FProcMeshData NorthernNeighbor;
+	bool bNorthernNeighbor = GetNeighborLandscapeData(InProcMeshData, ECardinalDirection::North, NorthernNeighbor, InLandscapeProperties.GetVectorScale(), InOutLandscapeDataMap);
+
+
+	FProcMeshData SouthernNeighbor;
+	bool bSouthernNeighbor = GetNeighborLandscapeData(InProcMeshData, ECardinalDirection::South, SouthernNeighbor, InLandscapeProperties.GetVectorScale(), InOutLandscapeDataMap);
+
+	FProcMeshData WesternNeighbor;
+	bool bWesternNeighbor = GetNeighborLandscapeData(InProcMeshData, ECardinalDirection::West, WesternNeighbor, InLandscapeProperties.GetVectorScale(), InOutLandscapeDataMap);
+
+	FVector NorthNeighborVector;
+	bool bFoundNorthNeighbor = false;
+
+	FVector SouthNeighborVector;
+	bool bFoundSouthNeighbor = false;
+
+	FVector EastNeighborVector;
+	bool bFoundEastNeighbor = false;
+
+	FVector WestNeighborVector;
+	bool bFoundWestNeighbor = false;
+
+	for (int32 i = 0; i < Radius; i++)
+	{
+		bFoundNorthNeighbor = InProcMeshData.FindVertexVector(FVector(InVertex.X + 1, InVertex.Y, 0), NorthNeighborVector, 0);
+
+		bFoundSouthNeighbor = InProcMeshData.FindVertexVector(FVector(InVertex.X - 1, InVertex.Y, 0), SouthNeighborVector, 0);
+
+		bFoundEastNeighbor = InProcMeshData.FindVertexVector(FVector(InVertex.X, InVertex.Y + 1, 0), EastNeighborVector, 0);
+
+		bFoundWestNeighbor = InProcMeshData.FindVertexVector(FVector(InVertex.X, InVertex.Y - 1, 0), WestNeighborVector, 0);
+
+
+
+	}
+
+	return 0;
 }
 
 TArray<FVector2D> AJetLandscapeMesh::CreateLandscapeUVArray(int32 InLandscapeSize, int32 InTileSize, int32 InHeightVariation)

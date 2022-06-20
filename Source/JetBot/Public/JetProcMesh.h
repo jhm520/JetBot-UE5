@@ -64,6 +64,21 @@ struct FProcMeshData
 
 	}
 
+	bool FindVertexVector(const FVector& InVectorKey, FVector& OutVertexVector, int32 InFaceIndex = 0) const
+	{
+		const int32 FoundVertexIndex = GetVertexIndex(InVectorKey, InFaceIndex);
+
+		if (FoundVertexIndex == -1)
+		{
+			return false;
+		}
+
+		OutVertexVector = Vertices[FoundVertexIndex];
+
+		return true;
+
+	}
+
 	FVector GetMapKey() const
 	{
 		return SpawnTransform.GetLocation() * FVector(1, 1, 0);
