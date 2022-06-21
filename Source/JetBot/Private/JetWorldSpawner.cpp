@@ -28,7 +28,6 @@ void AJetWorldSpawner::OnLandscapeDataCreated(const FOnLandscapeDataCreatedResul
 		return;
 	}
 
-
 	if (InLandscapeData.LandscapeArray.Num() == 0)
 	{
 		OnLandscapesFinishedSpawning();
@@ -44,7 +43,7 @@ void AJetWorldSpawner::OnLandscapeDataCreated(const FOnLandscapeDataCreatedResul
 	//	AJetLandscapeMesh::SpawnLandscapeWithData(this, Landscape, LandscapeProperties, this);
 	//}
 
-	/*if (PlayerEnteredLandscapeQueue.Num() == 0)
+	if (PlayerEnteredLandscapeQueue.Num() == 0)
 	{
 		return;
 	}
@@ -58,7 +57,7 @@ void AJetWorldSpawner::OnLandscapeDataCreated(const FOnLandscapeDataCreatedResul
 
 	WorldSpawner_OnPlayerEnteredLandscape(EnteredLandscape, nullptr);
 
-	PlayerEnteredLandscapeQueue.RemoveAt(0);*/
+	PlayerEnteredLandscapeQueue.RemoveAt(0);
 
 }
 

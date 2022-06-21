@@ -73,6 +73,11 @@ struct FProcMeshData
 			return false;
 		}
 
+		if (!Vertices.IsValidIndex(FoundVertexIndex))
+		{
+			return false;
+		}
+
 		OutVertexVector = Vertices[FoundVertexIndex];
 
 		return true;
