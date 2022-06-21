@@ -620,11 +620,13 @@ void AJetLandscapeMesh::CreateLandscapesInRadius(const FVector& InLocation, cons
 	int32 xEven = 0;
 	int32 yEven = 0;
 
+	int32 Selector = UKismetMathLibrary::RandomIntegerInRange(0, 1);
+
 	for (yEven = 0; yEven < 2; yEven++)
 	{
 		for (y = 0; y < yDim; y++)
 		{
-			if ((y % 2 == 0) != (yEven == 0))
+			if ((y % 2 == Selector) != (yEven == 0))
 			{
 				continue;
 			}
@@ -633,7 +635,7 @@ void AJetLandscapeMesh::CreateLandscapesInRadius(const FVector& InLocation, cons
 			{
 				for (x = 0; x < xDim; x++)
 				{
-					if ((x % 2 == 0) != (xEven == 0))
+					if ((x % 2 == Selector) != (xEven == 0))
 					{
 						continue;
 					}
