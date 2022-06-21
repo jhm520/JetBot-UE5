@@ -620,7 +620,9 @@ void AJetLandscapeMesh::CreateLandscapesInRadius(const FVector& InLocation, cons
 	int32 xEven = 0;
 	int32 yEven = 0;
 
-	int32 Selector = UKismetMathLibrary::RandomIntegerInRange(0, 1);
+	//int32 Selector = UKismetMathLibrary::RandomIntegerInRange(0, 1);
+
+	static int32 Selector = 0;
 
 	for (yEven = 0; yEven < 2; yEven++)
 	{
@@ -700,6 +702,13 @@ void AJetLandscapeMesh::CreateLandscapesInRadius(const FVector& InLocation, cons
 				}
 			}
 		}
+	}
+
+	Selector++;
+
+	if (Selector > 1)
+	{
+		Selector = 0;
 	}
 }
 
@@ -1715,12 +1724,65 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArrayNew(const FLandscap
 	TArray<FVector> OutVertexArray;
 	TArray<FVector> TempVertices;
 
-	for (y = 0; y < YDim; y++)
+	//int32 SelectStartCorner = UKismetMathLibrary::RandomIntegerInRange(0, 3);
+
+	static int32 SelectStartCorner = 0;
+
+
+	switch (SelectStartCorner)
 	{
-		for (x = 0; x < XDim; x++)
+		case 0:
 		{
-			TempVertices.Add(FVector(x, y, 0));
+			for (y = 0; y < YDim; y++)
+			{
+				for (x = 0; x < XDim; x++)
+				{
+					TempVertices.Add(FVector(x, y, 0));
+				}
+			}
+			break;
 		}
+		case 1:
+		{
+			for (y = 0; y < YDim; y++)
+			{
+				for (x = XDim - 1; x > -1; x--)
+				{
+					TempVertices.Add(FVector(x, y, 0));
+				}
+			}
+			break;
+		}
+		case 2:
+		{
+			for (y = YDim - 1; y > -1; y--)
+			{
+				for (x = 0; x < XDim; x++)
+				{
+					TempVertices.Add(FVector(x, y, 0));
+				}
+			}
+			break;
+		}
+		case 3:
+			{
+			for (y = YDim - 1; y > -1; y--)
+			{
+				for (x = XDim - 1; x > -1; x--)
+				{
+					TempVertices.Add(FVector(x, y, 0));
+				}
+			}
+			break;
+		}
+	}
+	
+
+	SelectStartCorner++;
+
+	if (SelectStartCorner > 3)
+	{
+		SelectStartCorner = 0;
 	}
 
 	const int32 TotalNumVertices = TempVertices.Num();
