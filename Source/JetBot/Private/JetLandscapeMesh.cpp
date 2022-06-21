@@ -1789,26 +1789,46 @@ int32 AJetLandscapeMesh::FindAverageVertexNeighborHeight(const FVector& InVertex
 	int32 XDim = InLandscapeProperties.LandscapeSize + 1;
 	int32 YDim = InLandscapeProperties.LandscapeSize + 1;
 
-	for (int32 i = 0; i < Radius; i++)
+	for (int32 i = 1; i < Radius; i++)
 	{
 		if (!bFoundNorthNeighborVertex)
 		{
-			bFoundNorthNeighborVertex = InProcMeshData.FindVertexVector(FVector(InVertex.X + 1, InVertex.Y, 0), NorthNeighborVector, 0);
+			bFoundNorthNeighborVertex = InProcMeshData.FindVertexVector(FVector(InVertex.X + i, InVertex.Y, 0), NorthNeighborVector, 0);
+
+			if (bFoundNorthNeighborVertex)
+			{
+				int32 sixnine = 69;
+			}
 		}
 
 		if (!bFoundSouthNeighborVertex)
 		{
-			bFoundSouthNeighborVertex = InProcMeshData.FindVertexVector(FVector(InVertex.X - 1, InVertex.Y, 0), SouthNeighborVector, 0);
+			bFoundSouthNeighborVertex = InProcMeshData.FindVertexVector(FVector(InVertex.X - i, InVertex.Y, 0), SouthNeighborVector, 0);
+
+			if (bFoundSouthNeighborVertex)
+			{
+				int32 sixnine = 69;
+			}
 		}
 
 		if (!bFoundEastNeighborVertex)
 		{
-			bFoundEastNeighborVertex = InProcMeshData.FindVertexVector(FVector(InVertex.X, InVertex.Y + 1, 0), EastNeighborVector, 0);
+			bFoundEastNeighborVertex = InProcMeshData.FindVertexVector(FVector(InVertex.X, InVertex.Y + i, 0), EastNeighborVector, 0);
+
+			if (bFoundEastNeighborVertex)
+			{
+				int32 sixnine = 69;
+			}
 		}
 
 		if (!bFoundWestNeighborVertex)
 		{
-			bFoundWestNeighborVertex = InProcMeshData.FindVertexVector(FVector(InVertex.X, InVertex.Y - 1, 0), WestNeighborVector, 0);
+			bFoundWestNeighborVertex = InProcMeshData.FindVertexVector(FVector(InVertex.X, InVertex.Y - i, 0), WestNeighborVector, 0);
+
+			if (bFoundWestNeighborVertex)
+			{
+				int32 sixnine = 69;
+			}
 		}
 	}
 
