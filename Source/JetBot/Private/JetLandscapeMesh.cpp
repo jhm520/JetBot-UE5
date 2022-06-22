@@ -662,6 +662,7 @@ void AJetLandscapeMesh::CreateLandscapesInRadius(const FVector& InLocation, cons
 
 					FTransform NewTileSpawnTransform = FTransform(MapKey);
 
+					
 					Landscape = CreateLandscapeData(NewTileSpawnTransform, InLandscapeProperties, InOutLandscapeDataMap);
 
 					FProcMeshData EasternNeighbor;
@@ -1802,13 +1803,19 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArrayNew(const FLandscap
 
 		//do stuff
 
+		const int32 DefaultMinimumHeightDifference = InLandscapeProperties.MinimumHeightDifference;
+
+		const int32 DefaultMaximumHeightDifference = InLandscapeProperties.MaximumHeightDifference;
+
+		int32 NewMaximumHeightDifference = UKismetMathLibrary::RandomIntegerInRange(DefaultMinimumHeightDifference, DefaultMaximumHeightDifference);
+
 		const int32 AvgNeighborHeight = FindAverageVertexNeighborHeight(CurrentMapKey, InLandscapeProperties, InOutProcMeshData, InOutLandscapeDataMap);
 
 		const int32 HeightVariation = UKismetMathLibrary::RandomIntegerInRange(-InLandscapeProperties.HeightVariation, InLandscapeProperties.HeightVariation);
 
 		const int32 NewMod = AvgNeighborHeight == 0 ? HeightVariation : AvgNeighborHeight;
 
-		const int32 NewHeight = UKismetMathLibrary::RandomIntegerInRange(NewMod - InLandscapeProperties.MaximumHeightDifference, NewMod + InLandscapeProperties.MaximumHeightDifference);
+		const int32 NewHeight = UKismetMathLibrary::RandomIntegerInRange(NewMod - NewMaximumHeightDifference, NewMod + NewMaximumHeightDifference);
 
 		const FVector NewVertex = (CurrentMapKey * InLandscapeProperties.TileSize) + FVector(0, 0, NewHeight);
 
