@@ -713,6 +713,22 @@ void AJetLandscapeMesh::CreateLandscapesInRadius(const FVector& InLocation, cons
 	}
 }
 
+void AJetLandscapeMesh::CreateLandscapeDataInRadius(const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, FProcMeshData& InOutLandscapeDataArray, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap)
+{
+	int32 LandscapeTileDimensions = (InLandscapeProperties.NeighborSpawnRadius * 2) + 1;
+
+	int32 XDim = InLandscapeProperties.LandscapeSize * LandscapeTileDimensions;
+	int32 YDim = XDim;
+
+	FLandscapeProperties NewLandscapeProperties = InLandscapeProperties;
+
+	NewLandscapeProperties.TileSize = InLandscapeProperties.TileSize;
+	NewLandscapeProperties.LandscapeSize = InLandscapeProperties.LandscapeSize * XDim;
+	InOutLandscapeDataArray = CreateLandscapeData(FTransform(InLocation), NewLandscapeProperties, InOutLandscapeDataMap);
+
+	//TODO: Split this super-landscape into smaller landscapes
+}
+
 void AJetLandscapeMesh::QueueSpawnNeighborLandscapesInRadius()
 {
 	if (bHasSpawnedNeighborLandscapes)

@@ -163,6 +163,10 @@ public:
 	static void CreateLandscapesInRadius(const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, TArray<FProcMeshData>& InOutLandscapeDataArray, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap);
 
 
+	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
+	static void CreateLandscapeDataInRadius(const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, FProcMeshData& InOutLandscapeDataArray, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap);
+
+
 
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
 	void QueueSpawnNeighborLandscapesInRadius();
