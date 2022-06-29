@@ -713,20 +713,53 @@ void AJetLandscapeMesh::CreateLandscapesInRadius(const FVector& InLocation, cons
 	}
 }
 
-void AJetLandscapeMesh::CreateLandscapeDataInRadius(const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, FProcMeshData& InOutLandscapeDataArray, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap)
+void AJetLandscapeMesh::CreateLandscapeDataInRadius(const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, TArray<FProcMeshData>& InOutLandscapeDataArray, FProcMeshData& InOutSuperLandscapeData, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap)
 {
 	int32 LandscapeTileDimensions = (InLandscapeProperties.NeighborSpawnRadius * 2) + 1;
 
 	int32 XDim = InLandscapeProperties.LandscapeSize * LandscapeTileDimensions;
 	int32 YDim = XDim;
 
-	FLandscapeProperties NewLandscapeProperties = InLandscapeProperties;
+	FLandscapeProperties SuperLandscapeProperties = InLandscapeProperties;
 
-	NewLandscapeProperties.TileSize = InLandscapeProperties.TileSize;
-	NewLandscapeProperties.LandscapeSize = InLandscapeProperties.LandscapeSize * XDim;
-	InOutLandscapeDataArray = CreateLandscapeData(FTransform(InLocation), NewLandscapeProperties, InOutLandscapeDataMap);
-
+	SuperLandscapeProperties.TileSize = InLandscapeProperties.TileSize;
+	SuperLandscapeProperties.LandscapeSize = InLandscapeProperties.LandscapeSize * XDim;
+	InOutSuperLandscapeData = CreateLandscapeData(FTransform(InLocation), SuperLandscapeProperties, InOutLandscapeDataMap);
+	
 	//TODO: Split this super-landscape into smaller landscapes
+}
+
+void AJetLandscapeMesh::SplitSuperLandscape(const FLandscapeProperties& InSuperLandscapeProperties, const FProcMeshData& InSuperLandscape, const FLandscapeProperties& InSplitLandscapeProperties, TArray<FProcMeshData>& OutSplitLandscapeArray)
+{
+
+	int32 xSplit = 0;
+	int32 ySplit = 0;
+
+	const int32 SuperXDim = (InSplitLandscapeProperties.NeighborSpawnRadius * 2) + 1;
+
+	const int32& LandscapeTileDimensions = SuperXDim;
+
+	const int32 SuperYDim = SuperXDim;
+
+	FProcMeshData CurrentSplitLandscape = FProcMeshData();
+
+	CurrentSplitLandscape.SpawnTransform = InSuperLandscape.SpawnTransform;
+
+	int32 SuperI = 0;
+
+	for (ySplit = 0; ySplit < SuperYDim; ySplit++)
+	{
+		for (xSplit = 0; xSplit < SuperXDim; xSplit++)
+		{
+			int32 XDim = InSplitLandscapeProperties.LandscapeSize;
+			int32 YDim = InSplitLandscapeProperties.LandscapeSize;
+			
+		}
+	}
+
+	
+
+
 }
 
 void AJetLandscapeMesh::QueueSpawnNeighborLandscapesInRadius()

@@ -164,8 +164,10 @@ public:
 
 
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
-	static void CreateLandscapeDataInRadius(const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, FProcMeshData& InOutLandscapeDataArray, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap);
+	static void CreateLandscapeDataInRadius(const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, TArray<FProcMeshData>& InOutLandscapeDataArray, FProcMeshData& InOutSuperLandscapeData, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap);
 
+	UFUNCTION()
+	static void SplitSuperLandscape(const FLandscapeProperties& InSuperLandscapeProperties, const FProcMeshData& InSuperLandscape, const FLandscapeProperties& InSplitLandscapeProperties, TArray<FProcMeshData>& OutSplitLandscapeArray);
 
 
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
