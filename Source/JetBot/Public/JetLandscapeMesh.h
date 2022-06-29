@@ -63,6 +63,13 @@ struct FLandscapeProperties
 		return TileSize * LandscapeSize;
 	}
 
+	int32 GetSuperLandscapeScale() const
+	{
+		int32 LandscapeTileDimensions = (NeighborSpawnRadius * 2) + 1;
+
+		return GetVectorScale() * LandscapeTileDimensions;
+	}
+
 	FLandscapeProperties() {}
 };
 
@@ -76,6 +83,12 @@ class JETBOT_API AJetLandscapeMesh : public AJetProcMesh
 public:
 
 	AJetLandscapeMesh();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Landscape")
+	static int32 GetSuperLandscapeScale(const FLandscapeProperties& InLandscapeProperties)
+	{
+		return InLandscapeProperties.GetSuperLandscapeScale();
+	}
 
 	UPROPERTY(EditDefaultsOnly, Category = "Collision")
 	USphereComponent* SphereCollider = nullptr;

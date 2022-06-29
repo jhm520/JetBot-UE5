@@ -723,10 +723,24 @@ void AJetLandscapeMesh::CreateLandscapeDataInRadius(const FVector& InLocation, c
 	FLandscapeProperties SuperLandscapeProperties = InLandscapeProperties;
 
 	SuperLandscapeProperties.TileSize = InLandscapeProperties.TileSize;
-	SuperLandscapeProperties.LandscapeSize = InLandscapeProperties.LandscapeSize * XDim;
-	InOutSuperLandscapeData = CreateLandscapeData(FTransform(InLocation), SuperLandscapeProperties, InOutLandscapeDataMap);
+	SuperLandscapeProperties.LandscapeSize = InLandscapeProperties.LandscapeSize*LandscapeTileDimensions;
+
+	float Modifier = (float) LandscapeTileDimensions / 2.0f;
+
+	FVector MapKey = FVector(InLocation + (SuperLandscapeProperties.GetVectorScale() * (FVector(-0.5f, -0.5f, 0.0f))));
+
+	MapKey = MapKey * FVector(1, 1, 0);
+
+
+	InOutSuperLandscapeData = CreateLandscapeData(FTransform(MapKey), SuperLandscapeProperties, InOutLandscapeDataMap);
 	
 	//TODO: Split this super-landscape into smaller landscapes
+
+	//InOutSuperLandscapeData.SpawnTransform.SetLocation(MapKey);
+
+	InOutLandscapeDataArray.Add(InOutSuperLandscapeData);
+
+	InOutLandscapeDataMap.Add(MapKey, InOutSuperLandscapeData);
 }
 
 void AJetLandscapeMesh::SplitSuperLandscape(const FLandscapeProperties& InSuperLandscapeProperties, const FProcMeshData& InSuperLandscape, const FLandscapeProperties& InSplitLandscapeProperties, TArray<FProcMeshData>& OutSplitLandscapeArray)
