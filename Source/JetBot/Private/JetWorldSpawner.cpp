@@ -107,12 +107,12 @@ void AJetWorldSpawner::AsyncCreateLandscapeData(FOnLandscapeDataCreatedDelegate 
 
 		OutLandscapeResult.LandscapeDataMap = InLandscapeDataMap;
 
-		//AJetLandscapeMesh::CreateLandscapesInRadius(InLocation, InLandscapeProperties, OutLandscapeResult.LandscapeArray, OutLandscapeResult.LandscapeDataMap);
+		AJetLandscapeMesh::CreateLandscapesInRadius(InLocation, InLandscapeProperties, OutLandscapeResult.LandscapeArray, OutLandscapeResult.LandscapeDataMap);
 
-		FProcMeshData InOutSuperLandscapeData;
+		/*FProcMeshData InOutSuperLandscapeData;
 
 		AJetLandscapeMesh::CreateLandscapeDataInRadius(InLocation, InLandscapeProperties, OutLandscapeResult.LandscapeArray, InOutSuperLandscapeData, OutLandscapeResult.LandscapeDataMap);
-
+*/
 
 		AsyncTask(ENamedThreads::GameThread, [Out, OutLandscapeResult]()
 		{
@@ -151,9 +151,9 @@ void AJetWorldSpawner::WorldSpawner_OnPlayerEnteredLandscape(AJetLandscapeMesh* 
 		return;
 	}
 
-	/*TWeakObjectPtr<AJetWorldSpawner> WeakPtr = this;
+	TWeakObjectPtr<AJetWorldSpawner> WeakPtr = this;
 	bCreatingLandscapeData = true;
-	AsyncCreateLandscapeData(LandscapeCreatedDelegate, InLandscape->GetActorLocation(), LandscapeProperties, WeakPtr, GameState->LandscapeDataMap);*/
+	AsyncCreateLandscapeData(LandscapeCreatedDelegate, InLandscape->GetActorLocation(), LandscapeProperties, WeakPtr, GameState->LandscapeDataMap);
 }
 PRAGMA_ENABLE_OPTIMIZATION
 

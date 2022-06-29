@@ -87,7 +87,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Landscape")
 	static int32 GetSuperLandscapeScale(const FLandscapeProperties& InLandscapeProperties)
 	{
-		return InLandscapeProperties.GetSuperLandscapeScale();
+		return InLandscapeProperties.GetVectorScale();
 	}
 
 	UPROPERTY(EditDefaultsOnly, Category = "Collision")
