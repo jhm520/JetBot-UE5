@@ -22,3 +22,73 @@ TODO: Landscape code cleanup
 
 DONE: Cuboid function staticization. 
 TODO: Start working on the movement system, have a wall sliding system, momentum continuity, jumping, thrusting, grinding
+
+TODO: Use an "outside-in" approach to iterating through landscape vertex generation
+	Use average of 4 surrounding vertices to choose height
+	- Try shuffling the vertices and iterating through them in any order. At each vertex, gather up to 4 neighbors (or eight even) and set the starting point to the average of each of those 8 vertices, do 4 neighbors first
+	- For each neighbor, add an array entry. Shuffle that array.
+	- Alternate between the neighbors, generating one row per neighbor until the landscape is filled
+	- Perhaps all of these iteration styles are OK, and we just need to shuffle between them
+
+TODO: Implement the "snaking" approach to the vertex generation, percolation if you will
+
+TODO: Generate all of the current vertex data in a single function, split them into separate landscapes after generating the entire thing, have a single VertexDataMap function
+
+Dim = 5;
+
+Radius = Dim/2;
+
+int i = 0;
+
+
+TMap<FVector2D, int32> Map;
+
+for (i = 0; i < Radius; i++)
+{
+	int x = 0;
+	int y = 0;
+	
+
+	for (x = 0; x < Dim; x++)
+	{
+		//do stuff
+		if (WesternNeighbor)
+		{
+			if (!Map.Find(x, i))
+			{
+				DoStuffAt(x, i);
+			}
+		}
+		
+		if (EasternNeighbor)
+		{
+			if (!Map.Find(x, Dim-i))
+			{
+				DoStuffAt(x, Dim-i);
+			}
+		}
+	}
+
+
+	for (y = 0; y < Dim; y++)
+	{
+		//do stuff
+		//if that vertex has already had stuff done to it, don't do it. Store the vertex in an array or something
+		if (SouthernNeighbor)
+		{
+			if (!Map.Find(i, y))
+			{
+				DoStuffAt(i, y);
+			}
+		}
+		
+		if (NorthernNeighbor)
+		{
+			if (!Map.Find(Dim-i, y))
+			{
+				DoStuffAt(Dim-i, y);
+			}
+		}	
+	}
+}
+
