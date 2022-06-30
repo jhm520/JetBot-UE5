@@ -78,7 +78,7 @@ int32 AJetProcMesh::GetVertexIndex(const TMap<FVector, int32>& InVertexIndexMap,
 void AJetProcMesh::CreateMesh()
 {
 
-	ProcMesh->CreateMeshSection(0, ProcMeshData.Vertices, ProcMeshData.Triangles, TArray<FVector>(), ProcMeshData.UVs, TArray<FColor>(), TArray<FProcMeshTangent>(), true);
+	ProcMesh->CreateMeshSection(0, ProcMeshData.Vertices, ProcMeshData.Triangles, ProcMeshData.Normals, ProcMeshData.UVs, TArray<FColor>(), TArray<FProcMeshTangent>(), true);
 
 	for (UMaterialInterface* Mat : ProcMeshData.Materials)
 	{

@@ -185,6 +185,10 @@ FProcMeshData AJetLandscapeMesh::CreateLandscapeData(const FTransform& InSpawnTr
 
 	OutProcMeshData.Triangles = CreateLandscapeTriangleArray(OutProcMeshData.FaceVertexMapArray[0].VertexIndexMap, InLandscapeProperties.LandscapeSize, InLandscapeProperties.TileSize, InLandscapeProperties.HeightVariation);
 
+	OutProcMeshData.PopulateTriangleData();
+
+	OutProcMeshData.PopulateNormals();
+
 	OutProcMeshData.Materials.Add(InLandscapeProperties.LandscapeMaterialClass);
 
 	return OutProcMeshData;
@@ -2208,9 +2212,9 @@ TArray<int32> AJetLandscapeMesh::CreateLandscapeTriangleArray(const TMap<FVector
 
 	bool bEven = (InLandscapeSize % 2) == 0;
 
-	for (y = 0; y < InLandscapeSize + 1; y++)
+	for (y = 0; y < InLandscapeSize; y++)
 	{
-		for (x = 0; x < InLandscapeSize + 1; x++)
+		for (x = 0; x < InLandscapeSize; x++)
 		{
 			TArray<int32> CurrentTriangles;
 

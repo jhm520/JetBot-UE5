@@ -7,6 +7,32 @@
 #include "ProceduralMeshComponent.h"
 #include "JetProcMesh.generated.h"
 
+
+//a struct of integers representing the indices of the Vertices array
+USTRUCT(Blueprintable)
+struct FJetTriangle
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly)
+	TArray<int32> TriangleVertexIndices;
+
+	FJetTriangle() {};
+};
+
+//A struct to contain Triangle data related to a specific vertex
+
+USTRUCT(Blueprintable)
+struct FVertexTriangles
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly, Category = "Triangles")
+	TArray<FJetTriangle> Triangles;
+
+	FVertexTriangles() {};
+};
+
 //A struct to contain the vertex map for a single face of a Proc mesh
 USTRUCT(Blueprintable)
 struct FProcMeshFaceVertexMap
@@ -34,7 +60,13 @@ struct FProcMeshData
 	TArray<int32> Triangles;
 
 	UPROPERTY(BlueprintReadWrite, Category = "Procedural Mesh")
+	TArray<FVertexTriangles> TriangleData;
+
+	UPROPERTY(BlueprintReadWrite, Category = "Procedural Mesh")
 	TArray<FVector2D> UVs;
+
+	UPROPERTY(BlueprintReadWrite, Category = "Procedural Mesh")
+	TArray<FVector> Normals;
 
 	UPROPERTY(BlueprintReadWrite, Category = "Procedural Mesh")
 	TArray<FProcMeshFaceVertexMap> FaceVertexMapArray;
@@ -87,6 +119,132 @@ struct FProcMeshData
 	FVector GetMapKey() const
 	{
 		return SpawnTransform.GetLocation() * FVector(1, 1, 0);
+	}
+
+	void PopulateTriangleData()
+	{
+		if (TriangleData.Num() != 0)
+		{
+			//already done, return
+			return;
+		}
+
+		if (Vertices.Num() == 0)
+		{
+			//no vertices yet, return
+			return;
+		}
+
+		if (Triangles.Num() == 0)
+		{
+			//no triangles yet, return
+			return;
+		}
+
+		TriangleData.AddZeroed(Vertices.Num());
+
+		int32 triCount = 0;
+
+		FJetTriangle NewTriangle = FJetTriangle();
+
+		const int32 TriNum = Triangles.Num();
+
+		for (int32 i = 0; i < TriNum; i++)
+		{
+			NewTriangle.TriangleVertexIndices.Add(Triangles[i]);
+			i++;
+			NewTriangle.TriangleVertexIndices.Add(Triangles[i]);
+			i++;
+			NewTriangle.TriangleVertexIndices.Add(Triangles[i]);
+
+			for (int32 ti : NewTriangle.TriangleVertexIndices)
+			{
+				TriangleData[ti].Triangles.Add(NewTriangle);
+			}
+
+			NewTriangle = FJetTriangle();
+	
+		}
+	}
+
+	FVector GetTriangleSurfaceNormal(const FJetTriangle& InTriangle)
+	{
+		if (InTriangle.TriangleVertexIndices.Num() != 3)
+		{
+			return FVector::ZeroVector;
+		}
+
+		int32 ai = InTriangle.TriangleVertexIndices[0];
+		int32 bi = InTriangle.TriangleVertexIndices[1];
+		int32 ci = InTriangle.TriangleVertexIndices[2];
+
+		const FVector& A = Vertices[ai];
+		const FVector& B = Vertices[bi];
+		const FVector& C = Vertices[ci];
+
+		FVector OutNormal = FVector::CrossProduct(B - A, C - A);
+
+		OutNormal = OutNormal.GetSafeNormal();
+
+		return OutNormal;
+	}
+
+	FVector GetVertexNormal(int32 InVertexIndex)
+	{
+		if (!TriangleData.IsValidIndex(InVertexIndex))
+		{
+			return FVector::ZeroVector;
+		}
+
+		const FVertexTriangles& VT = TriangleData[InVertexIndex];
+
+		FVector NormalSum = FVector::ZeroVector;
+		int32 NormalCount = 0;
+
+
+		for (const FJetTriangle& Tri : VT.Triangles)
+		{
+			NormalSum += GetTriangleSurfaceNormal(Tri);
+			NormalCount++;
+		}
+
+		FVector NormalAvg = NormalSum / NormalCount;
+
+		NormalAvg = NormalAvg.GetSafeNormal();
+
+		return NormalAvg;
+
+
+	}
+
+	void PopulateNormals()
+	{
+		if (TriangleData.Num() == 0)
+		{
+			//no triangle data yet, return
+			return;
+		}
+
+		if (Vertices.Num() == 0)
+		{
+			//no vertices yet, return
+			return;
+		}
+
+		if (Triangles.Num() == 0)
+		{
+			//no triangles yet, return
+			return;
+		}
+
+		const int32 VerticesNum = Vertices.Num();
+
+		Normals.AddZeroed(VerticesNum);
+
+		for (int32 i = 0; i < VerticesNum; i++)
+		{
+			Normals[i] = GetVertexNormal(i)*-1.0f;
+		}
 	}
 
 
