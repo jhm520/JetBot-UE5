@@ -189,6 +189,26 @@ struct FProcMeshData
 		return OutNormal;
 	}
 
+	FVector GetTriangleCrossProductSum(const FJetTriangle& InTriangle)
+	{
+		if (InTriangle.TriangleVertexIndices.Num() != 3)
+		{
+			return FVector::ZeroVector;
+		}
+
+		int32 ai = InTriangle.TriangleVertexIndices[0];
+		int32 bi = InTriangle.TriangleVertexIndices[1];
+		int32 ci = InTriangle.TriangleVertexIndices[2];
+
+		const FVector& A = Vertices[ai];
+		const FVector& B = Vertices[bi];
+		const FVector& C = Vertices[ci];
+
+		FVector OutNormal = FVector::CrossProduct(B - A, C - A);
+
+		return OutNormal;
+	}
+
 	FVector GetVertexNormal(int32 InVertexIndex)
 	{
 		if (!TriangleData.IsValidIndex(InVertexIndex))
@@ -204,11 +224,11 @@ struct FProcMeshData
 
 		for (const FJetTriangle& Tri : VT.Triangles)
 		{
-			NormalSum += GetTriangleSurfaceNormal(Tri);
+			NormalSum += GetTriangleCrossProductSum(Tri);
 			NormalCount++;
 		}
 
-		FVector NormalAvg = NormalSum / NormalCount;
+		FVector NormalAvg = NormalSum/* / NormalCount*/;
 
 		NormalAvg = NormalAvg.GetSafeNormal();
 
