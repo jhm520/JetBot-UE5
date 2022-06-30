@@ -57,6 +57,9 @@ struct FLandscapeProperties
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
 	TSubclassOf<AJetLandscapeMesh> LandscapeClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
+	UMaterialInterface* LandscapeMaterialClass;
 	
 	int32 GetVectorScale() const
 	{

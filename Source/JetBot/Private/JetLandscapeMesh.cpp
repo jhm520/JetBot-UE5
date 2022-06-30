@@ -185,6 +185,8 @@ FProcMeshData AJetLandscapeMesh::CreateLandscapeData(const FTransform& InSpawnTr
 
 	OutProcMeshData.Triangles = CreateLandscapeTriangleArray(OutProcMeshData.FaceVertexMapArray[0].VertexIndexMap, InLandscapeProperties.LandscapeSize, InLandscapeProperties.TileSize, InLandscapeProperties.HeightVariation);
 
+	OutProcMeshData.Materials.Add(InLandscapeProperties.LandscapeMaterialClass);
+
 	return OutProcMeshData;
 }
 
