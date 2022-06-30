@@ -73,3 +73,8 @@ Plugins/*/Intermediate/*
 # Cache files for the editor to use
 DerivedDataCache/*
 Content/StarterContent/
+Content/ForestLandscape/
+Content/GrassLandscape/
+Content/PN_GrassLibrary/
+ForestLandscape.png
+GrassLandscape.png
