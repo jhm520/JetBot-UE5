@@ -45,20 +45,20 @@ void AJetWorldSpawner::OnLandscapeDataCreated(const FOnLandscapeDataCreatedResul
 		OnLandscapesFinishedSpawning();
 	}
 
-	const FProcMeshData& ProcMesh = InLandscapeData.LandscapeArray[0];
+	//const FProcMeshData& ProcMesh = InLandscapeData.LandscapeArray[0];
 
-	AJetLandscapeMesh* NewLandscape = AJetLandscapeMesh::SpawnLandscapeWithData(this, ProcMesh, this->LandscapeProperties, this);
+	/*AJetLandscapeMesh* NewLandscape = AJetLandscapeMesh::SpawnLandscapeWithData(this, ProcMesh, this->LandscapeProperties, this);
 
 	if (CurrentLandscape)
 	{
 		CurrentLandscape->SmoothDestroy();
 	}
 
-	CurrentLandscape = NewLandscape;
+	CurrentLandscape = NewLandscape;*/
 
-	OnLandscapesFinishedSpawning();
+	//OnLandscapesFinishedSpawning();
 
-	//GameState->AppendLandscapeSpawnQueue(InLandscapeData.LandscapeArray);
+	GameState->AppendLandscapeSpawnQueue(InLandscapeData.LandscapeArray);
 
 	WorldLandscapeVerticesMap = InLandscapeData.LandscapeVerticesMap;
 
@@ -70,7 +70,7 @@ void AJetWorldSpawner::OnLandscapeDataCreated(const FOnLandscapeDataCreatedResul
 	//	AJetLandscapeMesh::SpawnLandscapeWithData(this, Landscape, LandscapeProperties, this);
 	//}
 
-	/*if (PlayerEnteredLandscapeQueue.Num() == 0)
+	if (PlayerEnteredLandscapeQueue.Num() == 0)
 	{
 		return;
 	}
@@ -84,7 +84,7 @@ void AJetWorldSpawner::OnLandscapeDataCreated(const FOnLandscapeDataCreatedResul
 
 	WorldSpawner_OnPlayerEnteredLandscape(EnteredLandscape, nullptr, EnteredLandscape->GetActorLocation());
 
-	PlayerEnteredLandscapeQueue.RemoveAt(0);*/
+	PlayerEnteredLandscapeQueue.RemoveAt(0);
 
 }
 
@@ -114,7 +114,9 @@ void AJetWorldSpawner::BeginPlay()
 
 		//AJetLandscapeMesh::SpawnNeighborLandscapesInRadius(this, GetActorLocation(), LandscapeProperties, this, GameState->LandscapeDataMap);
 		bCreatingLandscapeData = true;
-		AsyncCreateLandscapeData(LandscapeCreatedDelegate, GetActorLocation(), LandscapeProperties, this, GameState->LandscapeDataMap, WorldLandscapeVerticesMap);
+		int32 Mod = LandscapeProperties.GetVectorScale() / 2;
+		FVector VectorMod = FVector(Mod, Mod, 0);
+		AsyncCreateLandscapeData(LandscapeCreatedDelegate, GetActorLocation()-VectorMod, LandscapeProperties, this, GameState->LandscapeDataMap, WorldLandscapeVerticesMap);
 	}
 }
 
@@ -135,11 +137,11 @@ void AJetWorldSpawner::AsyncCreateLandscapeData(FOnLandscapeDataCreatedDelegate 
 		OutLandscapeResult.LandscapeDataMap = InLandscapeDataMap;
 		OutLandscapeResult.LandscapeVerticesMap = InLandscapeVerticesMap;
 
-		//AJetLandscapeMesh::CreateLandscapesInRadius(InLocation, InLandscapeProperties, OutLandscapeResult.LandscapeArray, OutLandscapeResult.LandscapeDataMap);
+		AJetLandscapeMesh::CreateLandscapesInRadius(InLocation, InLandscapeProperties, OutLandscapeResult.LandscapeArray, OutLandscapeResult.LandscapeDataMap, OutLandscapeResult.LandscapeVerticesMap);
 
-		FProcMeshData InOutSuperLandscapeData;
+		/*FProcMeshData InOutSuperLandscapeData;
 
-		AJetLandscapeMesh::CreateLandscapeDataInRadius(InLocation, InLandscapeProperties, OutLandscapeResult.LandscapeArray, InOutSuperLandscapeData, OutLandscapeResult.LandscapeDataMap, OutLandscapeResult.LandscapeVerticesMap);
+		AJetLandscapeMesh::CreateLandscapeDataInRadius(InLocation, InLandscapeProperties, OutLandscapeResult.LandscapeArray, InOutSuperLandscapeData, OutLandscapeResult.LandscapeDataMap, OutLandscapeResult.LandscapeVerticesMap);*/
 
 
 		AsyncTask(ENamedThreads::GameThread, [Out, OutLandscapeResult]()
@@ -173,7 +175,7 @@ void AJetWorldSpawner::WorldSpawner_OnPlayerEnteredLandscape(AJetLandscapeMesh* 
 
 	TWeakObjectPtr<AJetWorldSpawner> WeakPtr = this;
 	bCreatingLandscapeData = true;
-	AsyncCreateLandscapeData(LandscapeCreatedDelegate, InLandscape->GetLandscapeCenter() + InLandscapeSegmentVector, LandscapeProperties, WeakPtr, GameState->LandscapeDataMap, WorldLandscapeVerticesMap);
+	AsyncCreateLandscapeData(LandscapeCreatedDelegate, InLandscape->GetActorLocation(), LandscapeProperties, WeakPtr, GameState->LandscapeDataMap, WorldLandscapeVerticesMap);
 }
 PRAGMA_ENABLE_OPTIMIZATION
 

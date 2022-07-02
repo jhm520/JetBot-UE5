@@ -152,7 +152,7 @@ void AJetLandscapeMesh::OnPlayerExitedLandscape(ACharacter* InPlayer, AJetLandsc
 		OldNeighbors.Remove(Land);
 	}*/
 
-	//GameState->AppendLandscapeDestroyQueue(OldNeighbors);
+	GameState->AppendLandscapeDestroyQueue(OldNeighbors);
 
 	/*for (AJetLandscapeMesh* OldNeighbor : OldNeighbors)
 	{
@@ -631,7 +631,7 @@ void AJetLandscapeMesh::SpawnNeighborLandscapesInRadius(UObject* WorldContextObj
 	//bHasSpawnedNeighborLandscapes = true;
 }
 
-void AJetLandscapeMesh::CreateLandscapesInRadius(const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, TArray<FProcMeshData>& InOutLandscapeDataArray, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap)
+void AJetLandscapeMesh::CreateLandscapesInRadius(const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, TArray<FProcMeshData>& InOutLandscapeDataArray, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap, TMap<FVector, int32>& InOutLandscapeVerticesMap)
 {
 	int32 x = 0;
 	int32 y = 0;
@@ -691,9 +691,9 @@ void AJetLandscapeMesh::CreateLandscapesInRadius(const FVector& InLocation, cons
 
 					TMap<FVector, int32> VectorMap;
 					
-					Landscape = CreateLandscapeData(NewTileSpawnTransform, InLandscapeProperties, InOutLandscapeDataMap, VectorMap);
+					Landscape = CreateLandscapeData(NewTileSpawnTransform, InLandscapeProperties, InOutLandscapeDataMap, InOutLandscapeVerticesMap);
 
-					FProcMeshData EasternNeighbor;
+					/*FProcMeshData EasternNeighbor;
 					bool bEasternNeighbor = GetNeighborLandscapeData(Landscape, ECardinalDirection::East, EasternNeighbor, InLandscapeProperties.GetVectorScale(), InOutLandscapeDataMap);
 
 					FProcMeshData NorthernNeighbor;
@@ -724,7 +724,7 @@ void AJetLandscapeMesh::CreateLandscapesInRadius(const FVector& InLocation, cons
 					if (bEasternNeighbor)
 					{
 						ZipLandscapeDataWithNeighbor(ECardinalDirection::East, Landscape, InLandscapeProperties, InOutLandscapeDataMap);
-					}
+					}*/
 
 					InOutLandscapeDataArray.Add(Landscape);
 					InOutLandscapeDataMap.Add(Landscape.SpawnTransform.GetLocation() * FVector(1, 1, 0), Landscape);

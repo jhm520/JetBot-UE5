@@ -156,8 +156,8 @@ void AJetGameState::Tick(const float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	/*TickSpawnLandscape();
-	TickDestroyLandscape();*/
+	TickSpawnLandscape();
+	TickDestroyLandscape();
 }
 
 void AJetGameState::TickSpawnLandscapeTransform()
