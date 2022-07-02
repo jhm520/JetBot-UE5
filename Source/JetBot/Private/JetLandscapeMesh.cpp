@@ -202,7 +202,7 @@ FProcMeshData AJetLandscapeMesh::CreateLandscapeData(const FTransform& InSpawnTr
 	OutProcMeshData.Vertices = CreateLandscapeVertexArrayNew(InLandscapeProperties, OutProcMeshData, InOutLandscapeDataMap, InOutLandscapeVerticesMap, InSpawnTransform.GetLocation());
 
 
-	OutProcMeshData.UVs = CreateLandscapeUVArray(InLandscapeProperties.LandscapeSize, InLandscapeProperties.TileSize, InLandscapeProperties.HeightVariation);
+	OutProcMeshData.UVs = CreateLandscapeUVArray(InLandscapeProperties.LandscapeSize, InLandscapeProperties.TileSize, InLandscapeProperties.HeightVariation, InSpawnTransform.GetLocation());
 
 	OutProcMeshData.Triangles = CreateLandscapeTriangleArray(OutProcMeshData.FaceVertexMapArray[0].VertexIndexMap, InLandscapeProperties.LandscapeSize, InLandscapeProperties.TileSize, InLandscapeProperties.HeightVariation);
 
@@ -776,6 +776,8 @@ void AJetLandscapeMesh::CreateLandscapesInRadius(const FVector& InLocation, cons
 			}
 		}
 	}
+
+	//TODO: Set the world UVs
 
 	Selector++;
 
@@ -2313,7 +2315,7 @@ int32 AJetLandscapeMesh::FindAverageVertexNeighborHeight(const FVector& InVertex
 	return NeighborHeightAvg;
 }
 
-TArray<FVector2D> AJetLandscapeMesh::CreateLandscapeUVArray(int32 InLandscapeSize, int32 InTileSize, int32 InHeightVariation)
+TArray<FVector2D> AJetLandscapeMesh::CreateLandscapeUVArray(int32 InLandscapeSize, int32 InTileSize, int32 InHeightVariation, const FVector& InLocation)
 {
 	int32 VertexNum = (InLandscapeSize + 1) * (InLandscapeSize + 1);
 
@@ -2327,11 +2329,13 @@ TArray<FVector2D> AJetLandscapeMesh::CreateLandscapeUVArray(int32 InLandscapeSiz
 	int32 XDim = InLandscapeSize + 1;
 	int32 YDim = InLandscapeSize + 1;
 
+	FVector2D ModVector = FVector2D((InLocation / 2.0f) / InTileSize);
+
 	for (y = 0; y < YDim; y++)
 	{
 		for (x = 0; x < XDim; x++)
 		{
-			OutUVArray.Add(FVector2D(x, y));
+			OutUVArray.Add(ModVector + FVector2D(x, y));
 		}
 	}
 
