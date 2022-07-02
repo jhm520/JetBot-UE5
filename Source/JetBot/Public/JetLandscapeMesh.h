@@ -88,6 +88,8 @@ class JETBOT_API AJetLandscapeMesh : public AJetProcMesh
 
 public:
 
+	virtual void Tick(float DeltaTime) override;
+
 	AJetLandscapeMesh();
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Landscape")

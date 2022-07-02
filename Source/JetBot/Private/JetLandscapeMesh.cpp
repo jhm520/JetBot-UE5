@@ -36,10 +36,15 @@ namespace LandscapeStatics
 
 }
 
+void AJetLandscapeMesh::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+}
+
 AJetLandscapeMesh::AJetLandscapeMesh()
 {
 	//
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 
 	SphereCollider = CreateDefaultSubobject<USphereComponent>("SphereCollider");
 	SphereCollider->SetupAttachment(RootComponent);

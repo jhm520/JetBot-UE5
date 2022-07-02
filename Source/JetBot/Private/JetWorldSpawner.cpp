@@ -33,12 +33,16 @@ void AJetWorldSpawner::OnLandscapeDataCreated(const FOnLandscapeDataCreatedResul
 		OnLandscapesFinishedSpawning();
 	}
 
-	if (CurrentLandscape)
+	const FProcMeshData& ProcMesh = InLandscapeData.LandscapeArray[0];
+
+	AJetLandscapeMesh* NewLandscape = AJetLandscapeMesh::SpawnLandscapeWithData(this, ProcMesh, this->LandscapeProperties, this);
+
+	/*if (CurrentLandscape)
 	{
 		CurrentLandscape->Destroy();
-	}
+	}*/
 
-	CurrentLandscape = AJetLandscapeMesh::SpawnLandscapeWithData(this, InLandscapeData.LandscapeArray[0], this->LandscapeProperties, this);
+	CurrentLandscape = NewLandscape;
 
 	OnLandscapesFinishedSpawning();
 

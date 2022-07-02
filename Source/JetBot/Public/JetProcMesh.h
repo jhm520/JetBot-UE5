@@ -281,7 +281,7 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "Procedural Mesh")
 		FProcMeshData ProcMeshData;
 
-	UPROPERTY(BlueprintReadWrite, Category = "Procedural Mesh")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Procedural Mesh")
 		UProceduralMeshComponent* ProcMesh;
 
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
