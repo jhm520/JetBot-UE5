@@ -735,6 +735,8 @@ void AJetLandscapeMesh::CreateLandscapesInRadius(const FVector& InLocation, cons
 
 	//for each new landscape data, compute the normals
 
+	TMap<FVector, FVector> WorldNormalsMap;
+
 	for (const FProcMeshData& LandscapeItr : InOutLandscapeDataArray)
 	{
 		const int32 VerticesNum = LandscapeItr.Vertices.Num();
@@ -742,7 +744,7 @@ void AJetLandscapeMesh::CreateLandscapesInRadius(const FVector& InLocation, cons
 		{
 			const FVector WorldMapKey = LandscapeItr.SpawnTransform.GetLocation() + LandscapeItr.Vertices[i];
 
-			FVector* NormalPtr = InOutLandscapeNormalMap.Find(WorldMapKey);
+			FVector* NormalPtr = WorldNormalsMap.Find(WorldMapKey);
 
 			FVector CurrentNormal = FVector::ZeroVector;
 			if (NormalPtr)
@@ -752,7 +754,7 @@ void AJetLandscapeMesh::CreateLandscapesInRadius(const FVector& InLocation, cons
 
 			CurrentNormal += LandscapeItr.Normals[i];
 
-			InOutLandscapeNormalMap.Add(WorldMapKey, CurrentNormal);
+			WorldNormalsMap.Add(WorldMapKey, CurrentNormal);
 		}
 	}
 
@@ -764,7 +766,7 @@ void AJetLandscapeMesh::CreateLandscapesInRadius(const FVector& InLocation, cons
 		{
 			const FVector WorldMapKey = LandscapeItr.SpawnTransform.GetLocation() + LandscapeItr.Vertices[i];
 
-			FVector* NormalPtr = InOutLandscapeNormalMap.Find(WorldMapKey);
+			FVector* NormalPtr = WorldNormalsMap.Find(WorldMapKey);
 
 			if (NormalPtr)
 			{
