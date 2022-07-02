@@ -99,3 +99,5 @@ For each vertex:
 	Get all triangles related to that vertex (Use a triangle array)
 	Calculate the normal for each triangle N = (B-A X C-A)/(||B-A X C-A||)'
 	Average those normals to get the vertex normal
+
+TODO: Update procedure for tracking the current landscape, and deleting the old landscapes

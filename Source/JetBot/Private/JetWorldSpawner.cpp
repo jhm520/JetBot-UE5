@@ -14,6 +14,18 @@ AJetWorldSpawner::AJetWorldSpawner()
 
 }
 
+AJetLandscapeMesh* AJetWorldSpawner::GetCurrentLandscapeMesh(UObject* WorldContextObject)
+{
+	AJetGameState* GameState = Cast<AJetGameState>(WorldContextObject->GetWorld()->GetGameState());
+
+	if (!GameState || !GameState->WorldSpawner)
+	{
+		return nullptr;
+	}
+
+	return GameState->WorldSpawner->CurrentLandscape;
+}
+
 void AJetWorldSpawner::OnLandscapeDataCreated(const FOnLandscapeDataCreatedResult& InLandscapeData)
 {
 	//bCreatingLandscapeData = false;
@@ -165,7 +177,7 @@ void AJetWorldSpawner::WorldSpawner_OnPlayerEnteredLandscape(AJetLandscapeMesh* 
 }
 PRAGMA_ENABLE_OPTIMIZATION
 
-void AJetWorldSpawner::OnLandscapesFinishedSpawning()
+void AJetWorldSpawner::OnLandscapesFinishedSpawning_Implementation()
 {
 	bCreatingLandscapeData = false;
 

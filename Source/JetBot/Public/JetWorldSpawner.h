@@ -35,7 +35,10 @@ public:
 	// Sets default values for this actor's properties
 	AJetWorldSpawner();
 
-	UPROPERTY()
+	UFUNCTION(BlueprintCallable, meta = (WorldContext = "WorldContextObject"), Category = "Landscape")
+	static AJetLandscapeMesh* GetCurrentLandscapeMesh(UObject* WorldContextObject);
+
+	UPROPERTY(BlueprintReadWrite, Category = "Landscape")
 	AJetLandscapeMesh* CurrentLandscape = nullptr;
 
 	UFUNCTION()
@@ -82,6 +85,6 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "WorldSpawner")
 	bool bHasWorldSpawned = false;
 
-	UFUNCTION()
+	UFUNCTION(BlueprintNativeEvent, Category = "WorldSpawner")
 	void OnLandscapesFinishedSpawning();
 };
