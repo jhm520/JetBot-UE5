@@ -596,7 +596,7 @@ void AJetLandscapeMesh::SpawnNeighborLandscapesInRadius(UObject* WorldContextObj
 
 			FTransform NewTileSpawnTransform = FTransform(MapKey);
 
-			Landscape = CreateLandscapeData(NewTileSpawnTransform, InLandscapeProperties, InLandscapeDataMap, InWorldSpawner->WorldLandscapeVerticesMap);
+			Landscape = CreateLandscapeData(NewTileSpawnTransform, InLandscapeProperties, InLandscapeDataMap, InWorldSpawner->WorldLandscapeHeightMap);
 
 			if (x > 0)
 			{
@@ -631,7 +631,7 @@ void AJetLandscapeMesh::SpawnNeighborLandscapesInRadius(UObject* WorldContextObj
 	//bHasSpawnedNeighborLandscapes = true;
 }
 
-void AJetLandscapeMesh::CreateLandscapesInRadius(const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, TArray<FProcMeshData>& InOutLandscapeDataArray, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap, TMap<FVector, int32>& InOutLandscapeVerticesMap)
+void AJetLandscapeMesh::CreateLandscapesInRadius(const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, TArray<FProcMeshData>& InOutLandscapeDataArray, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap, TMap<FVector, int32>& InOutLandscapeVerticesMap, TMap<FVector, FVector>& InOutLandscapeNormalMap)
 {
 	int32 x = 0;
 	int32 y = 0;
@@ -729,6 +729,48 @@ void AJetLandscapeMesh::CreateLandscapesInRadius(const FVector& InLocation, cons
 					InOutLandscapeDataArray.Add(Landscape);
 					InOutLandscapeDataMap.Add(Landscape.SpawnTransform.GetLocation() * FVector(1, 1, 0), Landscape);
 				}
+			}
+		}
+	}
+
+	//for each new landscape data, compute the normals
+
+	for (const FProcMeshData& LandscapeItr : InOutLandscapeDataArray)
+	{
+		const int32 VerticesNum = LandscapeItr.Vertices.Num();
+		for (int32 i = 0; i < VerticesNum; i++)
+		{
+			const FVector WorldMapKey = LandscapeItr.SpawnTransform.GetLocation() + LandscapeItr.Vertices[i];
+
+			FVector* NormalPtr = InOutLandscapeNormalMap.Find(WorldMapKey);
+
+			FVector CurrentNormal = FVector::ZeroVector;
+			if (NormalPtr)
+			{
+				CurrentNormal = *NormalPtr;
+			}
+
+			CurrentNormal += LandscapeItr.Normals[i];
+
+			InOutLandscapeNormalMap.Add(WorldMapKey, CurrentNormal);
+		}
+	}
+
+	//now set the normals
+	for (FProcMeshData& LandscapeItr : InOutLandscapeDataArray)
+	{
+		const int32 VerticesNum = LandscapeItr.Vertices.Num();
+		for (int32 i = 0; i < VerticesNum; i++)
+		{
+			const FVector WorldMapKey = LandscapeItr.SpawnTransform.GetLocation() + LandscapeItr.Vertices[i];
+
+			FVector* NormalPtr = InOutLandscapeNormalMap.Find(WorldMapKey);
+
+			if (NormalPtr)
+			{
+				FVector NewNormal = *NormalPtr;
+				NewNormal = NewNormal.GetSafeNormal();
+				LandscapeItr.Normals[i] = NewNormal;
 			}
 		}
 	}

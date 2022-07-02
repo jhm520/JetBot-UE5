@@ -230,7 +230,7 @@ struct FProcMeshData
 
 		FVector NormalAvg = NormalSum/* / NormalCount*/;
 
-		NormalAvg = NormalAvg.GetSafeNormal();
+		//NormalAvg = NormalAvg.GetSafeNormal();
 
 		return NormalAvg;
 

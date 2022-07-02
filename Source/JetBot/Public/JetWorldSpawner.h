@@ -21,6 +21,9 @@ struct FOnLandscapeDataCreatedResult
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
 	TMap<FVector, int32> LandscapeVerticesMap;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
+	TMap<FVector, FVector> LandscapeNormalMap;
+
 	FOnLandscapeDataCreatedResult() {}
 };
 
@@ -66,13 +69,16 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-    static void AsyncCreateLandscapeData(FOnLandscapeDataCreatedDelegate Out, const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, TWeakObjectPtr<AJetWorldSpawner> InWorldSpawner, const TMap<FVector, FProcMeshData>& InLandscapeDataMap, const TMap<FVector, int32>& InLandscapeVerticesMap);
+    static void AsyncCreateLandscapeData(FOnLandscapeDataCreatedDelegate Out, const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, TWeakObjectPtr<AJetWorldSpawner> InWorldSpawner, const TMap<FVector, FProcMeshData>& InLandscapeDataMap, const TMap<FVector, int32>& InLandscapeVerticesMap, const TMap<FVector, FVector>& InLandscapeNormalMap);
 
 	UPROPERTY()
 	TArray<AJetLandscapeMesh*> PlayerEnteredLandscapeQueue;
 
 	UPROPERTY()
-	TMap<FVector, int32> WorldLandscapeVerticesMap;
+	TMap<FVector, int32> WorldLandscapeHeightMap;
+
+	UPROPERTY()
+	TMap<FVector, FVector> WorldLandscapeNormalMap;
 
 	UPROPERTY(Transient)
 	bool bCreatingLandscapeData = false;
