@@ -49,10 +49,10 @@ void AJetWorldSpawner::OnLandscapeDataCreated(const FOnLandscapeDataCreatedResul
 
 	AJetLandscapeMesh* NewLandscape = AJetLandscapeMesh::SpawnLandscapeWithData(this, ProcMesh, this->LandscapeProperties, this);
 
-	/*if (CurrentLandscape)
+	if (CurrentLandscape)
 	{
-		CurrentLandscape->Destroy();
-	}*/
+		CurrentLandscape->SmoothDestroy();
+	}
 
 	CurrentLandscape = NewLandscape;
 
@@ -70,7 +70,7 @@ void AJetWorldSpawner::OnLandscapeDataCreated(const FOnLandscapeDataCreatedResul
 	//	AJetLandscapeMesh::SpawnLandscapeWithData(this, Landscape, LandscapeProperties, this);
 	//}
 
-	if (PlayerEnteredLandscapeQueue.Num() == 0)
+	/*if (PlayerEnteredLandscapeQueue.Num() == 0)
 	{
 		return;
 	}
@@ -84,7 +84,7 @@ void AJetWorldSpawner::OnLandscapeDataCreated(const FOnLandscapeDataCreatedResul
 
 	WorldSpawner_OnPlayerEnteredLandscape(EnteredLandscape, nullptr, EnteredLandscape->GetActorLocation());
 
-	PlayerEnteredLandscapeQueue.RemoveAt(0);
+	PlayerEnteredLandscapeQueue.RemoveAt(0);*/
 
 }
 
@@ -158,11 +158,11 @@ void AJetWorldSpawner::WorldSpawner_OnPlayerEnteredLandscape(AJetLandscapeMesh* 
 		return;
 	}
 
-	if (bCreatingLandscapeData)
+	/*if (bCreatingLandscapeData)
 	{
 		PlayerEnteredLandscapeQueue.Add(InLandscape);
 		return;
-	}
+	}*/
 
 	AJetGameState* GameState = Cast<AJetGameState>(GetWorld()->GetGameState());
 

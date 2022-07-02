@@ -90,6 +90,9 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "Landscape")
+	void SmoothDestroy();
+
 	AJetLandscapeMesh();
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Landscape")

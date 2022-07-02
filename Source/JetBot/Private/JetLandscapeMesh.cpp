@@ -152,7 +152,7 @@ void AJetLandscapeMesh::OnPlayerExitedLandscape(ACharacter* InPlayer, AJetLandsc
 		OldNeighbors.Remove(Land);
 	}*/
 
-	GameState->AppendLandscapeDestroyQueue(OldNeighbors);
+	//GameState->AppendLandscapeDestroyQueue(OldNeighbors);
 
 	/*for (AJetLandscapeMesh* OldNeighbor : OldNeighbors)
 	{
