@@ -56,7 +56,23 @@ AJetLandscapeMesh::AJetLandscapeMesh()
 	SphereCollider->SetHiddenInGame(true);
 }
 
-void AJetLandscapeMesh::OnPlayerEnteredLandscape(ACharacter* InPlayer)
+FVector AJetLandscapeMesh::StaticGetLandscapeCenter(const FProcMeshData& InLandscapeData, const FLandscapeProperties& InLandscapeProperties)
+{
+	FVector OutLandscapeCenter;
+
+	float Mod = ((float) InLandscapeProperties.GetVectorScale()) / 2.0f;
+
+	FVector VectorMod = FVector(Mod, Mod, 0);
+
+	return InLandscapeData.SpawnTransform.GetLocation() + VectorMod;
+}
+
+FVector AJetLandscapeMesh::GetLandscapeCenter()
+{
+	return AJetLandscapeMesh::StaticGetLandscapeCenter(ProcMeshData, LandscapeProperties);
+}
+
+void AJetLandscapeMesh::OnPlayerEnteredLandscape(ACharacter* InPlayer, const FVector& InLandscapeSegmentVector)
 {
 	if (!InPlayer || !InPlayer->IsLocallyControlled())
 	{
@@ -72,7 +88,7 @@ void AJetLandscapeMesh::OnPlayerEnteredLandscape(ACharacter* InPlayer)
 
 	if (WorldSpawner)
 	{
-		WorldSpawner->WorldSpawner_OnPlayerEnteredLandscape(this, InPlayer);
+		WorldSpawner->WorldSpawner_OnPlayerEnteredLandscape(this, InPlayer, InLandscapeSegmentVector);
 
 	}
 
@@ -168,7 +184,7 @@ void AJetLandscapeMesh::AppendLandscapeSpawnQueue_Transform(const TArray<FTransf
 	GameState->LandscapeSpawnTransformQueue.Append(InLandscapeSpawnQueue);
 }
 
-FProcMeshData AJetLandscapeMesh::CreateLandscapeData(const FTransform& InSpawnTransform, const FLandscapeProperties& InLandscapeProperties, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap)
+FProcMeshData AJetLandscapeMesh::CreateLandscapeData(const FTransform& InSpawnTransform, const FLandscapeProperties& InLandscapeProperties, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap, TMap<FVector, int32>& InOutLandscapeVerticesMap)
 {
 	FProcMeshData OutProcMeshData;
 
@@ -178,7 +194,7 @@ FProcMeshData AJetLandscapeMesh::CreateLandscapeData(const FTransform& InSpawnTr
 	OutProcMeshData.SpawnTransform = InSpawnTransform;
 	//OutProcMeshData.Vertices = CreateLandscapeVertexArray(InLandscapeProperties, OutProcMeshData, InOutLandscapeDataMap);
 
-	OutProcMeshData.Vertices = CreateLandscapeVertexArrayNew(InLandscapeProperties, OutProcMeshData, InOutLandscapeDataMap);
+	OutProcMeshData.Vertices = CreateLandscapeVertexArrayNew(InLandscapeProperties, OutProcMeshData, InOutLandscapeDataMap, InOutLandscapeVerticesMap, InSpawnTransform.GetLocation());
 
 
 	OutProcMeshData.UVs = CreateLandscapeUVArray(InLandscapeProperties.LandscapeSize, InLandscapeProperties.TileSize, InLandscapeProperties.HeightVariation);
@@ -575,7 +591,7 @@ void AJetLandscapeMesh::SpawnNeighborLandscapesInRadius(UObject* WorldContextObj
 
 			FTransform NewTileSpawnTransform = FTransform(MapKey);
 
-			Landscape = CreateLandscapeData(NewTileSpawnTransform, InLandscapeProperties, InLandscapeDataMap);
+			Landscape = CreateLandscapeData(NewTileSpawnTransform, InLandscapeProperties, InLandscapeDataMap, InWorldSpawner->WorldLandscapeVerticesMap);
 
 			if (x > 0)
 			{
@@ -668,8 +684,9 @@ void AJetLandscapeMesh::CreateLandscapesInRadius(const FVector& InLocation, cons
 
 					FTransform NewTileSpawnTransform = FTransform(MapKey);
 
+					TMap<FVector, int32> VectorMap;
 					
-					Landscape = CreateLandscapeData(NewTileSpawnTransform, InLandscapeProperties, InOutLandscapeDataMap);
+					Landscape = CreateLandscapeData(NewTileSpawnTransform, InLandscapeProperties, InOutLandscapeDataMap, VectorMap);
 
 					FProcMeshData EasternNeighbor;
 					bool bEasternNeighbor = GetNeighborLandscapeData(Landscape, ECardinalDirection::East, EasternNeighbor, InLandscapeProperties.GetVectorScale(), InOutLandscapeDataMap);
@@ -719,9 +736,9 @@ void AJetLandscapeMesh::CreateLandscapesInRadius(const FVector& InLocation, cons
 	}
 }
 
-void AJetLandscapeMesh::CreateLandscapeDataInRadius(const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, TArray<FProcMeshData>& InOutLandscapeDataArray, FProcMeshData& InOutSuperLandscapeData, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap)
+void AJetLandscapeMesh::CreateLandscapeDataInRadius(const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, TArray<FProcMeshData>& InOutLandscapeDataArray, FProcMeshData& InOutSuperLandscapeData, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap, TMap<FVector, int32>& InOutLandscapeVerticesMap)
 {
-	int32 LandscapeTileDimensions = (InLandscapeProperties.NeighborSpawnRadius * 2) + 1;
+	/*int32 LandscapeTileDimensions = (InLandscapeProperties.NeighborSpawnRadius * 2) + 1;
 
 	int32 XDim = InLandscapeProperties.LandscapeSize * LandscapeTileDimensions;
 	int32 YDim = XDim;
@@ -729,16 +746,15 @@ void AJetLandscapeMesh::CreateLandscapeDataInRadius(const FVector& InLocation, c
 	FLandscapeProperties SuperLandscapeProperties = InLandscapeProperties;
 
 	SuperLandscapeProperties.TileSize = InLandscapeProperties.TileSize;
-	SuperLandscapeProperties.LandscapeSize = InLandscapeProperties.LandscapeSize*LandscapeTileDimensions;
+	SuperLandscapeProperties.LandscapeSize = InLandscapeProperties.LandscapeSize * LandscapeTileDimensions;
 
-	float Modifier = (float) LandscapeTileDimensions / 2.0f;
+	float Modifier = (float)LandscapeTileDimensions / 2.0f;*/
 
-	FVector MapKey = FVector(InLocation + (SuperLandscapeProperties.GetVectorScale() * (FVector(-0.5f, -0.5f, 0.0f))));
+	FVector MapKey = FVector(InLocation + (InLandscapeProperties.GetVectorScale() * (FVector(-0.5f, -0.5f, 0.0f))));
 
 	MapKey = MapKey * FVector(1, 1, 0);
 
-
-	InOutSuperLandscapeData = CreateLandscapeData(FTransform(MapKey), SuperLandscapeProperties, InOutLandscapeDataMap);
+	InOutSuperLandscapeData = CreateLandscapeData(FTransform(MapKey), InLandscapeProperties, InOutLandscapeDataMap, InOutLandscapeVerticesMap);
 	
 	//TODO: Split this super-landscape into smaller landscapes
 
@@ -938,10 +954,11 @@ AJetLandscapeMesh* AJetLandscapeMesh::SpawnNeighborLandscape(ECardinalDirection 
 	{
 		return SpawnLandscapeWithData(this, *DataPtr, LandscapeProperties, WorldSpawner);
 	}
-	
+	TMap<FVector, int32> VectorMap;
+
 
 	//Create a new landscape and spawn it
-	FProcMeshData NewLandscapeData = CreateLandscapeData(NeighborTransform, LandscapeProperties, GameState->LandscapeDataMap);
+	FProcMeshData NewLandscapeData = CreateLandscapeData(NeighborTransform, LandscapeProperties, GameState->LandscapeDataMap, VectorMap);
 
 	return SpawnNeighboringLandscapeWithData(NewLandscapeData);
 	//ZipLandscapeDataWithNeighbors(NewLandscapeData);
@@ -995,8 +1012,10 @@ bool AJetLandscapeMesh::CreateNewNeighborLandscapeData(UObject* WorldContextObje
 	//	}
 	//}
 
+	TMap<FVector, int32> VectorMap;
+
 	//Create a new landscape and spawn it
-	FProcMeshData NewLandscapeData = CreateLandscapeData(NeighborTransform, InLandscapeProperties, GameState->LandscapeDataMap);
+	FProcMeshData NewLandscapeData = CreateLandscapeData(NeighborTransform, InLandscapeProperties, GameState->LandscapeDataMap, VectorMap);
 	
 	//ZipLandscapeDataWithNeighbors(WorldContextObject, NewLandscapeData, InLandscapeProperties);
 
@@ -1771,7 +1790,7 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArray(const FLandscapePr
 	return OutVertexArray;
 }
 
-TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArrayNew(const FLandscapeProperties& InLandscapeProperties, FProcMeshData& InOutProcMeshData, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap)
+TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArrayNew(const FLandscapeProperties& InLandscapeProperties, FProcMeshData& InOutProcMeshData, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap, TMap<FVector, int32>& InOutLandscapeVerticesMap, const FVector& InSpawnLocation)
 {
 	if (!InOutProcMeshData.FaceVertexMapArray.IsValidIndex(0))
 	{
@@ -1867,25 +1886,37 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArrayNew(const FLandscap
 		//const int32 CurrentRandomVertexIndex = UKismetMathLibrary::RandomIntegerInRange(0, CurrentNumVertices-1);
 
 		//const FVector& CurrentMapKey = TempVertices[CurrentRandomVertexIndex];
-
 		const FVector& CurrentMapKey = TempVertices[i];
+		const FVector& CurrentScaledWorldMapKey = InSpawnLocation + CurrentMapKey*InLandscapeProperties.TileSize;
 
+		int32* IntPtr = InOutLandscapeVerticesMap.Find(CurrentScaledWorldMapKey);
+
+		int32 NewHeight = 0;
+
+		if (IntPtr)
+		{
+			NewHeight = *IntPtr;
+		}
+		else
+		{
+			const int32 DefaultMinimumHeightDifference = InLandscapeProperties.MinimumHeightDifference;
+
+			const int32 DefaultMaximumHeightDifference = InLandscapeProperties.MaximumHeightDifference;
+
+			int32 NewMaximumHeightDifference = UKismetMathLibrary::RandomIntegerInRange(DefaultMinimumHeightDifference, DefaultMaximumHeightDifference);
+
+			const int32 AvgNeighborHeight = FindAverageVertexNeighborHeight(CurrentMapKey, InLandscapeProperties, InOutProcMeshData, InOutLandscapeDataMap, InOutLandscapeVerticesMap);
+
+			const int32 HeightVariation = UKismetMathLibrary::RandomIntegerInRange(-InLandscapeProperties.HeightVariation, InLandscapeProperties.HeightVariation);
+
+			const int32 NewMod = AvgNeighborHeight == 0 ? HeightVariation : AvgNeighborHeight;
+
+			NewHeight = UKismetMathLibrary::RandomIntegerInRange(NewMod - NewMaximumHeightDifference, NewMod + NewMaximumHeightDifference);
+
+		}
 		//do stuff
 
-		const int32 DefaultMinimumHeightDifference = InLandscapeProperties.MinimumHeightDifference;
-
-		const int32 DefaultMaximumHeightDifference = InLandscapeProperties.MaximumHeightDifference;
-
-		int32 NewMaximumHeightDifference = UKismetMathLibrary::RandomIntegerInRange(DefaultMinimumHeightDifference, DefaultMaximumHeightDifference);
-
-		const int32 AvgNeighborHeight = FindAverageVertexNeighborHeight(CurrentMapKey, InLandscapeProperties, InOutProcMeshData, InOutLandscapeDataMap);
-
-		const int32 HeightVariation = UKismetMathLibrary::RandomIntegerInRange(-InLandscapeProperties.HeightVariation, InLandscapeProperties.HeightVariation);
-
-		const int32 NewMod = AvgNeighborHeight == 0 ? HeightVariation : AvgNeighborHeight;
-
-		const int32 NewHeight = UKismetMathLibrary::RandomIntegerInRange(NewMod - NewMaximumHeightDifference, NewMod + NewMaximumHeightDifference);
-
+		
 		const FVector NewVertex = (CurrentMapKey * InLandscapeProperties.TileSize) + FVector(0, 0, NewHeight);
 
 
@@ -1897,6 +1928,8 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArrayNew(const FLandscap
 
 		InOutProcMeshData.FaceVertexMapArray[0].VertexIndexMap.Add(CurrentMapKey, NewVertexIndex);
 
+		InOutLandscapeVerticesMap.Add(CurrentScaledWorldMapKey, NewHeight);
+
 		//TempVertices.RemoveAt(CurrentRandomVertexIndex);
 		//TempVertices.RemoveAt(i);
 		CurrentNumVertices--;
@@ -1906,7 +1939,7 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArrayNew(const FLandscap
 	return OutVertexArray;
 }
 
-int32 AJetLandscapeMesh::FindAverageVertexNeighborHeight(const FVector& InVertex, const FLandscapeProperties& InLandscapeProperties, const FProcMeshData& InProcMeshData, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap)
+int32 AJetLandscapeMesh::FindAverageVertexNeighborHeight(const FVector& InVertex, const FLandscapeProperties& InLandscapeProperties, const FProcMeshData& InProcMeshData, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap, TMap<FVector, int32>& InOutWorldLandscapeVertices)
 {
 	const int32 Radius = InLandscapeProperties.LandscapeSize + 1;
 
@@ -1948,9 +1981,22 @@ int32 AJetLandscapeMesh::FindAverageVertexNeighborHeight(const FVector& InVertex
 
 		if (!bFoundNorthNeighborVertex)
 		{
-			bFoundNorthNeighborVertex = InProcMeshData.FindVertexVector(FVector(InVertex.X + i, InVertex.Y, 0), NorthNeighborVector, 0);
+			const FVector NorthNeighborKey = FVector(InVertex.X + i, InVertex.Y, 0);
 
-			if (bFoundNorthNeighborVertex)
+			const FVector NorthNeighborWorldKey = NorthNeighborKey * InLandscapeProperties.TileSize;
+
+			int32* IntPtr = InOutWorldLandscapeVertices.Find(InProcMeshData.SpawnTransform.GetLocation() + NorthNeighborWorldKey);
+
+			if (IntPtr)
+			{
+				bFoundNorthNeighborVertex = true;
+				NorthNeighborVector = NorthNeighborWorldKey;
+				NorthNeighborVector.Z = *IntPtr;
+			}
+
+			//bFoundNorthNeighborVertex = InProcMeshData.FindVertexVector(FVector(InVertex.X + i, InVertex.Y, 0), NorthNeighborVector, 0);
+
+			/*if (bFoundNorthNeighborVertex)
 			{
 				NorthNeighborScalar = CurrentScalar;
 				int32 sixnine = 69;
@@ -1969,12 +2015,26 @@ int32 AJetLandscapeMesh::FindAverageVertexNeighborHeight(const FVector& InVertex
 						}
 					}
 				}
-			}
+			}*/
 		}
 
 		if (!bFoundSouthNeighborVertex)
 		{
-			bFoundSouthNeighborVertex = InProcMeshData.FindVertexVector(FVector(InVertex.X - i, InVertex.Y, 0), SouthNeighborVector, 0);
+			const FVector SouthNeighborKey = FVector(InVertex.X - i, InVertex.Y, 0);
+
+			const FVector SouthNeighborWorldKey = SouthNeighborKey * InLandscapeProperties.TileSize;
+
+			int32* IntPtr = InOutWorldLandscapeVertices.Find(InProcMeshData.SpawnTransform.GetLocation() + SouthNeighborWorldKey);
+
+			if (IntPtr)
+			{
+				bFoundNorthNeighborVertex = true;
+				SouthNeighborVector = SouthNeighborWorldKey;
+				SouthNeighborVector.Z = *IntPtr;
+			}
+
+
+			/*bFoundSouthNeighborVertex = InProcMeshData.FindVertexVector(FVector(InVertex.X - i, InVertex.Y, 0), SouthNeighborVector, 0);
 
 			if (bFoundSouthNeighborVertex)
 			{
@@ -1995,12 +2055,25 @@ int32 AJetLandscapeMesh::FindAverageVertexNeighborHeight(const FVector& InVertex
 						}
 					}
 				}
-			}
+			}*/
 		}
 
 		if (!bFoundEastNeighborVertex)
 		{
-			bFoundEastNeighborVertex = InProcMeshData.FindVertexVector(FVector(InVertex.X, InVertex.Y + i, 0), EastNeighborVector, 0);
+			const FVector EastNeighborKey = FVector(InVertex.X, InVertex.Y + i, 0);
+
+			const FVector EastNeighborWorldKey = EastNeighborKey * InLandscapeProperties.TileSize;
+
+			int32* IntPtr = InOutWorldLandscapeVertices.Find(InProcMeshData.SpawnTransform.GetLocation() + EastNeighborWorldKey);
+
+			if (IntPtr)
+			{
+				bFoundNorthNeighborVertex = true;
+				EastNeighborVector = EastNeighborWorldKey;
+				EastNeighborVector.Z = *IntPtr;
+			}
+
+			/*bFoundEastNeighborVertex = InProcMeshData.FindVertexVector(FVector(InVertex.X, InVertex.Y + i, 0), EastNeighborVector, 0);
 
 			if (bFoundEastNeighborVertex)
 			{
@@ -2021,12 +2094,25 @@ int32 AJetLandscapeMesh::FindAverageVertexNeighborHeight(const FVector& InVertex
 						}
 					}
 				}
-			}
+			}*/
 		}
 
 		if (!bFoundWestNeighborVertex)
 		{
-			bFoundWestNeighborVertex = InProcMeshData.FindVertexVector(FVector(InVertex.X, InVertex.Y - i, 0), WestNeighborVector, 0);
+			const FVector WestNeighborKey = FVector(InVertex.X, InVertex.Y - i, 0);
+
+			const FVector WestNeighborWorldKey = WestNeighborKey * InLandscapeProperties.TileSize;
+
+			int32* IntPtr = InOutWorldLandscapeVertices.Find(InProcMeshData.SpawnTransform.GetLocation() + WestNeighborWorldKey);
+
+			if (IntPtr)
+			{
+				bFoundNorthNeighborVertex = true;
+				WestNeighborVector = WestNeighborWorldKey;
+				WestNeighborVector.Z = *IntPtr;
+			}
+
+			/*bFoundWestNeighborVertex = InProcMeshData.FindVertexVector(FVector(InVertex.X, InVertex.Y - i, 0), WestNeighborVector, 0);
 
 			if (bFoundWestNeighborVertex)
 			{
@@ -2047,7 +2133,7 @@ int32 AJetLandscapeMesh::FindAverageVertexNeighborHeight(const FVector& InVertex
 						}
 					}
 				}
-			}
+			}*/
 		}
 	}
 

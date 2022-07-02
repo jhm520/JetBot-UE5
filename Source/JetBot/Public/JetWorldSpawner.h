@@ -18,6 +18,8 @@ struct FOnLandscapeDataCreatedResult
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
 	TMap<FVector, FProcMeshData> LandscapeDataMap;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
+	TMap<FVector, int32> LandscapeVerticesMap;
 
 	FOnLandscapeDataCreatedResult() {}
 };
@@ -32,6 +34,9 @@ class JETBOT_API AJetWorldSpawner : public AActor
 public:	
 	// Sets default values for this actor's properties
 	AJetWorldSpawner();
+
+	UPROPERTY()
+	AJetLandscapeMesh* CurrentLandscape = nullptr;
 
 	UFUNCTION()
 	void OnLandscapeDataCreated(const FOnLandscapeDataCreatedResult& InLandscapeData);
@@ -58,19 +63,23 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-    static void AsyncCreateLandscapeData(FOnLandscapeDataCreatedDelegate Out, const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, TWeakObjectPtr<AJetWorldSpawner> InWorldSpawner, const TMap<FVector, FProcMeshData>& InLandscapeDataMap);
+    static void AsyncCreateLandscapeData(FOnLandscapeDataCreatedDelegate Out, const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, TWeakObjectPtr<AJetWorldSpawner> InWorldSpawner, const TMap<FVector, FProcMeshData>& InLandscapeDataMap, const TMap<FVector, int32>& InLandscapeVerticesMap);
 
 	UPROPERTY()
 	TArray<AJetLandscapeMesh*> PlayerEnteredLandscapeQueue;
 
+	UPROPERTY()
+	TMap<FVector, int32> WorldLandscapeVerticesMap;
+
 	UPROPERTY(Transient)
 	bool bCreatingLandscapeData = false;
 
-	void WorldSpawner_OnPlayerEnteredLandscape(AJetLandscapeMesh* InLandscape, ACharacter* InPlayer);
+	void WorldSpawner_OnPlayerEnteredLandscape(AJetLandscapeMesh* InLandscape, ACharacter* InPlayer, const FVector& InLandscapeSegmentVector);
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "World Spawner")
 	void OnWorldSpawned();
 
+	UPROPERTY(BlueprintReadWrite, Category = "WorldSpawner")
 	bool bHasWorldSpawned = false;
 
 	UFUNCTION()

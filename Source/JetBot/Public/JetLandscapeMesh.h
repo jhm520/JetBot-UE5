@@ -44,13 +44,16 @@ struct FLandscapeProperties
 	int32 NeighborSpawnRadius = 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
-	int32 MinimumHeightDifference = 10.0f;
+	float MinimumHeightDifference = 10.0f;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
-	int32 MaximumHeightDifference = 10.0f;
+	float MaximumHeightDifference = 10.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
-	int32 MaximumSlopeDifference = 10.0f;
+	float MaximumSlopeDifference = 10.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
+	int32 LandscapeSubdivisions = 3;
 
 	/*UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
 	int32 MaximumHeightDifference = 50.0f;*/
@@ -88,16 +91,22 @@ public:
 	AJetLandscapeMesh();
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Landscape")
-	static int32 GetSuperLandscapeScale(const FLandscapeProperties& InLandscapeProperties)
+	static float GetLandscapeScale(const FLandscapeProperties& InLandscapeProperties)
 	{
-		return InLandscapeProperties.GetVectorScale();
+		return (float) InLandscapeProperties.GetVectorScale();
 	}
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Landscape")
+	static FVector StaticGetLandscapeCenter(const FProcMeshData& InLandscapeData, const FLandscapeProperties& InLandscapeProperties);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Landscape")
+	FVector GetLandscapeCenter();
 
 	UPROPERTY(EditDefaultsOnly, Category = "Collision")
 	USphereComponent* SphereCollider = nullptr;
 
 	UFUNCTION(BlueprintCallable, Category = "Landscape")
-	void OnPlayerEnteredLandscape(ACharacter* InPlayer);
+	void OnPlayerEnteredLandscape(ACharacter* InPlayer, const FVector& InLandscapeSegmentVector);
 
 	UFUNCTION(BlueprintCallable, Category = "Landscape")
 	void OnPlayerExitedLandscape(ACharacter* InPlayer, AJetLandscapeMesh* NewLandscape);
@@ -143,7 +152,7 @@ public:
 
 	//Creates data needed to make a landscape
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
-	static FProcMeshData CreateLandscapeData(const FTransform& InSpawnTransform, const FLandscapeProperties& InLandscapeProperties, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap);
+	static FProcMeshData CreateLandscapeData(const FTransform& InSpawnTransform, const FLandscapeProperties& InLandscapeProperties, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap, TMap<FVector, int32>& InOutWorldLandscapeVerticesMap);
 
 	UFUNCTION(meta = (WorldContext = "WorldContextObject"))
 	static void ZipLandscapeDataWithNeighbors(UObject* WorldContextObject, FProcMeshData& InOutLandscapeData, const FLandscapeProperties& InLandscapeProperties);
@@ -180,7 +189,7 @@ public:
 
 
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
-	static void CreateLandscapeDataInRadius(const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, TArray<FProcMeshData>& InOutLandscapeDataArray, FProcMeshData& InOutSuperLandscapeData, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap);
+	static void CreateLandscapeDataInRadius(const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, TArray<FProcMeshData>& InOutLandscapeDataArray, FProcMeshData& InOutSuperLandscapeData, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap, TMap<FVector, int32>& InOutLandscapeVerticesMap);
 
 	UFUNCTION()
 	static void SplitSuperLandscape(const FLandscapeProperties& InSuperLandscapeProperties, const FProcMeshData& InSuperLandscape, const FLandscapeProperties& InSplitLandscapeProperties, TArray<FProcMeshData>& OutSplitLandscapeArray);
@@ -243,10 +252,10 @@ public:
 	static TArray<FVector> CreateLandscapeVertexArray(const FLandscapeProperties& InLandscapeProperties, FProcMeshData& InOutProcMeshData, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap);
 
 	UFUNCTION(BlueprintCallable, Category = "Landscape")
-	static TArray<FVector> CreateLandscapeVertexArrayNew(const FLandscapeProperties& InLandscapeProperties, FProcMeshData& InOutProcMeshData, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap);
+	static TArray<FVector> CreateLandscapeVertexArrayNew(const FLandscapeProperties& InLandscapeProperties, FProcMeshData& InOutProcMeshData, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap, TMap<FVector, int32>& InOutLandscapeVerticesMap, const FVector& InSpawnLocation);
 
 	UFUNCTION(BlueprintCallable, Category = "Landscape")
-	static int32 FindAverageVertexNeighborHeight(const FVector& InVertex, const FLandscapeProperties& InLandscapeProperties, const FProcMeshData& InProcMeshData, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap);
+	static int32 FindAverageVertexNeighborHeight(const FVector& InVertex, const FLandscapeProperties& InLandscapeProperties, const FProcMeshData& InProcMeshData, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap, TMap<FVector, int32>& InOutWorldLandscapeVertices);
 
 	static TArray<FVector2D> CreateLandscapeUVArray(int32 InLandscapeSize, int32 InTileSize, int32 InHeightVariation);
 
