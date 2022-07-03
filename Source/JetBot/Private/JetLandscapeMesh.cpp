@@ -1986,10 +1986,25 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArrayNew(const FLandscap
 
 			//NewHeight = UKismetMathLibrary::RandomIntegerInRange(NewMod - AvgHeightDiff, NewMod + AvgHeightDiff);
 
-			NewHeight = NewMod + AvgNeighborData.AvgNeighborHeight + UKismetMathLibrary::RandomIntegerInRange(-20, 20);
+			NewHeight = NewMod + AvgHeightDiff/* + UKismetMathLibrary::RandomIntegerInRange(-20, 20)*/;
+
+			if (NewHeight > InLandscapeProperties.MaximumHeight)
+			{
+				NewHeight += UKismetMathLibrary::RandomIntegerInRange(-InLandscapeProperties.MaximumSlopeDifference, 0);
+
+			}
+			else if (NewHeight < InLandscapeProperties.MinimumHeight)
+			{
+				NewHeight += UKismetMathLibrary::RandomIntegerInRange(0, InLandscapeProperties.MaximumSlopeDifference);
+			}
+			else
+			{
+				NewHeight += UKismetMathLibrary::RandomIntegerInRange(-InLandscapeProperties.MaximumSlopeDifference, InLandscapeProperties.MaximumSlopeDifference);
+			}
 
 
-			NewHeight = UKismetMathLibrary::Clamp(NewHeight, InLandscapeProperties.MinimumHeight, InLandscapeProperties.MaximumHeight);
+
+			//NewHeight = UKismetMathLibrary::Clamp(NewHeight, InLandscapeProperties.MinimumHeight, InLandscapeProperties.MaximumHeight);
 
 			NewVertexData.Height = NewHeight;
 		}
