@@ -12,6 +12,24 @@
 
 class USphereComponent;
 
+USTRUCT(BlueprintType)
+struct FLandscapeVertexData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
+	int32 Height = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
+	int32 AvgNeighborHeight = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
+	int32 AvgNeighborSlope = 0;
+
+	FLandscapeVertexData() {}
+
+};
+
 UENUM(BlueprintType)
 enum class ECardinalDirection : uint8
 {
@@ -157,7 +175,7 @@ public:
 
 	//Creates data needed to make a landscape
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
-	static FProcMeshData CreateLandscapeData(const FTransform& InSpawnTransform, const FLandscapeProperties& InLandscapeProperties, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap, TMap<FVector, int32>& InOutWorldLandscapeVerticesMap);
+	static FProcMeshData CreateLandscapeData(const FTransform& InSpawnTransform, const FLandscapeProperties& InLandscapeProperties, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap, TMap<FVector, FLandscapeVertexData>& InOutWorldLandscapeVerticesMap);
 
 	UFUNCTION(meta = (WorldContext = "WorldContextObject"))
 	static void ZipLandscapeDataWithNeighbors(UObject* WorldContextObject, FProcMeshData& InOutLandscapeData, const FLandscapeProperties& InLandscapeProperties);
@@ -190,11 +208,11 @@ public:
 	static void SpawnNeighborLandscapesInRadius(UObject* WorldContextObject, const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, AJetWorldSpawner* InWorldSpawner, TMap<FVector, FProcMeshData>& InLandscapeDataMap);
 
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
-	static void CreateLandscapesInRadius(const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, TArray<FProcMeshData>& InOutLandscapeDataArray, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap, TMap<FVector, int32>& InOutLandscapeVerticesMap, TMap<FVector, FVector>& InOutLandscapeNormalMap);
+	static void CreateLandscapesInRadius(const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, TArray<FProcMeshData>& InOutLandscapeDataArray, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap, TMap<FVector, FLandscapeVertexData>& InOutLandscapeVerticesMap, TMap<FVector, FVector>& InOutLandscapeNormalMap);
 
 
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
-	static void CreateLandscapeDataInRadius(const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, TArray<FProcMeshData>& InOutLandscapeDataArray, FProcMeshData& InOutSuperLandscapeData, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap, TMap<FVector, int32>& InOutLandscapeVerticesMap);
+	static void CreateLandscapeDataInRadius(const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, TArray<FProcMeshData>& InOutLandscapeDataArray, FProcMeshData& InOutSuperLandscapeData, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap, TMap<FVector, FLandscapeVertexData>& InOutLandscapeVerticesMap);
 
 	UFUNCTION()
 	static void SplitSuperLandscape(const FLandscapeProperties& InSuperLandscapeProperties, const FProcMeshData& InSuperLandscape, const FLandscapeProperties& InSplitLandscapeProperties, TArray<FProcMeshData>& OutSplitLandscapeArray);
@@ -257,10 +275,10 @@ public:
 	static TArray<FVector> CreateLandscapeVertexArray(const FLandscapeProperties& InLandscapeProperties, FProcMeshData& InOutProcMeshData, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap);
 
 	UFUNCTION(BlueprintCallable, Category = "Landscape")
-	static TArray<FVector> CreateLandscapeVertexArrayNew(const FLandscapeProperties& InLandscapeProperties, FProcMeshData& InOutProcMeshData, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap, TMap<FVector, int32>& InOutLandscapeVerticesMap, const FVector& InSpawnLocation);
+	static TArray<FVector> CreateLandscapeVertexArrayNew(const FLandscapeProperties& InLandscapeProperties, FProcMeshData& InOutProcMeshData, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap, TMap<FVector, FLandscapeVertexData>& InOutLandscapeVerticesMap, const FVector& InSpawnLocation);
 
 	UFUNCTION(BlueprintCallable, Category = "Landscape")
-	static int32 FindAverageVertexNeighborHeight(const FVector& InVertex, const FLandscapeProperties& InLandscapeProperties, const FProcMeshData& InProcMeshData, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap, TMap<FVector, int32>& InOutWorldLandscapeVertices);
+	static int32 FindAverageVertexNeighborHeight(const FVector& InVertex, const FLandscapeProperties& InLandscapeProperties, const FProcMeshData& InProcMeshData, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap, TMap<FVector, FLandscapeVertexData>& InOutWorldLandscapeVertices);
 
 	static TArray<FVector2D> CreateLandscapeUVArray(int32 InLandscapeSize, int32 InTileSize, int32 InHeightVariation, const FVector& InLocation);
 

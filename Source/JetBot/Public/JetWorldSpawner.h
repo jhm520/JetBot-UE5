@@ -19,7 +19,7 @@ struct FOnLandscapeDataCreatedResult
 	TMap<FVector, FProcMeshData> LandscapeDataMap;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
-	TMap<FVector, int32> LandscapeVerticesMap;
+	TMap<FVector, FLandscapeVertexData> LandscapeVerticesMap;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
 	TMap<FVector, FVector> LandscapeNormalMap;
@@ -69,13 +69,16 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-    static void AsyncCreateLandscapeData(FOnLandscapeDataCreatedDelegate Out, const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, TWeakObjectPtr<AJetWorldSpawner> InWorldSpawner, const TMap<FVector, FProcMeshData>& InLandscapeDataMap, const TMap<FVector, int32>& InLandscapeVerticesMap, const TMap<FVector, FVector>& InLandscapeNormalMap);
+    static void AsyncCreateLandscapeData(FOnLandscapeDataCreatedDelegate Out, const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, TWeakObjectPtr<AJetWorldSpawner> InWorldSpawner, const TMap<FVector, FProcMeshData>& InLandscapeDataMap, const TMap<FVector, FLandscapeVertexData>& InLandscapeVerticesMap, const TMap<FVector, FVector>& InLandscapeNormalMap);
 
 	UPROPERTY()
 	TArray<AJetLandscapeMesh*> PlayerEnteredLandscapeQueue;
 
 	UPROPERTY()
 	TMap<FVector, int32> WorldLandscapeHeightMap;
+
+	UPROPERTY()
+	TMap<FVector, FLandscapeVertexData> WorldLandscapeVertexMap;
 
 	UPROPERTY()
 	TMap<FVector, FVector> WorldLandscapeNormalMap;

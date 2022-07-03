@@ -60,7 +60,7 @@ void AJetWorldSpawner::OnLandscapeDataCreated(const FOnLandscapeDataCreatedResul
 
 	GameState->AppendLandscapeSpawnQueue(InLandscapeData.LandscapeArray);
 
-	WorldLandscapeHeightMap = InLandscapeData.LandscapeVerticesMap;
+	WorldLandscapeVertexMap = InLandscapeData.LandscapeVerticesMap;
 	WorldLandscapeNormalMap = InLandscapeData.LandscapeNormalMap;
 
 	//// Spawn all of the new neighbors
@@ -119,7 +119,7 @@ void AJetWorldSpawner::BeginPlay()
 		bCreatingLandscapeData = true;
 		int32 Mod = LandscapeProperties.GetVectorScale() / 2;
 		FVector VectorMod = FVector(Mod, Mod, 0);
-		AsyncCreateLandscapeData(LandscapeCreatedDelegate, GetActorLocation()-VectorMod, LandscapeProperties, this, GameState->LandscapeDataMap, WorldLandscapeHeightMap, WorldLandscapeNormalMap);
+		AsyncCreateLandscapeData(LandscapeCreatedDelegate, GetActorLocation()-VectorMod, LandscapeProperties, this, GameState->LandscapeDataMap, WorldLandscapeVertexMap, WorldLandscapeNormalMap);
 	}
 }
 
@@ -130,7 +130,7 @@ void AJetWorldSpawner::Tick(float DeltaTime)
 
 }
 
-void AJetWorldSpawner::AsyncCreateLandscapeData(FOnLandscapeDataCreatedDelegate Out, const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, TWeakObjectPtr<AJetWorldSpawner> InWorldSpawner, const TMap<FVector, FProcMeshData>& InLandscapeDataMap, const TMap<FVector, int32>& InLandscapeVerticesMap, const TMap<FVector, FVector>& InLandscapeNormalMap)
+void AJetWorldSpawner::AsyncCreateLandscapeData(FOnLandscapeDataCreatedDelegate Out, const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, TWeakObjectPtr<AJetWorldSpawner> InWorldSpawner, const TMap<FVector, FProcMeshData>& InLandscapeDataMap, const TMap<FVector, FLandscapeVertexData>& InLandscapeVerticesMap, const TMap<FVector, FVector>& InLandscapeNormalMap)
 {
 
 	AsyncTask(ENamedThreads::AnyHiPriThreadNormalTask, [Out, InLocation, InLandscapeProperties, InWorldSpawner, InLandscapeDataMap, InLandscapeVerticesMap, InLandscapeNormalMap]()
@@ -179,7 +179,7 @@ void AJetWorldSpawner::WorldSpawner_OnPlayerEnteredLandscape(AJetLandscapeMesh* 
 
 	TWeakObjectPtr<AJetWorldSpawner> WeakPtr = this;
 	bCreatingLandscapeData = true;
-	AsyncCreateLandscapeData(LandscapeCreatedDelegate, InLandscape->GetActorLocation(), LandscapeProperties, WeakPtr, GameState->LandscapeDataMap, WorldLandscapeHeightMap, WorldLandscapeNormalMap);
+	AsyncCreateLandscapeData(LandscapeCreatedDelegate, InLandscape->GetActorLocation(), LandscapeProperties, WeakPtr, GameState->LandscapeDataMap, WorldLandscapeVertexMap, WorldLandscapeNormalMap);
 }
 PRAGMA_ENABLE_OPTIMIZATION
 

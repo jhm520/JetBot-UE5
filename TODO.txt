@@ -104,3 +104,20 @@ TODO: Update procedure for tracking the current landscape, and deleting the old 
 TODO: Now that I have a centralized location for tracking the vertices, maybe I can revert to the old method of landscape spawning. It also removes the need to "Zip" the landscapes
 	Also, I have to fix the normals calculation to account for the centralized method
 		Try adding a centralized triangle storage method
+
+TODO: Take average height difference into account when generating landscapes
+	
+	int AverageNeighborHeight = GetAverageNeighborHeight()
+	int AverageNeighborHeightDiff = GetAverageNeighborHeightDiff()
+
+	GetAverageNeighborHeightDiff()
+		return GetAverageNeighborHeight() - (Average of each neighbor's AverageNeighborHeight)
+
+
+	FJetVertexData
+	{
+		float Height;
+		float AvgNeighborHeight;
+		float AvgNeighborHeightDiff; //slope
+	}
+		
