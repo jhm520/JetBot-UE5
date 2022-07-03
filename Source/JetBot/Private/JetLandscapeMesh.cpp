@@ -44,7 +44,7 @@ void AJetLandscapeMesh::Tick(float DeltaTime)
 AJetLandscapeMesh::AJetLandscapeMesh()
 {
 	//
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	SphereCollider = CreateDefaultSubobject<USphereComponent>("SphereCollider");
 	SphereCollider->SetupAttachment(RootComponent);
