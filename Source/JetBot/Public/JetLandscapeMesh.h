@@ -68,6 +68,12 @@ struct FLandscapeProperties
 	float MaximumHeightDifference = 10.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
+	float MinimumHeight = -2000.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
+	float MaximumHeight = 2000.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
 	float MaximumSlopeDifference = 10.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
@@ -278,7 +284,7 @@ public:
 	static TArray<FVector> CreateLandscapeVertexArrayNew(const FLandscapeProperties& InLandscapeProperties, FProcMeshData& InOutProcMeshData, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap, TMap<FVector, FLandscapeVertexData>& InOutLandscapeVerticesMap, const FVector& InSpawnLocation);
 
 	UFUNCTION(BlueprintCallable, Category = "Landscape")
-	static int32 FindAverageVertexNeighborHeight(const FVector& InVertex, const FLandscapeProperties& InLandscapeProperties, const FProcMeshData& InProcMeshData, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap, TMap<FVector, FLandscapeVertexData>& InOutWorldLandscapeVertices);
+	static FLandscapeVertexData FindAverageVertexNeighborData(const FVector& InVertex, const FLandscapeProperties& InLandscapeProperties, const FProcMeshData& InProcMeshData, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap, TMap<FVector, FLandscapeVertexData>& InOutWorldLandscapeVertices);
 
 	static TArray<FVector2D> CreateLandscapeUVArray(int32 InLandscapeSize, int32 InTileSize, int32 InHeightVariation, const FVector& InLocation);
 

@@ -1966,20 +1966,32 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArrayNew(const FLandscap
 		else
 		{
 			NewVertexData = FLandscapeVertexData();
+
+			const FLandscapeVertexData AvgNeighborData = FindAverageVertexNeighborData(CurrentMapKey, InLandscapeProperties, InOutProcMeshData, InOutLandscapeDataMap, InOutLandscapeVerticesMap);
+
+			NewVertexData.AvgNeighborHeight = AvgNeighborData.Height;
+
+			const int32 HeightVariation = UKismetMathLibrary::RandomIntegerInRange(-InLandscapeProperties.HeightVariation, InLandscapeProperties.HeightVariation);
+
+			const int32 NewMod = AvgNeighborData.Height == 0 ? HeightVariation : AvgNeighborData.Height;
+
 			const int32 DefaultMinimumHeightDifference = InLandscapeProperties.MinimumHeightDifference;
 
 			const int32 DefaultMaximumHeightDifference = InLandscapeProperties.MaximumHeightDifference;
 
 			int32 NewMaximumHeightDifference = UKismetMathLibrary::RandomIntegerInRange(DefaultMinimumHeightDifference, DefaultMaximumHeightDifference);
 
-			const int32 AvgNeighborHeight = FindAverageVertexNeighborHeight(CurrentMapKey, InLandscapeProperties, InOutProcMeshData, InOutLandscapeDataMap, InOutLandscapeVerticesMap);
 
-			const int32 HeightVariation = UKismetMathLibrary::RandomIntegerInRange(-InLandscapeProperties.HeightVariation, InLandscapeProperties.HeightVariation);
+			int32 AvgHeightDiff = NewMod - AvgNeighborData.AvgNeighborHeight;
 
-			const int32 NewMod = AvgNeighborHeight == 0 ? HeightVariation : AvgNeighborHeight;
+			//NewHeight = UKismetMathLibrary::RandomIntegerInRange(NewMod - AvgHeightDiff, NewMod + AvgHeightDiff);
 
-			NewHeight = UKismetMathLibrary::RandomIntegerInRange(NewMod - NewMaximumHeightDifference, NewMod + NewMaximumHeightDifference);
+			NewHeight = NewMod + AvgNeighborData.AvgNeighborHeight + UKismetMathLibrary::RandomIntegerInRange(-20, 20);
 
+
+			NewHeight = UKismetMathLibrary::Clamp(NewHeight, InLandscapeProperties.MinimumHeight, InLandscapeProperties.MaximumHeight);
+
+			NewVertexData.Height = NewHeight;
 		}
 		//do stuff
 
@@ -1994,8 +2006,6 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArrayNew(const FLandscap
 
 		InOutProcMeshData.FaceVertexMapArray[0].VertexIndexMap.Add(CurrentMapKey, NewVertexIndex);
 
-		NewVertexData.Height = NewHeight;
-
 		InOutLandscapeVerticesMap.Add(CurrentScaledWorldMapKey, NewVertexData);
 
 		//TempVertices.RemoveAt(CurrentRandomVertexIndex);
@@ -2007,8 +2017,9 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArrayNew(const FLandscap
 	return OutVertexArray;
 }
 
-int32 AJetLandscapeMesh::FindAverageVertexNeighborHeight(const FVector& InVertex, const FLandscapeProperties& InLandscapeProperties, const FProcMeshData& InProcMeshData, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap, TMap<FVector, FLandscapeVertexData>& InOutWorldLandscapeVertices)
+FLandscapeVertexData AJetLandscapeMesh::FindAverageVertexNeighborData(const FVector& InVertex, const FLandscapeProperties& InLandscapeProperties, const FProcMeshData& InProcMeshData, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap, TMap<FVector, FLandscapeVertexData>& InOutWorldLandscapeVertices)
 {
+	FLandscapeVertexData OutAverageVertexData = FLandscapeVertexData();
 	const int32 Radius = InLandscapeProperties.LandscapeSize + 1;
 
 	FProcMeshData EasternNeighbor;
@@ -2043,6 +2054,11 @@ int32 AJetLandscapeMesh::FindAverageVertexNeighborHeight(const FVector& InVertex
 	float EastNeighborScalar = 0.0f;
 	float WestNeighborScalar = 0.0f;
 
+	int32 NorthNeighborAverageHeight = 0;
+	int32 SouthNeighborAverageHeight = 0;
+	int32 EastNeighborAverageHeight = 0;
+	int32 WestNeighborAverageHeight = 0;
+
 	for (int32 i = 1; i < Radius; i++)
 	{
 		const float CurrentScalar = 1.0f - (((float) i - 1.0f) / ((float) Radius - 1.0f));
@@ -2061,6 +2077,7 @@ int32 AJetLandscapeMesh::FindAverageVertexNeighborHeight(const FVector& InVertex
 				NorthNeighborVector = NorthNeighborWorldKey;
 				NorthNeighborVector.Z = VertexPtr->Height;
 				NorthNeighborScalar = CurrentScalar;
+				NorthNeighborAverageHeight = VertexPtr->AvgNeighborHeight;
 
 			}
 
@@ -2102,6 +2119,7 @@ int32 AJetLandscapeMesh::FindAverageVertexNeighborHeight(const FVector& InVertex
 				SouthNeighborVector = SouthNeighborWorldKey;
 				SouthNeighborVector.Z = VertexPtr->Height;
 				SouthNeighborScalar = CurrentScalar;
+				SouthNeighborAverageHeight = VertexPtr->AvgNeighborHeight;
 
 			}
 
@@ -2144,6 +2162,8 @@ int32 AJetLandscapeMesh::FindAverageVertexNeighborHeight(const FVector& InVertex
 				EastNeighborVector = EastNeighborWorldKey;
 				EastNeighborVector.Z = VertexPtr->Height;
 				EastNeighborScalar = CurrentScalar;
+				EastNeighborAverageHeight = VertexPtr->AvgNeighborHeight;
+
 
 			}
 
@@ -2185,6 +2205,8 @@ int32 AJetLandscapeMesh::FindAverageVertexNeighborHeight(const FVector& InVertex
 				WestNeighborVector = WestNeighborWorldKey;
 				WestNeighborVector.Z = VertexPtr->Height;
 				WestNeighborScalar = CurrentScalar;
+				WestNeighborAverageHeight = VertexPtr->AvgNeighborHeight;
+
 			}
 
 			/*bFoundWestNeighborVertex = InProcMeshData.FindVertexVector(FVector(InVertex.X, InVertex.Y - i, 0), WestNeighborVector, 0);
@@ -2312,10 +2334,17 @@ int32 AJetLandscapeMesh::FindAverageVertexNeighborHeight(const FVector& InVertex
 		NeighborSelectArray.RemoveAt(Rand);
 	}*/
 
-	int32 NeighborHeightSum = (bFoundNorthNeighborVertex * NorthNeighborVector.Z * NorthNeighborScalar)
+	int32 NeighborHeightSum =
+		(bFoundNorthNeighborVertex * NorthNeighborVector.Z * NorthNeighborScalar)
 		+ (bFoundSouthNeighborVertex * SouthNeighborVector.Z * SouthNeighborScalar)
 		+ (bFoundWestNeighborVertex * WestNeighborVector.Z * WestNeighborScalar)
 		+ (bFoundEastNeighborVertex * EastNeighborVector.Z * EastNeighborScalar);
+
+	int32 NeighborAverageHeightSum =
+		(bFoundNorthNeighborVertex * NorthNeighborAverageHeight * NorthNeighborScalar)
+		+ (bFoundSouthNeighborVertex * SouthNeighborAverageHeight * SouthNeighborScalar)
+		+ (bFoundWestNeighborVertex * WestNeighborAverageHeight * WestNeighborScalar)
+		+ (bFoundEastNeighborVertex * EastNeighborAverageHeight * EastNeighborScalar);
 
 	int32 NeighborSum = (bFoundNorthNeighborVertex
 		+ bFoundSouthNeighborVertex
@@ -2323,13 +2352,18 @@ int32 AJetLandscapeMesh::FindAverageVertexNeighborHeight(const FVector& InVertex
 		+ bFoundEastNeighborVertex);
 
 	int32 NeighborHeightAvg = 0;
+	int32 NeighborAverageHeightAverage = 0;
 
 	if (NeighborSum > 0)
 	{
 		NeighborHeightAvg = NeighborHeightSum / NeighborSum;
+		NeighborAverageHeightAverage = NeighborAverageHeightSum / NeighborSum;
 	}
 
-	return NeighborHeightAvg;
+	OutAverageVertexData.Height = NeighborHeightAvg;
+	OutAverageVertexData.AvgNeighborHeight = NeighborAverageHeightAverage;
+
+	return OutAverageVertexData;
 }
 
 TArray<FVector2D> AJetLandscapeMesh::CreateLandscapeUVArray(int32 InLandscapeSize, int32 InTileSize, int32 InHeightVariation, const FVector& InLocation)
