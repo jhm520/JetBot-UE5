@@ -106,6 +106,8 @@ void AJetWorldSpawner::BeginPlay()
 	LandscapeCreatedDelegate.AddDynamic(this, &AJetWorldSpawner::OnLandscapeDataCreated);
 	
 	//GameState->CreateWorldLandscapes(GetActorLocation(), WorldRadius, LandscapeProperties);
+	
+	WorldLandscapeMaterial = UMaterialInstanceDynamic::Create(LandscapeProperties.LandscapeMaterialClass, this);
 
 	if (bSpawnWorldAtBeginPlay)
 	{
@@ -162,11 +164,11 @@ void AJetWorldSpawner::WorldSpawner_OnPlayerEnteredLandscape(AJetLandscapeMesh* 
 		return;
 	}
 
-	/*if (bCreatingLandscapeData)
+	if (bCreatingLandscapeData)
 	{
 		PlayerEnteredLandscapeQueue.Add(InLandscape);
 		return;
-	}*/
+	}
 
 	AJetGameState* GameState = Cast<AJetGameState>(GetWorld()->GetGameState());
 

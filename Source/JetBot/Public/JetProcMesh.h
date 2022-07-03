@@ -285,7 +285,13 @@ public:
 		UProceduralMeshComponent* ProcMesh;
 
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
-	void CreateMesh();
+		void CreateMesh(TArray<UMaterialInterface*> InMaterialArray);
+
+	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
+	void CreateMeshSection(const FProcMeshData& InProcMeshData);
+
+	UPROPERTY()
+	TArray<FProcMeshData> MeshSections;
 
 public:
 	// Sets default values for this actor's properties

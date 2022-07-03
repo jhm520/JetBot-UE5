@@ -80,6 +80,9 @@ public:
 	UPROPERTY()
 	TMap<FVector, FVector> WorldLandscapeNormalMap;
 
+	UPROPERTY()
+	UMaterialInstanceDynamic* WorldLandscapeMaterial = nullptr;
+
 	UPROPERTY(Transient)
 	bool bCreatingLandscapeData = false;
 

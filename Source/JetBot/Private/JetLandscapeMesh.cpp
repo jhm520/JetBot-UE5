@@ -735,26 +735,31 @@ void AJetLandscapeMesh::CreateLandscapesInRadius(const FVector& InLocation, cons
 
 	//for each new landscape data, compute the normals
 
-	TMap<FVector, FVector> WorldNormalsMap;
+	//TMap<FVector, FVector> WorldNormalsMap;
 
 	for (const FProcMeshData& LandscapeItr : InOutLandscapeDataArray)
 	{
 		const int32 VerticesNum = LandscapeItr.Vertices.Num();
 		for (int32 i = 0; i < VerticesNum; i++)
 		{
-			const FVector WorldMapKey = LandscapeItr.SpawnTransform.GetLocation() + LandscapeItr.Vertices[i];
+			FVector WorldMapKey = LandscapeItr.SpawnTransform.GetLocation() + LandscapeItr.Vertices[i];
+			WorldMapKey *= FVector(1, 1, 0);
 
-			FVector* NormalPtr = WorldNormalsMap.Find(WorldMapKey);
+			FVector* NormalPtr = InOutLandscapeNormalMap.Find(WorldMapKey);
 
 			FVector CurrentNormal = FVector::ZeroVector;
+
 			if (NormalPtr)
 			{
 				CurrentNormal = *NormalPtr;
 			}
+			else
+			{
+				CurrentNormal = LandscapeItr.Normals[i];
+			}
 
-			CurrentNormal += LandscapeItr.Normals[i];
 
-			WorldNormalsMap.Add(WorldMapKey, CurrentNormal);
+			InOutLandscapeNormalMap.Add(WorldMapKey, CurrentNormal);
 		}
 	}
 
@@ -764,9 +769,9 @@ void AJetLandscapeMesh::CreateLandscapesInRadius(const FVector& InLocation, cons
 		const int32 VerticesNum = LandscapeItr.Vertices.Num();
 		for (int32 i = 0; i < VerticesNum; i++)
 		{
-			const FVector WorldMapKey = LandscapeItr.SpawnTransform.GetLocation() + LandscapeItr.Vertices[i];
-
-			FVector* NormalPtr = WorldNormalsMap.Find(WorldMapKey);
+			FVector WorldMapKey = LandscapeItr.SpawnTransform.GetLocation() + LandscapeItr.Vertices[i];
+			WorldMapKey *= FVector(1, 1, 0);
+			FVector* NormalPtr = InOutLandscapeNormalMap.Find(WorldMapKey);
 
 			if (NormalPtr)
 			{
@@ -1136,8 +1141,9 @@ AJetLandscapeMesh* AJetLandscapeMesh::SpawnNeighboringLandscapeWithData(const FP
 	{
 		GameState->OnLandscapeSpawned(SpawnedActor, SpawnedActor->ProcMeshData);
 	}
+	TArray<UMaterialInterface*> MatArray;
 
-	SpawnedActor->CreateMesh();
+	SpawnedActor->CreateMesh(MatArray);
 
 	
 
@@ -1170,8 +1176,15 @@ AJetLandscapeMesh* AJetLandscapeMesh::SpawnLandscapeWithData(UObject* WorldConte
 	SpawnedActor->ProcMeshData = InProcMeshData;
 
 	UGameplayStatics::FinishSpawningActor(SpawnedActor, InProcMeshData.SpawnTransform);
+	
+	TArray<UMaterialInterface*> MatArray;
 
-	SpawnedActor->CreateMesh();
+	if (InWorldSpawner)
+	{
+		MatArray.Add(InWorldSpawner->WorldLandscapeMaterial);
+	}
+
+	SpawnedActor->CreateMesh(MatArray);
 
 	AJetGameState* GameState = Cast<AJetGameState>(WorldContextObject->GetWorld()->GetGameState());
 
@@ -2329,7 +2342,9 @@ TArray<FVector2D> AJetLandscapeMesh::CreateLandscapeUVArray(int32 InLandscapeSiz
 	int32 XDim = InLandscapeSize + 1;
 	int32 YDim = InLandscapeSize + 1;
 
-	FVector2D ModVector = FVector2D((InLocation / 2.0f) / InTileSize);
+	float fMod = ((float)InLandscapeSize * InTileSize) / 2.0f;
+
+	FVector2D ModVector = FVector2D(((InLocation + fMod) / 2.0f) / InTileSize);
 
 	for (y = 0; y < YDim; y++)
 	{

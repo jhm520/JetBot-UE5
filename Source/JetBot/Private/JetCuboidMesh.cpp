@@ -569,7 +569,8 @@ void AJetCuboidMesh::BeginPlay()
 
 	ProcMeshData = CreateCuboidData(Dimensions, TileSize);
 
-	CreateMesh();
+	TArray<UMaterialInterface*> MatArray;
+	CreateMesh(MatArray);
 
 	Super::BeginPlay();
 }

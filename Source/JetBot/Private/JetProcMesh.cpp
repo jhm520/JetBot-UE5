@@ -75,12 +75,44 @@ int32 AJetProcMesh::GetVertexIndex(const TMap<FVector, int32>& InVertexIndexMap,
 	return -1;
 }
 
-void AJetProcMesh::CreateMesh()
+void AJetProcMesh::CreateMesh(TArray<UMaterialInterface*> InMaterialArray)
 {
 
 	ProcMesh->CreateMeshSection(0, ProcMeshData.Vertices, ProcMeshData.Triangles, ProcMeshData.Normals, ProcMeshData.UVs, TArray<FColor>(), TArray<FProcMeshTangent>(), true);
 
+	int32 i = 0;
+
+	if (InMaterialArray.Num() > 0)
+	{
+		for (UMaterialInterface* Mat : InMaterialArray)
+		{
+
+			ProcMesh->SetMaterial(i, Mat);
+			i++;
+		}
+
+		return;
+	}
+
+
 	for (UMaterialInterface* Mat : ProcMeshData.Materials)
+	{
+		
+
+		ProcMesh->SetMaterial(i, Mat);
+
+		i++;
+	}
+}
+
+void AJetProcMesh::CreateMeshSection(const FProcMeshData& InProcMeshData)
+{
+	const int32 CurrentSectionIndex = MeshSections.Num();
+	ProcMesh->CreateMeshSection(CurrentSectionIndex, InProcMeshData.Vertices, InProcMeshData.Triangles, InProcMeshData.Normals, InProcMeshData.UVs, TArray<FColor>(), TArray<FProcMeshTangent>(), true);
+
+	MeshSections.Add(InProcMeshData);
+
+	for (UMaterialInterface* Mat : InProcMeshData.Materials)
 	{
 		int32 i = 0;
 
