@@ -733,6 +733,8 @@ void AJetLandscapeMesh::CreateLandscapesInRadius(const FVector& InLocation, cons
 		}
 	}
 
+	//for each new landscape data, smooth the landscape
+
 	//for each new landscape data, compute the normals
 
 	//TMap<FVector, FVector> WorldNormalsMap;
@@ -789,6 +791,43 @@ void AJetLandscapeMesh::CreateLandscapesInRadius(const FVector& InLocation, cons
 	if (Selector > 1)
 	{
 		Selector = 0;
+	}
+}
+
+void AJetLandscapeMesh::SmoothLandscape(FProcMeshData& InOutProcMesh, float InSmoothingConstant, const FLandscapeProperties& InLandscapeProperties, TMap<FVector, FLandscapeVertexData>& InOutVertexDataMap)
+{
+	int32 XDim = InLandscapeProperties.LandscapeSize + 1;
+	int32 YDim = InLandscapeProperties.LandscapeSize + 1;
+
+	const int32 VerticesNum = InOutProcMesh.Vertices.Num();
+
+	TArray<FVector> TempVertices;
+
+	for (int32 y = 0; y < YDim; y++)
+	{
+		for (int32 x = 0; x < XDim; x++)
+		{
+			TempVertices.Add(FVector(x, y, 0));
+		}
+	}
+
+	TArray<FVector> RandomizedVertices;
+
+	for (int32 i = 0; i < VerticesNum; i++)
+	{
+		int32 RandInt = UKismetMathLibrary::RandomInteger(VerticesNum - 1 - i);
+
+		RandomizedVertices.Add(TempVertices[i]);
+
+		TempVertices.RemoveAt(i);
+	}
+
+	for (int32 i = 0; i < VerticesNum; i++)
+	{
+		const FVector CurrentMapKey = RandomizedVertices[i];
+
+		const FLandscapeVertexData AvgNeighborData = FindAverageVertexNeighborData(CurrentMapKey, InLandscapeProperties, InOutProcMesh, InOutVertexDataMap);
+
 	}
 }
 
@@ -1961,13 +2000,18 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArrayNew(const FLandscap
 		if (VertexPtr)
 		{
 			NewVertexData = *VertexPtr;
+
+			const FLandscapeVertexData AvgNeighborData = FindAverageVertexNeighborData(CurrentMapKey, InLandscapeProperties, InOutProcMeshData, InOutLandscapeVerticesMap);
+
+			NewVertexData.AvgNeighborHeight = AvgNeighborData.Height;
+
 			NewHeight = NewVertexData.Height;
 		}
 		else
 		{
 			NewVertexData = FLandscapeVertexData();
 
-			const FLandscapeVertexData AvgNeighborData = FindAverageVertexNeighborData(CurrentMapKey, InLandscapeProperties, InOutProcMeshData, InOutLandscapeDataMap, InOutLandscapeVerticesMap);
+			const FLandscapeVertexData AvgNeighborData = FindAverageVertexNeighborData(CurrentMapKey, InLandscapeProperties, InOutProcMeshData, InOutLandscapeVerticesMap);
 
 			NewVertexData.AvgNeighborHeight = AvgNeighborData.Height;
 
@@ -2032,7 +2076,7 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArrayNew(const FLandscap
 	return OutVertexArray;
 }
 
-FLandscapeVertexData AJetLandscapeMesh::FindAverageVertexNeighborData(const FVector& InVertex, const FLandscapeProperties& InLandscapeProperties, const FProcMeshData& InProcMeshData, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap, TMap<FVector, FLandscapeVertexData>& InOutWorldLandscapeVertices)
+FLandscapeVertexData AJetLandscapeMesh::FindAverageVertexNeighborData(const FVector& InVertex, const FLandscapeProperties& InLandscapeProperties, const FProcMeshData& InProcMeshData, TMap<FVector, FLandscapeVertexData>& InOutWorldLandscapeVertices)
 {
 	FLandscapeVertexData OutAverageVertexData = FLandscapeVertexData();
 	const int32 Radius = InLandscapeProperties.LandscapeSize + 1;

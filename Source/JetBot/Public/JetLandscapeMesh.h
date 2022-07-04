@@ -216,6 +216,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
 	static void CreateLandscapesInRadius(const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, TArray<FProcMeshData>& InOutLandscapeDataArray, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap, TMap<FVector, FLandscapeVertexData>& InOutLandscapeVerticesMap, TMap<FVector, FVector>& InOutLandscapeNormalMap);
 
+	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
+	static void SmoothLandscape(FProcMeshData& InOutProcMesh, float InSmoothingConstant, const FLandscapeProperties& InLandscapeProperties, TMap<FVector, FLandscapeVertexData>& InOutVertexDataMap);
 
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
 	static void CreateLandscapeDataInRadius(const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, TArray<FProcMeshData>& InOutLandscapeDataArray, FProcMeshData& InOutSuperLandscapeData, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap, TMap<FVector, FLandscapeVertexData>& InOutLandscapeVerticesMap);
@@ -284,7 +286,7 @@ public:
 	static TArray<FVector> CreateLandscapeVertexArrayNew(const FLandscapeProperties& InLandscapeProperties, FProcMeshData& InOutProcMeshData, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap, TMap<FVector, FLandscapeVertexData>& InOutLandscapeVerticesMap, const FVector& InSpawnLocation);
 
 	UFUNCTION(BlueprintCallable, Category = "Landscape")
-	static FLandscapeVertexData FindAverageVertexNeighborData(const FVector& InVertex, const FLandscapeProperties& InLandscapeProperties, const FProcMeshData& InProcMeshData, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap, TMap<FVector, FLandscapeVertexData>& InOutWorldLandscapeVertices);
+	static FLandscapeVertexData FindAverageVertexNeighborData(const FVector& InVertex, const FLandscapeProperties& InLandscapeProperties, const FProcMeshData& InProcMeshData, TMap<FVector, FLandscapeVertexData>& InOutWorldLandscapeVertices);
 
 	static TArray<FVector2D> CreateLandscapeUVArray(int32 InLandscapeSize, int32 InTileSize, int32 InHeightVariation, const FVector& InLocation);
 
