@@ -1921,8 +1921,44 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArrayNew(const FLandscap
 	//static int32 SelectStartCorner = 0;
 
 
-	switch (SelectStartCorner)
-	{
+	//if (SelectStartCorner == 4)
+	//{
+	//	//"OUTSIDE IN" ITERATION
+	//	int32 LandscapeRadius = XDim / 2;
+
+	//	if (XDim % 2 == 1)
+	//	{
+	//		LandscapeRadius++;
+	//	}
+
+	//	for (int32 r = 0; r < LandscapeRadius; r++)
+	//	{
+	//		for (int32 i = r; i < XDim - (r); i++)
+	//		{
+	//			TempVertices.AddUnique(FVector(i, r, 0));
+	//		}
+
+	//		for (int32 i = r; i < XDim - (r); i++)
+	//		{
+	//			TempVertices.AddUnique(FVector(r, i, 0));
+	//		}
+
+	//		for (int32 i = r; i < XDim - (r); i++)
+	//		{
+	//			TempVertices.AddUnique(FVector(XDim - 1 - r, i, 0));
+	//		}
+
+	//		for (int32 i = r; i < XDim - (r); i++)
+	//		{
+	//			TempVertices.AddUnique(FVector(i, XDim - 1 - r, 0));
+	//		}
+	//	}
+	//}
+	//else
+	//{
+		//randomly selected iteration
+		switch (SelectStartCorner)
+		{
 		case 0:
 		{
 			for (y = 0; y < YDim; y++)
@@ -1957,7 +1993,7 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArrayNew(const FLandscap
 			break;
 		}
 		case 3:
-			{
+		{
 			for (y = YDim - 1; y > -1; y--)
 			{
 				for (x = XDim - 1; x > -1; x--)
@@ -1967,15 +2003,16 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArrayNew(const FLandscap
 			}
 			break;
 		}
-	}
+		}
+	//}
 	
-
-	SelectStartCorner++;
+	
+	/*SelectStartCorner++;
 
 	if (SelectStartCorner > 3)
 	{
 		SelectStartCorner = 0;
-	}
+	}*/
 
 	const int32 TotalNumVertices = TempVertices.Num();
 
@@ -2019,41 +2056,73 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArrayNew(const FLandscap
 
 			const int32 NewMod = AvgNeighborData.Height == 0 ? HeightVariation : AvgNeighborData.Height;
 
-			int32 AvgHeightDiff = NewMod - AvgNeighborData.AvgNeighborHeight;
+			float Rise = AvgNeighborData.Height - AvgNeighborData.AvgNeighborHeight;
 
-			//NewHeight = UKismetMathLibrary::RandomIntegerInRange(NewMod - AvgHeightDiff, NewMod + AvgHeightDiff);
+			float AvgNeighborSlope = Rise / (float) InLandscapeProperties.TileSize;
 
-			NewHeight = NewMod + AvgHeightDiff/* + UKismetMathLibrary::RandomIntegerInRange(-20, 20)*/;
+			float NewSlopeAdd = 0.0f;
 
-			if (NewHeight > InLandscapeProperties.MaximumHeight)
+			if (AvgNeighborData.Height > InLandscapeProperties.MaximumHeight)
 			{
-				NewHeight += UKismetMathLibrary::RandomIntegerInRange(-InLandscapeProperties.MaximumHeightDifference, 0);
+				NewSlopeAdd += UKismetMathLibrary::RandomFloatInRange(-InLandscapeProperties.MaximumSlopeDifference, 0);
 
 			}
-			else if (NewHeight < InLandscapeProperties.MinimumHeight)
+			else if (AvgNeighborData.Height < InLandscapeProperties.MinimumHeight)
 			{
-				NewHeight += UKismetMathLibrary::RandomIntegerInRange(0, InLandscapeProperties.MaximumHeightDifference);
+				NewSlopeAdd += UKismetMathLibrary::RandomFloatInRange(0, InLandscapeProperties.MaximumSlopeDifference);
 			}
 			else
 			{
-				NewHeight += UKismetMathLibrary::RandomIntegerInRange(-InLandscapeProperties.MaximumHeightDifference, InLandscapeProperties.MaximumHeightDifference);
+				NewSlopeAdd += UKismetMathLibrary::RandomFloatInRange(-InLandscapeProperties.MaximumSlopeDifference, InLandscapeProperties.MaximumSlopeDifference);
 			}
 
-			int32 Rise = NewHeight - AvgNeighborData.Height;
-			float Slope = (float) Rise/(float) InLandscapeProperties.TileSize;
+			float NewSlope = AvgNeighborSlope + NewSlopeAdd;
 
-			Slope = UKismetMathLibrary::FClamp(Slope, -InLandscapeProperties.MaximumSlope, InLandscapeProperties.MaximumSlope);
+			NewSlope = UKismetMathLibrary::FClamp(NewSlope, -InLandscapeProperties.MaximumSlope, InLandscapeProperties.MaximumSlope);
 
-			float SlopeDiff = Slope - AvgNeighborData.AvgNeighborSlope;
 
-			SlopeDiff = UKismetMathLibrary::FClamp(SlopeDiff, -InLandscapeProperties.MaximumSlopeDifference, InLandscapeProperties.MaximumSlopeDifference);
+			float NewHeightDiff = NewSlope * InLandscapeProperties.TileSize;
 
-			Slope = AvgNeighborData.AvgNeighborSlope + SlopeDiff;
+			NewHeight = NewMod + NewHeightDiff;
 
-			NewHeight = NewMod + (Slope * InLandscapeProperties.TileSize);
+			//int32 AvgHeightDiff = NewMod - AvgNeighborData.AvgNeighborHeight;
+
+			////NewHeight = UKismetMathLibrary::RandomIntegerInRange(NewMod - AvgHeightDiff, NewMod + AvgHeightDiff);
+
+			//NewHeight = NewMod + AvgHeightDiff/* + UKismetMathLibrary::RandomIntegerInRange(-20, 20)*/;
+
+			//if (NewHeight > InLandscapeProperties.MaximumHeight)
+			//{
+			//	NewHeight += UKismetMathLibrary::RandomIntegerInRange(-InLandscapeProperties.MaximumHeightDifference, 0);
+
+			//}
+			//else if (NewHeight < InLandscapeProperties.MinimumHeight)
+			//{
+			//	NewHeight += UKismetMathLibrary::RandomIntegerInRange(0, InLandscapeProperties.MaximumHeightDifference);
+			//}
+			//else
+			//{
+			//	NewHeight += UKismetMathLibrary::RandomIntegerInRange(-InLandscapeProperties.MaximumHeightDifference, InLandscapeProperties.MaximumHeightDifference);
+			//}
+
+			//int32 Rise = NewHeight - AvgNeighborData.Height;
+			//float Slope = (float) Rise/(float) InLandscapeProperties.TileSize;
+
+			//Slope = UKismetMathLibrary::FClamp(Slope, -InLandscapeProperties.MaximumSlope, InLandscapeProperties.MaximumSlope);
+
+			//float SlopeDiff = Slope - AvgNeighborData.AvgNeighborSlope;
+
+			//SlopeDiff = UKismetMathLibrary::FClamp(SlopeDiff, -InLandscapeProperties.MaximumSlopeDifference, InLandscapeProperties.MaximumSlopeDifference);
+
+			//Slope = AvgNeighborData.AvgNeighborSlope + SlopeDiff;
+
+			//NewHeight = NewMod + (Slope * InLandscapeProperties.TileSize);
 
 			//NewHeight = UKismetMathLibrary::Clamp(NewHeight, InLandscapeProperties.MinimumHeight, InLandscapeProperties.MaximumHeight);
-			NewVertexData.AvgNeighborSlope = Slope;
+			//NewVertexData.AvgNeighborSlope = Slope;
+
+			NewVertexData.AvgNeighborSlope = NewSlope;
+
 			NewVertexData.Height = NewHeight;
 		}
 		//do stuff
