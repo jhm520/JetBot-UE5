@@ -24,7 +24,7 @@ struct FLandscapeVertexData
 	int32 AvgNeighborHeight = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
-	int32 AvgNeighborSlope = 0;
+	float AvgNeighborSlope = 0;
 
 	FLandscapeVertexData() {}
 
@@ -74,7 +74,10 @@ struct FLandscapeProperties
 	float MaximumHeight = 2000.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
-	float MaximumSlopeDifference = 10.0f;
+	float MaximumSlope = 0.5f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
+	float MaximumSlopeDifference = 0.1f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
 	int32 LandscapeSubdivisions = 3;

@@ -2019,13 +2019,6 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArrayNew(const FLandscap
 
 			const int32 NewMod = AvgNeighborData.Height == 0 ? HeightVariation : AvgNeighborData.Height;
 
-			const int32 DefaultMinimumHeightDifference = InLandscapeProperties.MinimumHeightDifference;
-
-			const int32 DefaultMaximumHeightDifference = InLandscapeProperties.MaximumHeightDifference;
-
-			int32 NewMaximumHeightDifference = UKismetMathLibrary::RandomIntegerInRange(DefaultMinimumHeightDifference, DefaultMaximumHeightDifference);
-
-
 			int32 AvgHeightDiff = NewMod - AvgNeighborData.AvgNeighborHeight;
 
 			//NewHeight = UKismetMathLibrary::RandomIntegerInRange(NewMod - AvgHeightDiff, NewMod + AvgHeightDiff);
@@ -2034,22 +2027,33 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArrayNew(const FLandscap
 
 			if (NewHeight > InLandscapeProperties.MaximumHeight)
 			{
-				NewHeight += UKismetMathLibrary::RandomIntegerInRange(-InLandscapeProperties.MaximumSlopeDifference, 0);
+				NewHeight += UKismetMathLibrary::RandomIntegerInRange(-InLandscapeProperties.MaximumHeightDifference, 0);
 
 			}
 			else if (NewHeight < InLandscapeProperties.MinimumHeight)
 			{
-				NewHeight += UKismetMathLibrary::RandomIntegerInRange(0, InLandscapeProperties.MaximumSlopeDifference);
+				NewHeight += UKismetMathLibrary::RandomIntegerInRange(0, InLandscapeProperties.MaximumHeightDifference);
 			}
 			else
 			{
-				NewHeight += UKismetMathLibrary::RandomIntegerInRange(-InLandscapeProperties.MaximumSlopeDifference, InLandscapeProperties.MaximumSlopeDifference);
+				NewHeight += UKismetMathLibrary::RandomIntegerInRange(-InLandscapeProperties.MaximumHeightDifference, InLandscapeProperties.MaximumHeightDifference);
 			}
 
+			int32 Rise = NewHeight - AvgNeighborData.Height;
+			float Slope = (float) Rise/(float) InLandscapeProperties.TileSize;
 
+			Slope = UKismetMathLibrary::FClamp(Slope, -InLandscapeProperties.MaximumSlope, InLandscapeProperties.MaximumSlope);
+
+			float SlopeDiff = Slope - AvgNeighborData.AvgNeighborSlope;
+
+			SlopeDiff = UKismetMathLibrary::FClamp(SlopeDiff, -InLandscapeProperties.MaximumSlopeDifference, InLandscapeProperties.MaximumSlopeDifference);
+
+			Slope = AvgNeighborData.AvgNeighborSlope + SlopeDiff;
+
+			NewHeight = NewMod + (Slope * InLandscapeProperties.TileSize);
 
 			//NewHeight = UKismetMathLibrary::Clamp(NewHeight, InLandscapeProperties.MinimumHeight, InLandscapeProperties.MaximumHeight);
-
+			NewVertexData.AvgNeighborSlope = Slope;
 			NewVertexData.Height = NewHeight;
 		}
 		//do stuff
@@ -2106,6 +2110,11 @@ FLandscapeVertexData AJetLandscapeMesh::FindAverageVertexNeighborData(const FVec
 	int32 EastNeighborAverageHeight = 0;
 	int32 WestNeighborAverageHeight = 0;
 
+	float NorthNeighborAverageSlope = 0;
+	float SouthNeighborAverageSlope = 0;
+	float EastNeighborAverageSlope = 0;
+	float WestNeighborAverageSlope = 0;
+
 	for (int32 i = 1; i < Radius; i++)
 	{
 		const float CurrentScalar = 1.0f - (((float) i - 1.0f) / ((float) Radius - 1.0f));
@@ -2125,6 +2134,7 @@ FLandscapeVertexData AJetLandscapeMesh::FindAverageVertexNeighborData(const FVec
 				NorthNeighborVector.Z = VertexPtr->Height;
 				NorthNeighborScalar = CurrentScalar;
 				NorthNeighborAverageHeight = VertexPtr->AvgNeighborHeight;
+				NorthNeighborAverageSlope = VertexPtr->AvgNeighborSlope;
 
 			}
 		}
@@ -2144,6 +2154,8 @@ FLandscapeVertexData AJetLandscapeMesh::FindAverageVertexNeighborData(const FVec
 				SouthNeighborVector.Z = VertexPtr->Height;
 				SouthNeighborScalar = CurrentScalar;
 				SouthNeighborAverageHeight = VertexPtr->AvgNeighborHeight;
+				SouthNeighborAverageSlope = VertexPtr->AvgNeighborSlope;
+
 
 			}
 		}
@@ -2163,6 +2175,8 @@ FLandscapeVertexData AJetLandscapeMesh::FindAverageVertexNeighborData(const FVec
 				EastNeighborVector.Z = VertexPtr->Height;
 				EastNeighborScalar = CurrentScalar;
 				EastNeighborAverageHeight = VertexPtr->AvgNeighborHeight;
+				EastNeighborAverageSlope = VertexPtr->AvgNeighborSlope;
+
 			}
 		}
 
@@ -2181,6 +2195,8 @@ FLandscapeVertexData AJetLandscapeMesh::FindAverageVertexNeighborData(const FVec
 				WestNeighborVector.Z = VertexPtr->Height;
 				WestNeighborScalar = CurrentScalar;
 				WestNeighborAverageHeight = VertexPtr->AvgNeighborHeight;
+				WestNeighborAverageSlope = VertexPtr->AvgNeighborSlope;
+
 
 			}
 		}
@@ -2198,6 +2214,12 @@ FLandscapeVertexData AJetLandscapeMesh::FindAverageVertexNeighborData(const FVec
 		+ (bFoundWestNeighborVertex * WestNeighborAverageHeight * WestNeighborScalar)
 		+ (bFoundEastNeighborVertex * EastNeighborAverageHeight * EastNeighborScalar);
 
+	float NeighborAverageSlopeSum =
+		(bFoundNorthNeighborVertex * NorthNeighborAverageSlope * NorthNeighborScalar)
+		+ (bFoundSouthNeighborVertex * SouthNeighborAverageSlope * SouthNeighborScalar)
+		+ (bFoundWestNeighborVertex * WestNeighborAverageSlope * WestNeighborScalar)
+		+ (bFoundEastNeighborVertex * EastNeighborAverageSlope * EastNeighborScalar);
+
 	int32 NeighborSum = (bFoundNorthNeighborVertex
 		+ bFoundSouthNeighborVertex
 		+ bFoundWestNeighborVertex
@@ -2205,15 +2227,18 @@ FLandscapeVertexData AJetLandscapeMesh::FindAverageVertexNeighborData(const FVec
 
 	int32 NeighborHeightAvg = 0;
 	int32 NeighborAverageHeightAverage = 0;
+	float NeighborAverageSlopeAverage = 0;
 
 	if (NeighborSum > 0)
 	{
 		NeighborHeightAvg = NeighborHeightSum / NeighborSum;
 		NeighborAverageHeightAverage = NeighborAverageHeightSum / NeighborSum;
+		NeighborAverageSlopeAverage = NeighborAverageSlopeSum / NeighborSum;
 	}
 
 	OutAverageVertexData.Height = NeighborHeightAvg;
 	OutAverageVertexData.AvgNeighborHeight = NeighborAverageHeightAverage;
+	OutAverageVertexData.AvgNeighborSlope = NeighborAverageSlopeAverage;
 	//OutAverageVertexData.AvgNeighborSlope = OutAverageVertexData.Height - OutAverageVertexData.AvgNeighborHeight;
 
 	return OutAverageVertexData;
