@@ -26,6 +26,9 @@ struct FLandscapeVertexData
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
 	float AvgNeighborSlope = 0;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
+	float ProjectedHeight = 0;
+
 	FLandscapeVertexData() {}
 
 };

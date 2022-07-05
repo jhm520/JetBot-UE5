@@ -2184,13 +2184,18 @@ FLandscapeVertexData AJetLandscapeMesh::FindAverageVertexNeighborData(const FVec
 	float EastNeighborAverageSlope = 0;
 	float WestNeighborAverageSlope = 0;
 
-	for (int32 i = 1; i < Radius; i++)
+	int32 NorthNeighborDistance = 0;
+	int32 SouthNeighborDistance = 0;
+	int32 EastNeighborDistance = 0;
+	int32 WestNeighborDistance = 0;
+
+	for (int32 NeighborDistance = 1; NeighborDistance < Radius; NeighborDistance++)
 	{
-		const float CurrentScalar = 1.0f - (((float) i - 1.0f) / ((float) Radius - 1.0f));
+		const float CurrentScalar = 1.0f - (((float) NeighborDistance - 1.0f) / ((float) Radius - 1.0f));
 
 		if (!bFoundNorthNeighborVertex)
 		{
-			const FVector NorthNeighborKey = FVector(InVertex.X + i, InVertex.Y, 0);
+			const FVector NorthNeighborKey = FVector(InVertex.X + NeighborDistance, InVertex.Y, 0);
 
 			const FVector NorthNeighborWorldKey = NorthNeighborKey * InLandscapeProperties.TileSize;
 
@@ -2204,13 +2209,14 @@ FLandscapeVertexData AJetLandscapeMesh::FindAverageVertexNeighborData(const FVec
 				NorthNeighborScalar = CurrentScalar;
 				NorthNeighborAverageHeight = VertexPtr->AvgNeighborHeight;
 				NorthNeighborAverageSlope = VertexPtr->AvgNeighborSlope;
+				NorthNeighborDistance = NeighborDistance;
 
 			}
 		}
 
 		if (!bFoundSouthNeighborVertex)
 		{
-			const FVector SouthNeighborKey = FVector(InVertex.X - i, InVertex.Y, 0);
+			const FVector SouthNeighborKey = FVector(InVertex.X - NeighborDistance, InVertex.Y, 0);
 
 			const FVector SouthNeighborWorldKey = SouthNeighborKey * InLandscapeProperties.TileSize;
 
@@ -2224,14 +2230,14 @@ FLandscapeVertexData AJetLandscapeMesh::FindAverageVertexNeighborData(const FVec
 				SouthNeighborScalar = CurrentScalar;
 				SouthNeighborAverageHeight = VertexPtr->AvgNeighborHeight;
 				SouthNeighborAverageSlope = VertexPtr->AvgNeighborSlope;
-
+				SouthNeighborDistance = NeighborDistance;
 
 			}
 		}
 
 		if (!bFoundEastNeighborVertex)
 		{
-			const FVector EastNeighborKey = FVector(InVertex.X, InVertex.Y + i, 0);
+			const FVector EastNeighborKey = FVector(InVertex.X, InVertex.Y + NeighborDistance, 0);
 
 			const FVector EastNeighborWorldKey = EastNeighborKey * InLandscapeProperties.TileSize;
 
@@ -2245,13 +2251,14 @@ FLandscapeVertexData AJetLandscapeMesh::FindAverageVertexNeighborData(const FVec
 				EastNeighborScalar = CurrentScalar;
 				EastNeighborAverageHeight = VertexPtr->AvgNeighborHeight;
 				EastNeighborAverageSlope = VertexPtr->AvgNeighborSlope;
+				EastNeighborDistance = NeighborDistance;
 
 			}
 		}
 
 		if (!bFoundWestNeighborVertex)
 		{
-			const FVector WestNeighborKey = FVector(InVertex.X, InVertex.Y - i, 0);
+			const FVector WestNeighborKey = FVector(InVertex.X, InVertex.Y - NeighborDistance, 0);
 
 			const FVector WestNeighborWorldKey = WestNeighborKey * InLandscapeProperties.TileSize;
 
@@ -2265,29 +2272,32 @@ FLandscapeVertexData AJetLandscapeMesh::FindAverageVertexNeighborData(const FVec
 				WestNeighborScalar = CurrentScalar;
 				WestNeighborAverageHeight = VertexPtr->AvgNeighborHeight;
 				WestNeighborAverageSlope = VertexPtr->AvgNeighborSlope;
+				WestNeighborDistance = NeighborDistance;
 
 
 			}
 		}
 	}
 
+	float NorthProjectedHeight = 0.0f;
+
 	int32 NeighborHeightSum =
-		(bFoundNorthNeighborVertex * NorthNeighborVector.Z * NorthNeighborScalar)
-		+ (bFoundSouthNeighborVertex * SouthNeighborVector.Z * SouthNeighborScalar)
-		+ (bFoundWestNeighborVertex * WestNeighborVector.Z * WestNeighborScalar)
-		+ (bFoundEastNeighborVertex * EastNeighborVector.Z * EastNeighborScalar);
+		(bFoundNorthNeighborVertex * NorthNeighborVector.Z/* * NorthNeighborScalar*/)
+		+ (bFoundSouthNeighborVertex * SouthNeighborVector.Z/* * SouthNeighborScalar*/)
+		+ (bFoundWestNeighborVertex * WestNeighborVector.Z/* * WestNeighborScalar*/)
+		+ (bFoundEastNeighborVertex * EastNeighborVector.Z/* * EastNeighborScalar*/);
 
 	int32 NeighborAverageHeightSum =
-		(bFoundNorthNeighborVertex * NorthNeighborAverageHeight * NorthNeighborScalar)
-		+ (bFoundSouthNeighborVertex * SouthNeighborAverageHeight * SouthNeighborScalar)
-		+ (bFoundWestNeighborVertex * WestNeighborAverageHeight * WestNeighborScalar)
-		+ (bFoundEastNeighborVertex * EastNeighborAverageHeight * EastNeighborScalar);
+		(bFoundNorthNeighborVertex * NorthNeighborAverageHeight/* * NorthNeighborScalar*/)
+		+ (bFoundSouthNeighborVertex * SouthNeighborAverageHeight/* * SouthNeighborScalar*/)
+		+ (bFoundWestNeighborVertex * WestNeighborAverageHeight/* * WestNeighborScalar*/)
+		+ (bFoundEastNeighborVertex * EastNeighborAverageHeight/* * EastNeighborScalar*/);
 
 	float NeighborAverageSlopeSum =
-		(bFoundNorthNeighborVertex * NorthNeighborAverageSlope * NorthNeighborScalar)
-		+ (bFoundSouthNeighborVertex * SouthNeighborAverageSlope * SouthNeighborScalar)
-		+ (bFoundWestNeighborVertex * WestNeighborAverageSlope * WestNeighborScalar)
-		+ (bFoundEastNeighborVertex * EastNeighborAverageSlope * EastNeighborScalar);
+		(bFoundNorthNeighborVertex * NorthNeighborAverageSlope/* * NorthNeighborScalar*/)
+		+ (bFoundSouthNeighborVertex * SouthNeighborAverageSlope/* * SouthNeighborScalar*/)
+		+ (bFoundWestNeighborVertex * WestNeighborAverageSlope/* * WestNeighborScalar*/)
+		+ (bFoundEastNeighborVertex * EastNeighborAverageSlope/* * EastNeighborScalar*/);
 
 	int32 NeighborSum = (bFoundNorthNeighborVertex
 		+ bFoundSouthNeighborVertex
