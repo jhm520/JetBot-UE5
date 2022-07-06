@@ -199,7 +199,7 @@ FProcMeshData AJetLandscapeMesh::CreateLandscapeData(const FTransform& InSpawnTr
 	OutProcMeshData.SpawnTransform = InSpawnTransform;
 	//OutProcMeshData.Vertices = CreateLandscapeVertexArray(InLandscapeProperties, OutProcMeshData, InOutLandscapeDataMap);
 
-	OutProcMeshData.Vertices = CreateLandscapeVertexArrayNew(InLandscapeProperties, OutProcMeshData, InOutLandscapeDataMap, InOutLandscapeVerticesMap, InSpawnTransform.GetLocation());
+	OutProcMeshData.Vertices = CreateLandscapeVertexArrayImproved(InLandscapeProperties, OutProcMeshData, InOutLandscapeDataMap, InOutLandscapeVerticesMap, InSpawnTransform.GetLocation());
 
 
 	OutProcMeshData.UVs = CreateLandscapeUVArray(InLandscapeProperties.LandscapeSize, InLandscapeProperties.TileSize, InLandscapeProperties.HeightVariation, InSpawnTransform.GetLocation());
@@ -2142,6 +2142,180 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArrayNew(const FLandscap
 
 		//TempVertices.RemoveAt(CurrentRandomVertexIndex);
 		//TempVertices.RemoveAt(i);
+		CurrentNumVertices--;
+	}
+
+
+	return OutVertexArray;
+}
+
+TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArrayImproved(const FLandscapeProperties& InLandscapeProperties, FProcMeshData& InOutProcMeshData, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap, TMap<FVector, FLandscapeVertexData>& InOutLandscapeVerticesMap, const FVector& InSpawnLocation)
+{
+	if (!InOutProcMeshData.FaceVertexMapArray.IsValidIndex(0))
+	{
+		return TArray<FVector>();
+	}
+
+	int32 VertexNum = (InLandscapeProperties.LandscapeSize + 1) * (InLandscapeProperties.LandscapeSize + 1);
+
+	int32 x = 0;
+	int32 y = 0;
+
+	int32 XDim = InLandscapeProperties.LandscapeSize + 1;
+	int32 YDim = InLandscapeProperties.LandscapeSize + 1;
+
+	/*if (!InOutProcMeshData.FaceVertexMapArray.IsValidIndex(0))
+	{
+		return TArray<FVector>();
+	}*/
+
+	TArray<FVector> OutVertexArray;
+	TArray<FVector> TempVertices;
+
+	int32 SelectStartCorner = UKismetMathLibrary::RandomIntegerInRange(0, 3);
+
+	//static int32 SelectStartCorner = 0;
+
+
+	//if (SelectStartCorner == 4)
+	//{
+	//	//"OUTSIDE IN" ITERATION
+	//	int32 LandscapeRadius = XDim / 2;
+
+	//	if (XDim % 2 == 1)
+	//	{
+	//		LandscapeRadius++;
+	//	}
+
+	//	for (int32 r = 0; r < LandscapeRadius; r++)
+	//	{
+	//		for (int32 i = r; i < XDim - (r); i++)
+	//		{
+	//			TempVertices.AddUnique(FVector(i, r, 0));
+	//		}
+
+	//		for (int32 i = r; i < XDim - (r); i++)
+	//		{
+	//			TempVertices.AddUnique(FVector(r, i, 0));
+	//		}
+
+	//		for (int32 i = r; i < XDim - (r); i++)
+	//		{
+	//			TempVertices.AddUnique(FVector(XDim - 1 - r, i, 0));
+	//		}
+
+	//		for (int32 i = r; i < XDim - (r); i++)
+	//		{
+	//			TempVertices.AddUnique(FVector(i, XDim - 1 - r, 0));
+	//		}
+	//	}
+	//}
+	//else
+	//{
+		//randomly selected iteration
+	switch (SelectStartCorner)
+	{
+	case 0:
+	{
+		for (y = 0; y < YDim; y++)
+		{
+			for (x = 0; x < XDim; x++)
+			{
+				TempVertices.Add(FVector(x, y, 0));
+			}
+		}
+		break;
+	}
+	case 1:
+	{
+		for (y = 0; y < YDim; y++)
+		{
+			for (x = XDim - 1; x > -1; x--)
+			{
+				TempVertices.Add(FVector(x, y, 0));
+			}
+		}
+		break;
+	}
+	case 2:
+	{
+		for (y = YDim - 1; y > -1; y--)
+		{
+			for (x = 0; x < XDim; x++)
+			{
+				TempVertices.Add(FVector(x, y, 0));
+			}
+		}
+		break;
+	}
+	case 3:
+	{
+		for (y = YDim - 1; y > -1; y--)
+		{
+			for (x = XDim - 1; x > -1; x--)
+			{
+				TempVertices.Add(FVector(x, y, 0));
+			}
+		}
+		break;
+	}
+	}
+	//}
+
+
+	/*SelectStartCorner++;
+
+	if (SelectStartCorner > 3)
+	{
+		SelectStartCorner = 0;
+	}*/
+
+	const int32 TotalNumVertices = TempVertices.Num();
+
+	OutVertexArray.SetNumZeroed(TotalNumVertices);
+	InOutProcMeshData.Vertices.SetNumZeroed(TotalNumVertices);
+	int32 CurrentNumVertices = TempVertices.Num();
+
+
+	for (int32 i = 0; i < TotalNumVertices; i++)
+	{
+		const FVector& CurrentMapKey = TempVertices[i];
+		const FVector& CurrentScaledWorldMapKey = InSpawnLocation + CurrentMapKey * InLandscapeProperties.TileSize;
+
+		FLandscapeVertexData* VertexPtr = InOutLandscapeVerticesMap.Find(CurrentScaledWorldMapKey);
+
+		FLandscapeVertexData NewVertexData;
+		int32 NewHeight = 0;
+
+		if (VertexPtr)
+		{
+			NewVertexData = *VertexPtr;
+
+			/*const FLandscapeVertexData AvgNeighborData = FindAverageVertexNeighborData(CurrentMapKey, InLandscapeProperties, InOutProcMeshData, InOutLandscapeVerticesMap);
+
+			NewVertexData.AvgNeighborHeight = AvgNeighborData.Height;*/
+
+			NewHeight = NewVertexData.Height;
+		}
+		else
+		{
+			
+		}
+		//do stuff
+
+		const FVector NewVertex = (CurrentMapKey * InLandscapeProperties.TileSize) + FVector(0, 0, NewHeight);
+
+
+		const int32 NewVertexIndex = CurrentMapKey.X + (CurrentMapKey.Y * (YDim));
+
+		OutVertexArray[NewVertexIndex] = NewVertex;
+
+		InOutProcMeshData.Vertices[NewVertexIndex] = NewVertex;
+
+		InOutProcMeshData.FaceVertexMapArray[0].VertexIndexMap.Add(CurrentMapKey, NewVertexIndex);
+
+		InOutLandscapeVerticesMap.Add(CurrentScaledWorldMapKey, NewVertexData);
+
 		CurrentNumVertices--;
 	}
 
