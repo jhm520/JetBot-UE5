@@ -29,6 +29,7 @@ struct FLandscapeVertexData
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
 	float ProjectedHeight = 0;
 
+	//this is zero by default, but it gets populated when this struct is returned from FindNearestVertexNeighborData()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
 	int32 NeighborDistance = 0;
 

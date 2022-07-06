@@ -2169,6 +2169,8 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArrayImproved(const FLan
 
 	int32 SelectStartCorner = UKismetMathLibrary::RandomIntegerInRange(0, 3);
 
+	SelectStartCorner = 1;
+
 	switch (SelectStartCorner)
 	{
 	case 0:
@@ -2232,7 +2234,6 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArrayImproved(const FLan
 		FLandscapeVertexData* VertexPtr = InOutLandscapeVerticesMap.Find(CurrentScaledWorldMapKey);
 
 		FLandscapeVertexData NewVertexData;
-		int32 NewHeight = 0;
 
 		if (VertexPtr)
 		{
@@ -2242,22 +2243,67 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArrayImproved(const FLan
 
 			NewVertexData.AvgNeighborHeight = AvgNeighborData.Height;*/
 
-			NewHeight = NewVertexData.Height;
-
-
 		}
 		else
 		{
 			NewVertexData = FLandscapeVertexData();
 			
-			TArray<FLandscapeVertexData> NeighborDatas = GetAllVertexNeighborDatas(CurrentScaledWorldMapKey, InLandscapeProperties, InOutProcMeshData, InOutLandscapeVerticesMap);
+			TArray<FLandscapeVertexData> NeighborDatas = GetAllVertexNeighborDatas(CurrentMapKey, InLandscapeProperties, InOutProcMeshData, InOutLandscapeVerticesMap);
 
+			float AvgProjectedHeight = 0.0f;
+
+			float AvgProjectedHeightSum = 0.0f;
+
+			float AvgNeighborHeightSum = 0.0f;
+
+			int32 AvgNeighborHeightCount = 0;
+
+			for (const FLandscapeVertexData& NeighborData : NeighborDatas)
+			{
+				float SlopeAdd = UKismetMathLibrary::RandomFloatInRange(-InLandscapeProperties.MaximumSlopeDifference, InLandscapeProperties.MaximumSlopeDifference);
+
+				float NewSlope = NeighborData.AvgNeighborSlope + SlopeAdd;
+
+				AvgProjectedHeightSum += NeighborData.Height;
+
+				for (int32 iDist = 0; iDist < NeighborData.NeighborDistance; iDist++)
+				{
+					NewSlope = UKismetMathLibrary::FClamp(NewSlope, -InLandscapeProperties.MaximumSlope, InLandscapeProperties.MaximumSlope);
+
+					AvgProjectedHeightSum += (NewSlope * InLandscapeProperties.TileSize/* * NeighborData.NeighborDistance*/);
+
+					SlopeAdd = UKismetMathLibrary::RandomFloatInRange(-InLandscapeProperties.MaximumSlopeDifference, InLandscapeProperties.MaximumSlopeDifference);
+
+					NewSlope += SlopeAdd;
+				}
+
+
+				if (NeighborData.NeighborDistance == 1)
+				{
+					AvgNeighborHeightSum += NeighborData.Height;
+					AvgNeighborHeightCount++;
+				}
+			}
+
+			if (NeighborDatas.Num() > 0)
+			{
+				NewVertexData.Height = AvgProjectedHeightSum / NeighborDatas.Num();
+
+				if (AvgNeighborHeightCount > 0)
+				{
+					NewVertexData.AvgNeighborHeight = AvgNeighborHeightSum / AvgNeighborHeightCount;
+				}
+			}
+
+			int32 Rise = NewVertexData.Height - NewVertexData.AvgNeighborHeight;
+
+			NewVertexData.AvgNeighborSlope = Rise / InLandscapeProperties.TileSize;
 
 		}
 
 		//do stuff
 
-		const FVector NewVertex = (CurrentMapKey * InLandscapeProperties.TileSize) + FVector(0, 0, NewHeight);
+		const FVector NewVertex = (CurrentMapKey * InLandscapeProperties.TileSize) + FVector(0, 0, NewVertexData.Height);
 
 
 		const int32 NewVertexIndex = CurrentMapKey.X + (CurrentMapKey.Y * (YDim));
@@ -2465,18 +2511,22 @@ bool AJetLandscapeMesh::FindNearestVertexNeighborData(ECardinalDirection InNeigh
 			case ECardinalDirection::North:
 			{
 				NeighborKey = FVector(InVertex.X + NeighborDistance, InVertex.Y, 0);
+				break;
 			}
 			case ECardinalDirection::South:
 			{
 				NeighborKey = FVector(InVertex.X - NeighborDistance, InVertex.Y, 0);
+				break;
 			}
 			case ECardinalDirection::East:
 			{
 				NeighborKey = FVector(InVertex.X, InVertex.Y + NeighborDistance, 0);
+				break;
 			}
 			case ECardinalDirection::West:
 			{
 				NeighborKey = FVector(InVertex.X, InVertex.Y - NeighborDistance, 0);
+				break;
 			}
 		}
 
