@@ -29,6 +29,9 @@ struct FLandscapeVertexData
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
 	float ProjectedHeight = 0;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
+	int32 NeighborDistance = 0;
+
 	FLandscapeVertexData() {}
 
 };
@@ -297,6 +300,12 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Landscape")
 	static FLandscapeVertexData FindAverageVertexNeighborData(const FVector& InVertex, const FLandscapeProperties& InLandscapeProperties, const FProcMeshData& InProcMeshData, TMap<FVector, FLandscapeVertexData>& InOutWorldLandscapeVertices);
+
+	UFUNCTION(BlueprintCallable, Category = "Landscape")
+	static bool FindNearestVertexNeighborData(ECardinalDirection InNeighborDirection, const FVector& InVertex, FLandscapeVertexData& OutLandscapeVertexData, int32& OutNeighborDistance, const FLandscapeProperties& InLandscapeProperties, const FProcMeshData& InProcMeshData, TMap<FVector, FLandscapeVertexData>& InOutWorldLandscapeVertices);
+
+	static TArray<FLandscapeVertexData> GetAllVertexNeighborDatas(const FVector& InVertex, const FLandscapeProperties& InLandscapeProperties, const FProcMeshData& InProcMeshData, TMap<FVector, FLandscapeVertexData>& InOutWorldLandscapeVertices);
+
 
 	static TArray<FVector2D> CreateLandscapeUVArray(int32 InLandscapeSize, int32 InTileSize, int32 InHeightVariation, const FVector& InLocation);
 
