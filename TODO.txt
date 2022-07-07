@@ -120,4 +120,13 @@ TODO: Take average height difference into account when generating landscapes
 		float AvgNeighborHeight;
 		float AvgNeighborHeightDiff; //slope
 	}
-		
+
+TODO: Generate the landscape chunks, as many as desired at a given time, but make it so you can always draw them as a cluster of n radius actors, where n can be anything
+
+TODO: Vertex smoothing algorithm
+	Requirement: When creating a new spawn package of landscapes, keep a Set of the newly spawned vertices to return as an out variable. This is to use in the smoothing algorithm, so we don't accidentally edit a vertex that already exists in the world.
+	Input the array of new landscapes, and the Set of new vertices into the smoothing algorithm function. Pop a random vertex off the Vertices Set. Smooth that vertex with its neighbors. Re add that vertex to the global vertex map. Do this until the New Vertices Set is empty.
+	Now iterate through the new landscapes again, and update the landscape data to match the global vertices map
+
+	Smooth a Single Vertex:
+		Move the vertex height closer to the vertex's AverageNeighborHeight.

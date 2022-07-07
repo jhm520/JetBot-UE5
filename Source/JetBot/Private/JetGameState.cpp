@@ -123,9 +123,10 @@ void AJetGameState::CreateWorldLandscapes(FVector InWorldOrigin, int32 InWorldDi
 
 			FTransform NewTileSpawnTransform = FTransform(MapKey);
 			TMap<FVector, FLandscapeVertexData> VectorMap;
+			TSet<FVector> VertexSet;
 
 
-			Landscape = AJetLandscapeMesh::CreateLandscapeData(NewTileSpawnTransform, InLandscapeProperties, LandscapeDataMap, VectorMap);
+			Landscape = AJetLandscapeMesh::CreateLandscapeData(NewTileSpawnTransform, InLandscapeProperties, LandscapeDataMap, VectorMap, VertexSet);
 
 			if (x > 0)
 			{
@@ -188,8 +189,10 @@ void AJetGameState::TickSpawnLandscapeTransform()
 		FTransform NewTileSpawnTransform = FTransform(MapKey);
 
 		TMap<FVector, FLandscapeVertexData> VectorMap;
+		TSet<FVector> VertexSet;
 
-		Landscape = AJetLandscapeMesh::CreateLandscapeData(NewTileSpawnTransform, LandscapeSpawnProperties, LandscapeDataMap, VectorMap);
+
+		Landscape = AJetLandscapeMesh::CreateLandscapeData(NewTileSpawnTransform, LandscapeSpawnProperties, LandscapeDataMap, VectorMap, VertexSet);
 	}
 
 	

@@ -189,7 +189,7 @@ void AJetLandscapeMesh::AppendLandscapeSpawnQueue_Transform(const TArray<FTransf
 	GameState->LandscapeSpawnTransformQueue.Append(InLandscapeSpawnQueue);
 }
 
-FProcMeshData AJetLandscapeMesh::CreateLandscapeData(const FTransform& InSpawnTransform, const FLandscapeProperties& InLandscapeProperties, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap, TMap<FVector, FLandscapeVertexData>& InOutLandscapeVerticesMap)
+FProcMeshData AJetLandscapeMesh::CreateLandscapeData(const FTransform& InSpawnTransform, const FLandscapeProperties& InLandscapeProperties, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap, TMap<FVector, FLandscapeVertexData>& InOutLandscapeVerticesMap, TSet<FVector>& OutNewVertexSet)
 {
 	FProcMeshData OutProcMeshData;
 
@@ -199,8 +199,7 @@ FProcMeshData AJetLandscapeMesh::CreateLandscapeData(const FTransform& InSpawnTr
 	OutProcMeshData.SpawnTransform = InSpawnTransform;
 	//OutProcMeshData.Vertices = CreateLandscapeVertexArray(InLandscapeProperties, OutProcMeshData, InOutLandscapeDataMap);
 
-	OutProcMeshData.Vertices = CreateLandscapeVertexArrayImproved(InLandscapeProperties, OutProcMeshData, InOutLandscapeDataMap, InOutLandscapeVerticesMap, InSpawnTransform.GetLocation());
-
+	OutProcMeshData.Vertices = CreateLandscapeVertexArrayImproved(InLandscapeProperties, OutProcMeshData, InOutLandscapeDataMap, InOutLandscapeVerticesMap, InSpawnTransform.GetLocation(), OutNewVertexSet);
 
 	OutProcMeshData.UVs = CreateLandscapeUVArray(InLandscapeProperties.LandscapeSize, InLandscapeProperties.TileSize, InLandscapeProperties.HeightVariation, InSpawnTransform.GetLocation());
 
@@ -213,6 +212,37 @@ FProcMeshData AJetLandscapeMesh::CreateLandscapeData(const FTransform& InSpawnTr
 	OutProcMeshData.Materials.Add(InLandscapeProperties.LandscapeMaterialClass);
 
 	return OutProcMeshData;
+}
+
+void AJetLandscapeMesh::SmoothLandscapeVertices(const TArray<FVector>& InVerticesArray, const FLandscapeProperties& InLandscapeProperties, TMap<FVector, FLandscapeVertexData>& InOutWorldLandscapeVerticesMap)
+{
+}
+
+void AJetLandscapeMesh::UpdateWorldVertex(const FVector& InWorldVertex, const int32 InHeight, const FLandscapeProperties& InLandscapeProperties, FProcMeshData& InOutLandscapeData)
+{
+
+}
+
+void AJetLandscapeMesh::UpdateLandscapeVertexMap(const TArray<FVector>& InUpdatedVertices, const FLandscapeProperties& InLandscapeProperties, TArray<FProcMeshData>& InOutLandscapeDataArray, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap, const TMap<FVector, FLandscapeVertexData>& InOutWorldLandscapeVerticesMap)
+{
+	for (const FVector& UpdatedVertex : InUpdatedVertices)
+	{
+		const FLandscapeVertexData* WorldVertexPtr = InOutWorldLandscapeVerticesMap.Find(UpdatedVertex);
+
+		if (!WorldVertexPtr)
+		{
+			continue;
+		}
+
+		FVector NewVertex = UpdatedVertex;
+
+		NewVertex.Z = WorldVertexPtr->Height;
+
+		for (FProcMeshData& Landscape : InOutLandscapeDataArray)
+		{
+			UpdateWorldVertex(UpdatedVertex, WorldVertexPtr->Height, InLandscapeProperties, Landscape);
+		}
+	}
 }
 
 void AJetLandscapeMesh::ZipLandscapeDataWithNeighbors(UObject* WorldContextObject, FProcMeshData& InOutLandscapeData, const FLandscapeProperties& InLandscapeProperties)
@@ -596,7 +626,9 @@ void AJetLandscapeMesh::SpawnNeighborLandscapesInRadius(UObject* WorldContextObj
 
 			FTransform NewTileSpawnTransform = FTransform(MapKey);
 
-			Landscape = CreateLandscapeData(NewTileSpawnTransform, InLandscapeProperties, InLandscapeDataMap, InWorldSpawner->WorldLandscapeVertexMap);
+			TSet<FVector> VertexSet;
+
+			Landscape = CreateLandscapeData(NewTileSpawnTransform, InLandscapeProperties, InLandscapeDataMap, InWorldSpawner->WorldLandscapeVertexMap, VertexSet);
 
 			if (x > 0)
 			{
@@ -649,6 +681,8 @@ void AJetLandscapeMesh::CreateLandscapesInRadius(const FVector& InLocation, cons
 
 	//int32 Selector = UKismetMathLibrary::RandomIntegerInRange(0, 1);
 
+	TSet<FVector> LocalNewVerticesSet;
+
 	static int32 Selector = 0;
 
 	for (yEven = 0; yEven < 2; yEven++)
@@ -688,10 +722,8 @@ void AJetLandscapeMesh::CreateLandscapesInRadius(const FVector& InLocation, cons
 					}
 
 					FTransform NewTileSpawnTransform = FTransform(MapKey);
-
-					TMap<FVector, FLandscapeVertexData> VectorMap;
 					
-					Landscape = CreateLandscapeData(NewTileSpawnTransform, InLandscapeProperties, InOutLandscapeDataMap, InOutLandscapeVerticesMap);
+					Landscape = CreateLandscapeData(NewTileSpawnTransform, InLandscapeProperties, InOutLandscapeDataMap, InOutLandscapeVerticesMap, LocalNewVerticesSet);
 
 					/*FProcMeshData EasternNeighbor;
 					bool bEasternNeighbor = GetNeighborLandscapeData(Landscape, ECardinalDirection::East, EasternNeighbor, InLandscapeProperties.GetVectorScale(), InOutLandscapeDataMap);
@@ -735,6 +767,12 @@ void AJetLandscapeMesh::CreateLandscapesInRadius(const FVector& InLocation, cons
 
 	//for each new landscape data, smooth the landscape
 
+	const TArray<FVector>& LocalNewVerticesArray = LocalNewVerticesSet.Array();
+	
+	//smooth the landscape vertices and update the World Landscape Vertices Map
+	SmoothLandscapeVertices(LocalNewVerticesArray, InLandscapeProperties, InOutLandscapeVerticesMap);
+
+	UpdateLandscapeVertexMap(LocalNewVerticesArray, InLandscapeProperties, InOutLandscapeDataArray, InOutLandscapeDataMap, InOutLandscapeVerticesMap);
 	//for each new landscape data, compute the normals
 
 	//TMap<FVector, FVector> WorldNormalsMap;
@@ -849,7 +887,9 @@ void AJetLandscapeMesh::CreateLandscapeDataInRadius(const FVector& InLocation, c
 
 	MapKey = MapKey * FVector(1, 1, 0);
 
-	InOutSuperLandscapeData = CreateLandscapeData(FTransform(MapKey), InLandscapeProperties, InOutLandscapeDataMap, InOutLandscapeVerticesMap);
+	TSet<FVector> VertexSet;
+
+	InOutSuperLandscapeData = CreateLandscapeData(FTransform(MapKey), InLandscapeProperties, InOutLandscapeDataMap, InOutLandscapeVerticesMap, VertexSet);
 	
 	//TODO: Split this super-landscape into smaller landscapes
 
@@ -1051,9 +1091,10 @@ AJetLandscapeMesh* AJetLandscapeMesh::SpawnNeighborLandscape(ECardinalDirection 
 	}
 	TMap<FVector, FLandscapeVertexData> VectorMap;
 
+	TSet<FVector> VertexSet;
 
 	//Create a new landscape and spawn it
-	FProcMeshData NewLandscapeData = CreateLandscapeData(NeighborTransform, LandscapeProperties, GameState->LandscapeDataMap, VectorMap);
+	FProcMeshData NewLandscapeData = CreateLandscapeData(NeighborTransform, LandscapeProperties, GameState->LandscapeDataMap, VectorMap, VertexSet);
 
 	return SpawnNeighboringLandscapeWithData(NewLandscapeData);
 	//ZipLandscapeDataWithNeighbors(NewLandscapeData);
@@ -1108,9 +1149,11 @@ bool AJetLandscapeMesh::CreateNewNeighborLandscapeData(UObject* WorldContextObje
 	//}
 
 	TMap<FVector, FLandscapeVertexData> VectorMap;
+	TSet<FVector> VertexSet;
+
 
 	//Create a new landscape and spawn it
-	FProcMeshData NewLandscapeData = CreateLandscapeData(NeighborTransform, InLandscapeProperties, GameState->LandscapeDataMap, VectorMap);
+	FProcMeshData NewLandscapeData = CreateLandscapeData(NeighborTransform, InLandscapeProperties, GameState->LandscapeDataMap, VectorMap, VertexSet);
 	
 	//ZipLandscapeDataWithNeighbors(WorldContextObject, NewLandscapeData, InLandscapeProperties);
 
@@ -2149,7 +2192,7 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArrayNew(const FLandscap
 	return OutVertexArray;
 }
 
-TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArrayImproved(const FLandscapeProperties& InLandscapeProperties, FProcMeshData& InOutProcMeshData, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap, TMap<FVector, FLandscapeVertexData>& InOutLandscapeVerticesMap, const FVector& InSpawnLocation)
+TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArrayImproved(const FLandscapeProperties& InLandscapeProperties, FProcMeshData& InOutProcMeshData, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap, TMap<FVector, FLandscapeVertexData>& InOutLandscapeVerticesMap, const FVector& InSpawnLocation, TSet<FVector>& OutNewVertexSet)
 {
 	if (!InOutProcMeshData.FaceVertexMapArray.IsValidIndex(0))
 	{
@@ -2413,6 +2456,10 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArrayImproved(const FLan
 				
 			}
 
+
+			//Add it to the the set of new vertices
+
+			OutNewVertexSet.Add(CurrentScaledWorldMapKey);
 		}
 
 		//do stuff
