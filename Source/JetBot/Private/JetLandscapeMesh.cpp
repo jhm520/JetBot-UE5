@@ -2169,7 +2169,7 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArrayImproved(const FLan
 
 	int32 SelectStartCorner = UKismetMathLibrary::RandomIntegerInRange(0, 3);
 
-	SelectStartCorner = 3;
+	//SelectStartCorner = 3;
 	switch (SelectStartCorner)
 	{
 	case 0:
@@ -2338,7 +2338,7 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArrayImproved(const FLan
 					{
 						NewSlope = UKismetMathLibrary::RandomFloatInRange(-InLandscapeProperties.MaximumSlope, InLandscapeProperties.MaximumSlope);
 
-						AvgProjectedHeightSum += NeighborData.Height + (NewSlope * InLandscapeProperties.TileSize * NeighborData.NeighborDistance);
+							AvgProjectedHeightSum += NeighborData.Height + (NewSlope * InLandscapeProperties.TileSize * NeighborData.NeighborDistance);
 						AvgNeighborProjectedHeightCount++;
 					}
 					else
