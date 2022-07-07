@@ -2169,6 +2169,7 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArrayImproved(const FLan
 
 	int32 SelectStartCorner = UKismetMathLibrary::RandomIntegerInRange(0, 3);
 
+	SelectStartCorner = 3;
 	switch (SelectStartCorner)
 	{
 	case 0:
@@ -2286,11 +2287,15 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArrayImproved(const FLan
 
 			bool bHasAdjacentNeighbor = false;
 
+			TArray<FLandscapeVertexData> AdjacentNeighbors;
+
 			for (const FLandscapeVertexData& NeighborData : NeighborDatas)
 			{
 				if (NeighborData.NeighborDistance == 1)
 				{
 					bHasAdjacentNeighbor = true;
+
+					AdjacentNeighbors.Add(NeighborData);
 				}
 			}
 
@@ -2313,7 +2318,7 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArrayImproved(const FLan
 					SlopeAdd = UKismetMathLibrary::RandomFloatInRange(-InLandscapeProperties.MaximumSlopeDifference, 0);
 
 				}
-				else if (NeighborData.Height < InLandscapeProperties.MaximumHeight)
+				else if (NeighborData.Height < -InLandscapeProperties.MaximumHeight)
 				{
 					SlopeAdd = UKismetMathLibrary::RandomFloatInRange(0, InLandscapeProperties.MaximumSlopeDifference);
 				}
@@ -2331,8 +2336,40 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArrayImproved(const FLan
 				{
 					if (!bHasAdjacentNeighbor)
 					{
+						NewSlope = UKismetMathLibrary::RandomFloatInRange(-InLandscapeProperties.MaximumSlope, InLandscapeProperties.MaximumSlope);
+
 						AvgProjectedHeightSum += NeighborData.Height + (NewSlope * InLandscapeProperties.TileSize * NeighborData.NeighborDistance);
 						AvgNeighborProjectedHeightCount++;
+					}
+					else
+					{
+						float LocalAdjacentNeighborsAverageHeightSum = 0;
+						int32 LocalAdjacentNeighborsAverageHeightCount = 0;
+
+						for (const FLandscapeVertexData& AdjacentNeighborData : AdjacentNeighbors)
+						{
+							LocalAdjacentNeighborsAverageHeightSum += AdjacentNeighborData.Height;
+							LocalAdjacentNeighborsAverageHeightCount++;
+						}
+
+						float LocalAdjacentNeigborsAverageHeight = LocalAdjacentNeighborsAverageHeightSum / LocalAdjacentNeighborsAverageHeightCount;
+
+
+						float NeighborRise = NeighborData.Height - LocalAdjacentNeigborsAverageHeight;
+
+						float NeighborSlope = (NeighborRise / InLandscapeProperties.TileSize) / NeighborData.NeighborDistance;
+
+						float NewNeighborSlope = UKismetMathLibrary::RandomFloatInRange(NeighborSlope - InLandscapeProperties.MaximumSlopeDifference, NeighborSlope + InLandscapeProperties.MaximumSlopeDifference);
+
+						NewNeighborSlope = UKismetMathLibrary::FClamp(NewNeighborSlope, -InLandscapeProperties.MaximumSlope, InLandscapeProperties.MaximumSlope);
+
+
+						AvgProjectedHeightSum += LocalAdjacentNeigborsAverageHeight + (NewNeighborSlope * InLandscapeProperties.TileSize);
+
+						//AvgProjectedHeightSum += UKismetMathLibrary::Lerp(LocalAdjacentNeigborsAverageHeight, NeighborData.Height, 1 - ((NeighborData.NeighborDistance-1) / (InLandscapeProperties.LandscapeSize + 1)));
+						AvgNeighborProjectedHeightCount++;
+
+						//AvgProjectedHeightSum += NeighborData.Height + (NewSlope * InLandscapeProperties.TileSize)
 					}
 				}
 				else
@@ -2367,12 +2404,14 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArrayImproved(const FLan
 				if (AvgNeighborHeightCount > 0)
 				{
 					NewVertexData.AvgNeighborHeight = AvgNeighborHeightSum / AvgNeighborHeightCount;
+
+					float Rise = NewVertexData.Height - NewVertexData.AvgNeighborHeight;
+
+					NewVertexData.AvgNeighborSlope = (Rise / InLandscapeProperties.TileSize) / AvgNeighborHeightCount;
 				}
+
+				
 			}
-
-			float Rise = NewVertexData.Height - NewVertexData.AvgNeighborHeight;
-
-			NewVertexData.AvgNeighborSlope = (Rise / InLandscapeProperties.TileSize)/AvgNeighborHeightCount;
 
 		}
 
