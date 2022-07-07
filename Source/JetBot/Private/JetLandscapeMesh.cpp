@@ -2169,8 +2169,6 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArrayImproved(const FLan
 
 	int32 SelectStartCorner = UKismetMathLibrary::RandomIntegerInRange(0, 3);
 
-	SelectStartCorner = 1;
-
 	switch (SelectStartCorner)
 	{
 	case 0:
@@ -2239,6 +2237,32 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArrayImproved(const FLan
 		{
 			NewVertexData = *VertexPtr;
 
+			TArray<FLandscapeVertexData> NeighborDatas = GetAllVertexNeighborDatas(CurrentMapKey, InLandscapeProperties, InOutProcMeshData, InOutLandscapeVerticesMap);
+
+			float AvgNeighborHeightSum = 0.0f;
+
+			int32 AvgNeighborHeightCount = 0;
+
+
+			//Update the vertex data, upon accessing a vertex we've already added
+			for (const FLandscapeVertexData& NeighborData : NeighborDatas)
+			{
+				if (NeighborData.NeighborDistance == 1)
+				{
+					AvgNeighborHeightSum += NeighborData.Height;
+					AvgNeighborHeightCount++;
+				}
+			}
+
+			if (AvgNeighborHeightCount > 0)
+			{
+				NewVertexData.AvgNeighborHeight = AvgNeighborHeightSum / AvgNeighborHeightCount;
+			}
+
+			float Rise = NewVertexData.Height - NewVertexData.AvgNeighborHeight;
+
+			NewVertexData.AvgNeighborSlope = (Rise / InLandscapeProperties.TileSize) / AvgNeighborHeightCount;
+
 			/*const FLandscapeVertexData AvgNeighborData = FindAverageVertexNeighborData(CurrentMapKey, InLandscapeProperties, InOutProcMeshData, InOutLandscapeVerticesMap);
 
 			NewVertexData.AvgNeighborHeight = AvgNeighborData.Height;*/
@@ -2260,22 +2284,36 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArrayImproved(const FLan
 
 			for (const FLandscapeVertexData& NeighborData : NeighborDatas)
 			{
+
+				/*if (NeighborData.NeighborDistance > 1)
+				{
+					continue;
+				}*/
+
+				if (NeighborData.NeighborDistance > 1)
+				{
+					int32 Sixnine = 69;
+				}
 				float SlopeAdd = UKismetMathLibrary::RandomFloatInRange(-InLandscapeProperties.MaximumSlopeDifference, InLandscapeProperties.MaximumSlopeDifference);
 
 				float NewSlope = NeighborData.AvgNeighborSlope + SlopeAdd;
 
+				NewSlope = UKismetMathLibrary::FClamp(NewSlope, -InLandscapeProperties.MaximumSlope, InLandscapeProperties.MaximumSlope);
+
 				AvgProjectedHeightSum += NeighborData.Height;
 
-				for (int32 iDist = 0; iDist < NeighborData.NeighborDistance; iDist++)
-				{
-					NewSlope = UKismetMathLibrary::FClamp(NewSlope, -InLandscapeProperties.MaximumSlope, InLandscapeProperties.MaximumSlope);
+				AvgProjectedHeightSum += (NewSlope * InLandscapeProperties.TileSize * NeighborData.NeighborDistance);
 
-					AvgProjectedHeightSum += (NewSlope * InLandscapeProperties.TileSize/* * NeighborData.NeighborDistance*/);
+				//for (int32 iDist = 0; iDist < NeighborData.NeighborDistance; iDist++)
+				//{
+				//	NewSlope = UKismetMathLibrary::FClamp(NewSlope, -InLandscapeProperties.MaximumSlope, InLandscapeProperties.MaximumSlope);
 
-					SlopeAdd = UKismetMathLibrary::RandomFloatInRange(-InLandscapeProperties.MaximumSlopeDifference, InLandscapeProperties.MaximumSlopeDifference);
+				//	AvgProjectedHeightSum += (NewSlope * InLandscapeProperties.TileSize/* * NeighborData.NeighborDistance*/);
 
-					NewSlope += SlopeAdd;
-				}
+				//	SlopeAdd = UKismetMathLibrary::RandomFloatInRange(-InLandscapeProperties.MaximumSlopeDifference, InLandscapeProperties.MaximumSlopeDifference);
+
+				//	NewSlope += SlopeAdd;
+				//}
 
 
 				if (NeighborData.NeighborDistance == 1)
@@ -2295,9 +2333,9 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArrayImproved(const FLan
 				}
 			}
 
-			int32 Rise = NewVertexData.Height - NewVertexData.AvgNeighborHeight;
+			float Rise = NewVertexData.Height - NewVertexData.AvgNeighborHeight;
 
-			NewVertexData.AvgNeighborSlope = Rise / InLandscapeProperties.TileSize;
+			NewVertexData.AvgNeighborSlope = (Rise / InLandscapeProperties.TileSize)/AvgNeighborHeightCount;
 
 		}
 
@@ -2536,6 +2574,7 @@ bool AJetLandscapeMesh::FindNearestVertexNeighborData(ECardinalDirection InNeigh
 
 		if (VertexPtr)
 		{
+
 			OutLandscapeVertexData = *VertexPtr;
 			OutLandscapeVertexData.NeighborDistance = NeighborDistance;
 			OutNeighborDistance = NeighborDistance;
