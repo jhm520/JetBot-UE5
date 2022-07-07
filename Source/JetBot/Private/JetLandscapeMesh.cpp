@@ -220,7 +220,23 @@ void AJetLandscapeMesh::SmoothLandscapeVertices(const TArray<FVector>& InVertice
 
 void AJetLandscapeMesh::UpdateWorldVertex(const FVector& InWorldVertex, const int32 InHeight, const FLandscapeProperties& InLandscapeProperties, FProcMeshData& InOutLandscapeData)
 {
+	FVector LandscapeRelativeLoc = InWorldVertex - InOutLandscapeData.SpawnTransform.GetLocation();
 
+	FVector IndexMapLoc = LandscapeRelativeLoc / InLandscapeProperties.TileSize;
+
+	int32* VertexIndexPtr = InOutLandscapeData.FaceVertexMapArray[0].VertexIndexMap.Find(IndexMapLoc);
+
+	if (!VertexIndexPtr)
+	{
+		return;
+	}
+
+	FVector NewVertex = LandscapeRelativeLoc;
+
+	NewVertex.Z = InHeight;
+
+
+	InOutLandscapeData.Vertices[*VertexIndexPtr] = NewVertex;
 }
 
 void AJetLandscapeMesh::UpdateLandscapeVertexMap(const TArray<FVector>& InUpdatedVertices, const FLandscapeProperties& InLandscapeProperties, TArray<FProcMeshData>& InOutLandscapeDataArray, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap, const TMap<FVector, FLandscapeVertexData>& InOutWorldLandscapeVerticesMap)
