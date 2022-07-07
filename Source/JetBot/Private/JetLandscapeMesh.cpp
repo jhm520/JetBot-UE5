@@ -257,6 +257,8 @@ void AJetLandscapeMesh::UpdateLandscapeVertexMap(const TArray<FVector>& InUpdate
 		for (FProcMeshData& Landscape : InOutLandscapeDataArray)
 		{
 			UpdateWorldVertex(UpdatedVertex, WorldVertexPtr->Height, InLandscapeProperties, Landscape);
+
+			InOutLandscapeDataMap.Add(Landscape.SpawnTransform.GetLocation() * FVector(1, 1, 0), Landscape);
 		}
 	}
 }
