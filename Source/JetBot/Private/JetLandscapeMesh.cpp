@@ -2434,7 +2434,7 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArrayImproved(const FLan
 
 						float NewNeighborSlope = UKismetMathLibrary::RandomFloatInRange(NeighborSlope - InLandscapeProperties.MaximumSlopeDifference, NeighborSlope + InLandscapeProperties.MaximumSlopeDifference);
 
-						NewNeighborSlope = UKismetMathLibrary::FClamp(NewNeighborSlope, -InLandscapeProperties.MaximumSlope, InLandscapeProperties.MaximumSlope);
+						//NewNeighborSlope = UKismetMathLibrary::FClamp(NewNeighborSlope, -InLandscapeProperties.MaximumSlope, InLandscapeProperties.MaximumSlope);
 
 
 						AvgProjectedHeightSum += LocalAdjacentNeigborsAverageHeight + (NewNeighborSlope * InLandscapeProperties.TileSize);
