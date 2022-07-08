@@ -196,7 +196,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
 	static void SmoothLandscapeVertices(const TArray<FVector>& InVerticesArray, const FLandscapeProperties& InLandscapeProperties, TMap<FVector, FLandscapeVertexData>& InOutWorldLandscapeVerticesMap);
 
-	static void UpdateWorldVertex(const FVector& InWorldVertex, const int32 InHeight, const FLandscapeProperties& InLandscapeProperties, FProcMeshData& InOutLandscapeData);
+	//returns whether a world vertex was updated
+	static bool UpdateWorldVertex(const FVector& InWorldVertex, const int32 InHeight, const FLandscapeProperties& InLandscapeProperties, FProcMeshData& InOutLandscapeData);
 
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
 	static void UpdateLandscapeVertexMap(const TArray<FVector>& InUpdatedVertices, const FLandscapeProperties& InLandscapeProperties, TArray<FProcMeshData>& InOutLandscapeDataArray, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap, const TMap<FVector, FLandscapeVertexData>& InOutWorldLandscapeVerticesMap);

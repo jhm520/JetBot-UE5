@@ -218,7 +218,7 @@ void AJetLandscapeMesh::SmoothLandscapeVertices(const TArray<FVector>& InVertice
 {
 }
 
-void AJetLandscapeMesh::UpdateWorldVertex(const FVector& InWorldVertex, const int32 InHeight, const FLandscapeProperties& InLandscapeProperties, FProcMeshData& InOutLandscapeData)
+bool AJetLandscapeMesh::UpdateWorldVertex(const FVector& InWorldVertex, const int32 InHeight, const FLandscapeProperties& InLandscapeProperties, FProcMeshData& InOutLandscapeData)
 {
 	FVector LandscapeRelativeLoc = InWorldVertex - InOutLandscapeData.SpawnTransform.GetLocation();
 
@@ -228,7 +228,7 @@ void AJetLandscapeMesh::UpdateWorldVertex(const FVector& InWorldVertex, const in
 
 	if (!VertexIndexPtr)
 	{
-		return;
+		return false;
 	}
 
 	FVector NewVertex = LandscapeRelativeLoc;
@@ -237,6 +237,8 @@ void AJetLandscapeMesh::UpdateWorldVertex(const FVector& InWorldVertex, const in
 
 
 	InOutLandscapeData.Vertices[*VertexIndexPtr] = NewVertex;
+
+	return true;
 }
 
 void AJetLandscapeMesh::UpdateLandscapeVertexMap(const TArray<FVector>& InUpdatedVertices, const FLandscapeProperties& InLandscapeProperties, TArray<FProcMeshData>& InOutLandscapeDataArray, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap, const TMap<FVector, FLandscapeVertexData>& InOutWorldLandscapeVerticesMap)
@@ -256,11 +258,21 @@ void AJetLandscapeMesh::UpdateLandscapeVertexMap(const TArray<FVector>& InUpdate
 
 		for (FProcMeshData& Landscape : InOutLandscapeDataArray)
 		{
-			UpdateWorldVertex(UpdatedVertex, WorldVertexPtr->Height, InLandscapeProperties, Landscape);
+			bool bUpdated = UpdateWorldVertex(UpdatedVertex, WorldVertexPtr->Height, InLandscapeProperties, Landscape);
 
-			InOutLandscapeDataMap.Add(Landscape.SpawnTransform.GetLocation() * FVector(1, 1, 0), Landscape);
+			if (!bUpdated)
+			{
+				continue;
+			}
 		}
 	}
+
+	//update the landscape map
+	for (FProcMeshData& Landscape : InOutLandscapeDataArray)
+	{
+		InOutLandscapeDataMap.Add(Landscape.SpawnTransform.GetLocation() * FVector(1, 1, 0), Landscape);
+	}
+
 }
 
 void AJetLandscapeMesh::ZipLandscapeDataWithNeighbors(UObject* WorldContextObject, FProcMeshData& InOutLandscapeData, const FLandscapeProperties& InLandscapeProperties)
