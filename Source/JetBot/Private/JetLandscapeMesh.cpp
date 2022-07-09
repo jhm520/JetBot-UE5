@@ -800,9 +800,11 @@ void AJetLandscapeMesh::CreateLandscapesInRadius(const FVector& InLocation, cons
 	const TArray<FVector>& LocalNewVerticesArray = LocalNewVerticesSet.Array();
 	
 	//smooth the landscape vertices and update the World Landscape Vertices Map
-	SmoothLandscapeVertices(LocalNewVerticesArray, InLandscapeProperties, InOutLandscapeVerticesMap);
+	//TODO: Write the SmoothLandscapeVertices() function
+	/*SmoothLandscapeVertices(LocalNewVerticesArray, InLandscapeProperties, InOutLandscapeVerticesMap);
 
-	UpdateLandscapeVertexMap(LocalNewVerticesArray, InLandscapeProperties, InOutLandscapeDataArray, InOutLandscapeDataMap, InOutLandscapeVerticesMap);
+	UpdateLandscapeVertexMap(LocalNewVerticesArray, InLandscapeProperties, InOutLandscapeDataArray, InOutLandscapeDataMap, InOutLandscapeVerticesMap);*/
+
 	//for each new landscape data, compute the normals
 
 	//TMap<FVector, FVector> WorldNormalsMap;
@@ -2409,9 +2411,16 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArrayImproved(const FLan
 				{
 					if (!bHasAdjacentNeighbor)
 					{
-						NewSlope = UKismetMathLibrary::RandomFloatInRange(-InLandscapeProperties.MaximumSlope, InLandscapeProperties.MaximumSlope);
+						for (int32 ni = 1; ni < NeighborData.NeighborDistance; ni++)
+						{
+							NewSlope += UKismetMathLibrary::RandomFloatInRange(-InLandscapeProperties.MaximumSlopeDifference, InLandscapeProperties.MaximumSlopeDifference);
+						}
 
-							AvgProjectedHeightSum += NeighborData.Height + (NewSlope * InLandscapeProperties.TileSize * NeighborData.NeighborDistance);
+						NewSlope = UKismetMathLibrary::FClamp(NewSlope, -InLandscapeProperties.MaximumSlope, InLandscapeProperties.MaximumSlope);
+
+						//NewSlope = UKismetMathLibrary::RandomFloatInRange(-InLandscapeProperties.MaximumSlope, InLandscapeProperties.MaximumSlope);
+
+						AvgProjectedHeightSum += NeighborData.Height + (NewSlope * InLandscapeProperties.TileSize * NeighborData.NeighborDistance);
 						AvgNeighborProjectedHeightCount++;
 					}
 					else
@@ -2432,7 +2441,7 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArrayImproved(const FLan
 
 						float NeighborSlope = (NeighborRise / InLandscapeProperties.TileSize) / NeighborData.NeighborDistance;
 
-						float NewNeighborSlope = UKismetMathLibrary::RandomFloatInRange(NeighborSlope - InLandscapeProperties.MaximumSlopeDifference, NeighborSlope + InLandscapeProperties.MaximumSlopeDifference);
+						float NewNeighborSlope = UKismetMathLibrary::RandomFloatInRange(NeighborSlope - InLandscapeProperties.MaximumSlopeInterpolationDifference, NeighborSlope + InLandscapeProperties.MaximumSlopeInterpolationDifference);
 
 						//NewNeighborSlope = UKismetMathLibrary::FClamp(NewNeighborSlope, -InLandscapeProperties.MaximumSlope, InLandscapeProperties.MaximumSlope);
 
