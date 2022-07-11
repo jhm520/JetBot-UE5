@@ -755,38 +755,6 @@ void AJetLandscapeMesh::CreateLandscapesInRadius(const FVector& InLocation, cons
 					
 					Landscape = CreateLandscapeData(NewTileSpawnTransform, InLandscapeProperties, InOutLandscapeDataMap, InOutLandscapeVerticesMap, LocalNewVerticesSet);
 
-					/*FProcMeshData EasternNeighbor;
-					bool bEasternNeighbor = GetNeighborLandscapeData(Landscape, ECardinalDirection::East, EasternNeighbor, InLandscapeProperties.GetVectorScale(), InOutLandscapeDataMap);
-
-					FProcMeshData NorthernNeighbor;
-					bool bNorthernNeighbor = GetNeighborLandscapeData(Landscape, ECardinalDirection::North, NorthernNeighbor, InLandscapeProperties.GetVectorScale(), InOutLandscapeDataMap);
-
-					FProcMeshData SouthernNeighbor;
-					bool bSouthernNeighbor = GetNeighborLandscapeData(Landscape, ECardinalDirection::South, SouthernNeighbor, InLandscapeProperties.GetVectorScale(), InOutLandscapeDataMap);
-
-					FProcMeshData WesternNeighbor;
-					bool bWesternNeighbor = GetNeighborLandscapeData(Landscape, ECardinalDirection::West, WesternNeighbor, InLandscapeProperties.GetVectorScale(), InOutLandscapeDataMap);
-
-
-					if (bSouthernNeighbor)
-					{
-						ZipLandscapeDataWithNeighbor(ECardinalDirection::South, Landscape, InLandscapeProperties, InOutLandscapeDataMap);
-					}
-					
-					if (bNorthernNeighbor)
-					{
-						ZipLandscapeDataWithNeighbor(ECardinalDirection::North, Landscape, InLandscapeProperties, InOutLandscapeDataMap);
-					}
-
-					if (bWesternNeighbor)
-					{
-						ZipLandscapeDataWithNeighbor(ECardinalDirection::West, Landscape, InLandscapeProperties, InOutLandscapeDataMap);
-					}
-					
-					if (bEasternNeighbor)
-					{
-						ZipLandscapeDataWithNeighbor(ECardinalDirection::East, Landscape, InLandscapeProperties, InOutLandscapeDataMap);
-					}*/
 
 					InOutLandscapeDataArray.Add(Landscape);
 					InOutLandscapeDataMap.Add(Landscape.SpawnTransform.GetLocation() * FVector(1, 1, 0), Landscape);
@@ -805,11 +773,23 @@ void AJetLandscapeMesh::CreateLandscapesInRadius(const FVector& InLocation, cons
 
 	UpdateLandscapeVertexMap(LocalNewVerticesArray, InLandscapeProperties, InOutLandscapeDataArray, InOutLandscapeDataMap, InOutLandscapeVerticesMap);*/
 
+	UpdateLandscapeNormals(InOutLandscapeDataArray, InOutLandscapeNormalMap, InLandscapeProperties);
+
+	//TODO: Set the world UVs
+
+	Selector++;
+
+	if (Selector > 1)
+	{
+		Selector = 0;
+	}
+}
+
+void AJetLandscapeMesh::UpdateLandscapeNormals(TArray<FProcMeshData>& InOutProcMeshArray, TMap<FVector, FVector>& InOutNormalsMap, const FLandscapeProperties& InLandscapeProperties)
+{
 	//for each new landscape data, compute the normals
 
-	//TMap<FVector, FVector> WorldNormalsMap;
-
-	for (const FProcMeshData& LandscapeItr : InOutLandscapeDataArray)
+	for (const FProcMeshData& LandscapeItr : InOutProcMeshArray)
 	{
 		const int32 VerticesNum = LandscapeItr.Vertices.Num();
 		for (int32 i = 0; i < VerticesNum; i++)
@@ -817,7 +797,7 @@ void AJetLandscapeMesh::CreateLandscapesInRadius(const FVector& InLocation, cons
 			FVector WorldMapKey = LandscapeItr.SpawnTransform.GetLocation() + LandscapeItr.Vertices[i];
 			WorldMapKey *= FVector(1, 1, 0);
 
-			FVector* NormalPtr = InOutLandscapeNormalMap.Find(WorldMapKey);
+			FVector* NormalPtr = InOutNormalsMap.Find(WorldMapKey);
 
 			FVector CurrentNormal = FVector::ZeroVector;
 
@@ -831,19 +811,19 @@ void AJetLandscapeMesh::CreateLandscapesInRadius(const FVector& InLocation, cons
 			}
 
 
-			InOutLandscapeNormalMap.Add(WorldMapKey, CurrentNormal);
+			InOutNormalsMap.Add(WorldMapKey, CurrentNormal);
 		}
 	}
 
 	//now set the normals
-	for (FProcMeshData& LandscapeItr : InOutLandscapeDataArray)
+	for (FProcMeshData& LandscapeItr : InOutProcMeshArray)
 	{
 		const int32 VerticesNum = LandscapeItr.Vertices.Num();
 		for (int32 i = 0; i < VerticesNum; i++)
 		{
 			FVector WorldMapKey = LandscapeItr.SpawnTransform.GetLocation() + LandscapeItr.Vertices[i];
 			WorldMapKey *= FVector(1, 1, 0);
-			FVector* NormalPtr = InOutLandscapeNormalMap.Find(WorldMapKey);
+			FVector* NormalPtr = InOutNormalsMap.Find(WorldMapKey);
 
 			if (NormalPtr)
 			{
@@ -852,15 +832,6 @@ void AJetLandscapeMesh::CreateLandscapesInRadius(const FVector& InLocation, cons
 				LandscapeItr.Normals[i] = NewNormal;
 			}
 		}
-	}
-
-	//TODO: Set the world UVs
-
-	Selector++;
-
-	if (Selector > 1)
-	{
-		Selector = 0;
 	}
 }
 

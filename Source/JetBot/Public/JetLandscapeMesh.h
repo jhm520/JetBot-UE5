@@ -239,6 +239,9 @@ public:
 	static void CreateLandscapesInRadius(const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, TArray<FProcMeshData>& InOutLandscapeDataArray, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap, TMap<FVector, FLandscapeVertexData>& InOutLandscapeVerticesMap, TMap<FVector, FVector>& InOutLandscapeNormalMap);
 
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
+	static void UpdateLandscapeNormals(TArray<FProcMeshData>& InOutProcMeshArray, TMap<FVector, FVector>& InOutNormalsMap, const FLandscapeProperties& InLandscapeProperties);
+
+	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
 	static void SmoothLandscape(FProcMeshData& InOutProcMesh, float InSmoothingConstant, const FLandscapeProperties& InLandscapeProperties, TMap<FVector, FLandscapeVertexData>& InOutVertexDataMap);
 
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
