@@ -78,6 +78,6 @@ public:
 	UFUNCTION()
 	void TickDestroyLandscape();
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite, Category = "World Spawner")
 	AJetWorldSpawner* WorldSpawner = nullptr;
 };

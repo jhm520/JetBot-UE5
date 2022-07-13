@@ -98,7 +98,10 @@ void AJetWorldSpawner::CreateLandscapeMeshSectionWithData(UObject* WorldContextO
 	}
 
 	LandscapeProcMesh->CreateMeshSection(CurrentMeshSectionIndex, InProcMeshData.WorldVertices, InProcMeshData.Triangles, InProcMeshData.Normals, InProcMeshData.UVs, TArray<FColor>(), TArray<FProcMeshTangent>(), true);
+	FProcMeshSection* Section = LandscapeProcMesh->GetProcMeshSection(CurrentMeshSectionIndex);
 
+	//TODO: USe this to get the section
+	const FProcMeshVertex& VertexZero = Section->ProcVertexBuffer[0];
 
 	if (WorldLandscapeMaterial)
 	{
