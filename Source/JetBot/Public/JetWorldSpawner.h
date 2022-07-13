@@ -68,6 +68,9 @@ public:
 	void CreateLandscapeMeshSectionWithData(UObject* WorldContextObject, const FProcMeshData& InProcMeshData, const FLandscapeProperties& InLandscapeProperties, AJetWorldSpawner* InWorldSpawner);
 
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Procedural Mesh")
+	int32 GetActorCurrentLandscapeSectionIndex(AActor* InActor);
+
 	UPROPERTY()
 	int32 CurrentMeshSectionIndex = 0;
 

@@ -123,6 +123,12 @@ void AJetWorldSpawner::CreateLandscapeMeshSectionWithData(UObject* WorldContextO
 	return;
 }
 
+int32 AJetWorldSpawner::GetActorCurrentLandscapeSectionIndex(AActor* InActor)
+{
+	//TODO: Implement
+	return -1;
+}
+
 // Called when the game starts or when spawned
 void AJetWorldSpawner::BeginPlay()
 {
