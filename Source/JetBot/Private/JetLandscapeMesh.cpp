@@ -785,7 +785,7 @@ void AJetLandscapeMesh::CreateLandscapesInRadius(const FVector& InLocation, cons
 	}
 }
 
-void AJetLandscapeMesh::UpdateLandscapeNormals(TArray<FProcMeshData>& InOutProcMeshArray, TMap<FVector, FVector>& InOutNormalsMap, const FLandscapeProperties& InLandscapeProperties, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap)
+void AJetLandscapeMesh::UpdateLandscapeNormals(TArray<FProcMeshData>& InOutProcMeshArray, TMap<FVector, FVector>& InOutNormalsMap, const FLandscapeProperties& InLandscapeProperties)
 {
 	//for each new landscape data, compute the normals
 
@@ -1244,6 +1244,11 @@ AJetLandscapeMesh* AJetLandscapeMesh::SpawnLandscapeWithData(UObject* WorldConte
 	AJetLandscapeMesh* SpawnedActor = WorldContextObject->GetWorld()->SpawnActorDeferred<AJetLandscapeMesh>(LandscapeClass, InProcMeshData.SpawnTransform);
 
 	if (!SpawnedActor)
+	{
+		return nullptr;
+	}
+
+	if (!InWorldSpawner)
 	{
 		return nullptr;
 	}
@@ -2268,6 +2273,8 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArrayImproved(const FLan
 
 	OutVertexArray.SetNumZeroed(TotalNumVertices);
 	InOutProcMeshData.Vertices.SetNumZeroed(TotalNumVertices);
+	InOutProcMeshData.WorldVertices.SetNumZeroed(TotalNumVertices);
+
 	int32 CurrentNumVertices = TempVertices.Num();
 
 
@@ -2482,6 +2489,7 @@ TArray<FVector> AJetLandscapeMesh::CreateLandscapeVertexArrayImproved(const FLan
 		OutVertexArray[NewVertexIndex] = NewVertex;
 
 		InOutProcMeshData.Vertices[NewVertexIndex] = NewVertex;
+		InOutProcMeshData.WorldVertices[NewVertexIndex] = InOutProcMeshData.SpawnTransform.GetLocation() + NewVertex;
 
 		InOutProcMeshData.FaceVertexMapArray[0].VertexIndexMap.Add(CurrentMapKey, NewVertexIndex);
 

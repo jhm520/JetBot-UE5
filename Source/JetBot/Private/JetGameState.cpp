@@ -34,7 +34,7 @@ void AJetGameState::AppendLandscapeSpawnQueue(const TArray<FProcMeshData> InLand
 
 void AJetGameState::AppendLandscapeDestroyQueue(const TArray<AJetLandscapeMesh*> InLandscapeQueue)
 {
-	LandscapeDestroyQueue.Append(InLandscapeQueue);
+	//LandscapeDestroyQueue.Append(InLandscapeQueue);
 
 	for (AJetLandscapeMesh* Neighbor : InLandscapeQueue)
 	{
@@ -254,7 +254,12 @@ void AJetGameState::TickSpawnLandscape()
 
 	FProcMeshData& FirstLandscape = LandscapeSpawnQueue[0];
 
-	AJetLandscapeMesh::SpawnLandscapeWithData(this, FirstLandscape, WorldSpawner->LandscapeProperties, WorldSpawner);
+	if (WorldSpawner)
+	{
+		WorldSpawner->CreateLandscapeMeshSectionWithData(this, FirstLandscape, WorldSpawner->LandscapeProperties, WorldSpawner);
+	}
+
+	//AJetLandscapeMesh::SpawnLandscapeWithData(this, FirstLandscape, WorldSpawner->LandscapeProperties, WorldSpawner);
 
 	LandscapeSpawnQueue.RemoveAt(0);
 

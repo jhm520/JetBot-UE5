@@ -57,6 +57,9 @@ struct FProcMeshData
 	TArray<FVector> Vertices;
 
 	UPROPERTY(BlueprintReadWrite, Category = "Procedural Mesh")
+	TArray<FVector> WorldVertices;
+
+	UPROPERTY(BlueprintReadWrite, Category = "Procedural Mesh")
 	TArray<int32> Triangles;
 
 	UPROPERTY(BlueprintReadWrite, Category = "Procedural Mesh")

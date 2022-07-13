@@ -11,7 +11,8 @@ AJetWorldSpawner::AJetWorldSpawner()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
+	LandscapeProcMesh = CreateDefaultSubobject<UProceduralMeshComponent>("ProcMesh");
+	RootComponent = LandscapeProcMesh;
 }
 
 AJetLandscapeMesh* AJetWorldSpawner::GetCurrentLandscapeMesh(UObject* WorldContextObject)
@@ -87,6 +88,36 @@ void AJetWorldSpawner::OnLandscapeDataCreated(const FOnLandscapeDataCreatedResul
 
 	PlayerEnteredLandscapeQueue.RemoveAt(0);
 
+}
+
+void AJetWorldSpawner::CreateLandscapeMeshSectionWithData(UObject* WorldContextObject, const FProcMeshData& InProcMeshData, const FLandscapeProperties& InLandscapeProperties, AJetWorldSpawner* InWorldSpawner)
+{
+	if (!LandscapeProcMesh)
+	{
+		return;
+	}
+
+	LandscapeProcMesh->CreateMeshSection(CurrentMeshSectionIndex, InProcMeshData.WorldVertices, InProcMeshData.Triangles, InProcMeshData.Normals, InProcMeshData.UVs, TArray<FColor>(), TArray<FProcMeshTangent>(), true);
+
+
+	if (WorldLandscapeMaterial)
+	{
+		LandscapeProcMesh->SetMaterial(CurrentMeshSectionIndex, WorldLandscapeMaterial);
+		CurrentMeshSectionIndex++;
+		return;
+	}
+
+	int32 i = 0;
+
+	for (UMaterialInterface* Mat : InProcMeshData.Materials)
+	{
+		LandscapeProcMesh->SetMaterial(i, Mat);
+
+		i++;
+	}
+
+	CurrentMeshSectionIndex++;
+	return;
 }
 
 // Called when the game starts or when spawned

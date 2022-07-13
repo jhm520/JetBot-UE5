@@ -61,6 +61,16 @@ public:
 	UPROPERTY()
 	FProcMeshData WorldLandscapeData;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Procedural Mesh")
+	class UProceduralMeshComponent* LandscapeProcMesh;
+
+	UFUNCTION(BlueprintCallable, meta = (WorldContext = "WorldContextObject"), Category = "Procedural Mesh")
+	void CreateLandscapeMeshSectionWithData(UObject* WorldContextObject, const FProcMeshData& InProcMeshData, const FLandscapeProperties& InLandscapeProperties, AJetWorldSpawner* InWorldSpawner);
+
+
+	UPROPERTY()
+	int32 CurrentMeshSectionIndex = 0;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
