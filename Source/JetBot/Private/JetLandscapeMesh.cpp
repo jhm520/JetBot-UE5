@@ -785,7 +785,7 @@ void AJetLandscapeMesh::CreateLandscapesInRadius(const FVector& InLocation, cons
 	}
 }
 
-void AJetLandscapeMesh::UpdateLandscapeNormals(TArray<FProcMeshData>& InOutProcMeshArray, TMap<FVector, FVector>& InOutNormalsMap, const FLandscapeProperties& InLandscapeProperties)
+void AJetLandscapeMesh::UpdateLandscapeNormals(TArray<FProcMeshData>& InOutProcMeshArray, TMap<FVector, FVector>& InOutNormalsMap, const FLandscapeProperties& InLandscapeProperties, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap)
 {
 	//for each new landscape data, compute the normals
 
