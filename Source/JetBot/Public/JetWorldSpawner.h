@@ -71,6 +71,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Procedural Mesh")
 	int32 GetActorCurrentLandscapeSectionIndex(AActor* InActor);
 
+	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
+	void OnCharacterEnteredNewLandscapeSection(ACharacter* InCharacter, int32 InLandscapeSectionIndex);
+
 	UPROPERTY()
 	int32 CurrentMeshSectionIndex = 0;
 
@@ -86,6 +89,9 @@ public:
 
 	UPROPERTY()
 	TArray<AJetLandscapeMesh*> PlayerEnteredLandscapeQueue;
+
+	UPROPERTY()
+	TArray<int32> PlayerEnteredLandscapeIndexQueue;
 
 	UPROPERTY()
 	TMap<FVector, int32> WorldLandscapeHeightMap;

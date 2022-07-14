@@ -4,6 +4,7 @@
 #include "JetWorldSpawner.h"
 #include "JetGameState.h"
 #include "Async/Async.h"
+#include "Kismet/GameplayStatics.h"
 
 PRAGMA_DISABLE_OPTIMIZATION
 // Sets default values
@@ -59,10 +60,18 @@ void AJetWorldSpawner::OnLandscapeDataCreated(const FOnLandscapeDataCreatedResul
 
 	//OnLandscapesFinishedSpawning();
 
-	GameState->AppendLandscapeSpawnQueue(InLandscapeData.LandscapeArray);
 
-	WorldLandscapeVertexMap = InLandscapeData.LandscapeVerticesMap;
-	WorldLandscapeNormalMap = InLandscapeData.LandscapeNormalMap;
+
+	if (InLandscapeData.LandscapeArray.Num() > 0)
+	{
+		GameState->LandscapeDataMap.Append(InLandscapeData.LandscapeDataMap);
+
+		GameState->AppendLandscapeSpawnQueue(InLandscapeData.LandscapeArray);
+
+		WorldLandscapeVertexMap.Append(InLandscapeData.LandscapeVerticesMap);
+		WorldLandscapeNormalMap.Append(InLandscapeData.LandscapeNormalMap);
+	}
+	
 
 	//// Spawn all of the new neighbors
 	//for (const FProcMeshData& Landscape : InLandscapeData.LandscapeArray)
@@ -72,21 +81,38 @@ void AJetWorldSpawner::OnLandscapeDataCreated(const FOnLandscapeDataCreatedResul
 	//	AJetLandscapeMesh::SpawnLandscapeWithData(this, Landscape, LandscapeProperties, this);
 	//}
 
-	if (PlayerEnteredLandscapeQueue.Num() == 0)
+	/*if (PlayerEnteredLandscapeQueue.Num() == 0)
+	{
+		return;
+	}*/
+
+	if (PlayerEnteredLandscapeIndexQueue.Num() == 0)
 	{
 		return;
 	}
 
-	AJetLandscapeMesh* EnteredLandscape = PlayerEnteredLandscapeQueue[0];
+	int32 EnteredLandscapeIndex = PlayerEnteredLandscapeIndexQueue[0];
+
+	if (EnteredLandscapeIndex < 0)
+	{
+		return;
+	}
+
+	/*JetLandscapeMesh* EnteredLandscape = PlayerEnteredLandscapeQueue[0];
 
 	if (!EnteredLandscape)
 	{
 		return;
-	}
+	}*/
 
-	WorldSpawner_OnPlayerEnteredLandscape(EnteredLandscape, nullptr, EnteredLandscape->GetActorLocation());
 
-	PlayerEnteredLandscapeQueue.RemoveAt(0);
+	OnCharacterEnteredNewLandscapeSection(UGameplayStatics::GetPlayerCharacter(this, 0), EnteredLandscapeIndex);
+
+	PlayerEnteredLandscapeIndexQueue.RemoveAt(0);
+
+	/*WorldSpawner_OnPlayerEnteredLandscape(EnteredLandscape, nullptr, EnteredLandscape->GetActorLocation());
+
+	PlayerEnteredLandscapeQueue.RemoveAt(0);*/
 
 }
 
@@ -126,7 +152,100 @@ void AJetWorldSpawner::CreateLandscapeMeshSectionWithData(UObject* WorldContextO
 int32 AJetWorldSpawner::GetActorCurrentLandscapeSectionIndex(AActor* InActor)
 {
 	//TODO: Implement
+
+	if (!InActor)
+	{
+		return -1;
+	}
+
+	if (!LandscapeProcMesh)
+	{
+		return -1;
+	}
+
+	const FVector ActorLoc = InActor->GetActorLocation();
+
+	for (int32 i = 0; i < CurrentMeshSectionIndex; i++)
+	{
+		FProcMeshSection* Section = LandscapeProcMesh->GetProcMeshSection(i);
+
+		if (!Section)
+		{
+			continue;
+		}
+
+		if (Section->ProcVertexBuffer.Num() == 0)
+		{
+			continue;
+		}
+
+		const FVector& StartLoc = Section->ProcVertexBuffer[0].Position;
+
+		const FVector& EndLoc = Section->ProcVertexBuffer[Section->ProcVertexBuffer.Num() - 1].Position;
+
+		bool bXStart = StartLoc.X < EndLoc.X;
+
+		float xStart = bXStart ? StartLoc.X : EndLoc.X;
+
+		float xEnd = bXStart ? EndLoc.X : StartLoc.X;
+
+		bool bYStart = StartLoc.Y < EndLoc.Y;
+
+		float yStart = bYStart ? StartLoc.Y : EndLoc.Y;
+
+		float yEnd = bYStart ? EndLoc.Y : StartLoc.Y;
+
+		bool bWithinX = FMath::IsWithin<float>(ActorLoc.X, xStart, xEnd);
+
+		bool bWithinY = FMath::IsWithin<float>(ActorLoc.Y, yStart, yEnd);
+
+		if (bWithinX && bWithinY)
+		{
+			return i;
+		}
+	}
+
 	return -1;
+}
+
+void AJetWorldSpawner::OnCharacterEnteredNewLandscapeSection(ACharacter* InCharacter, int32 InLandscapeSectionIndex)
+{
+	if (!InCharacter)
+	{
+		return;
+	}
+
+	if (!LandscapeProcMesh)
+	{
+		return;
+	}
+
+	if (bCreatingLandscapeData)
+	{
+		PlayerEnteredLandscapeIndexQueue.Add(InLandscapeSectionIndex);
+		return;
+	}
+
+
+	FProcMeshSection* Section = LandscapeProcMesh->GetProcMeshSection(InLandscapeSectionIndex);
+
+	if (!Section)
+	{
+		return;
+	}
+
+
+	AJetGameState* GameState = Cast<AJetGameState>(GetWorld()->GetGameState());
+
+	if (!GameState)
+	{
+		return;
+	}
+
+	TWeakObjectPtr<AJetWorldSpawner> WeakPtr = this;
+	bCreatingLandscapeData = true;
+	AsyncCreateLandscapeData(LandscapeCreatedDelegate, Section->ProcVertexBuffer[0].Position*FVector(1,1,0), LandscapeProperties, WeakPtr, GameState->LandscapeDataMap, WorldLandscapeVertexMap, WorldLandscapeNormalMap);
+
 }
 
 // Called when the game starts or when spawned
