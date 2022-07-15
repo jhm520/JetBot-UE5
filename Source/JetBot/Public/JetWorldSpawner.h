@@ -66,7 +66,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-    static void AsyncCreateLandscapeData(FOnLandscapeDataCreatedDelegate Out, const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, TWeakObjectPtr<AJetWorldSpawner> InWorldSpawner, const TMap<FVector, FProcMeshData>& InLandscapeDataMap, const TMap<FVector, FLandscapeVertexData>& InLandscapeVerticesMap, const TMap<FVector, FVector>& InLandscapeNormalMap, const FOnLandscapeDataCreatedResult& InWorldLandscapeData);
+    static void AsyncCreateLandscapeData(FOnLandscapeDataCreatedDelegate Out, const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, TWeakObjectPtr<AJetWorldSpawner> InWorldSpawner, const TMap<FVector, FProcMeshData>& InLandscapeDataMap, const TMap<FVector, FLandscapeVertexData>& InLandscapeVerticesMap, const TMap<FVector, FVector>& InLandscapeNormalMap, const FOnLandscapeDataCreatedResult* InWorldLandscapeData);
 
 	UPROPERTY()
 	TArray<AJetLandscapeMesh*> PlayerEnteredLandscapeQueue;
