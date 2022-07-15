@@ -12,6 +12,7 @@
 
 class USphereComponent;
 
+
 USTRUCT(BlueprintType)
 struct FLandscapeVertexData
 {
@@ -114,6 +115,26 @@ struct FLandscapeProperties
 	}
 
 	FLandscapeProperties() {}
+};
+
+USTRUCT(BlueprintType)
+struct FOnLandscapeDataCreatedResult
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
+	TArray<FProcMeshData> LandscapeArray;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
+	TMap<FVector, FProcMeshData> LandscapeDataMap;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
+	TMap<FVector, FLandscapeVertexData> LandscapeVerticesMap;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
+	TMap<FVector, FVector> LandscapeNormalMap;
+
+	FOnLandscapeDataCreatedResult() {}
 };
 
 //class AJetWorldSpawner;
@@ -236,7 +257,7 @@ public:
 	static void SpawnNeighborLandscapesInRadius(UObject* WorldContextObject, const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, AJetWorldSpawner* InWorldSpawner, TMap<FVector, FProcMeshData>& InLandscapeDataMap);*/
 
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
-	static void CreateLandscapesInRadius(const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, TArray<FProcMeshData>& InOutLandscapeDataArray, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap, TMap<FVector, FLandscapeVertexData>& InOutLandscapeVerticesMap, TMap<FVector, FVector>& InOutLandscapeNormalMap);
+	static void CreateLandscapesInRadius(const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, TArray<FProcMeshData>& InOutLandscapeDataArray, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap, TMap<FVector, FLandscapeVertexData>& InOutLandscapeVerticesMap, TMap<FVector, FVector>& InOutLandscapeNormalMap, const FOnLandscapeDataCreatedResult& InWorldLandscapeData, FOnLandscapeDataCreatedResult& OutNewWorldLandscapeData);
 
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
 	static void UpdateLandscapeNormals(TArray<FProcMeshData>& InOutProcMeshArray, TMap<FVector, FVector>& InOutNormalsMap, const FLandscapeProperties& InLandscapeProperties);

@@ -8,26 +8,6 @@
 #include "JetLandscapeMesh.h"
 #include "JetWorldSpawner.generated.h"
 
-USTRUCT(BlueprintType)
-struct FOnLandscapeDataCreatedResult
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
-	TArray<FProcMeshData> LandscapeArray;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
-	TMap<FVector, FProcMeshData> LandscapeDataMap;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
-	TMap<FVector, FLandscapeVertexData> LandscapeVerticesMap;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
-	TMap<FVector, FVector> LandscapeNormalMap;
-
-	FOnLandscapeDataCreatedResult() {}
-};
-
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLandscapeDataCreatedDelegate, const struct FOnLandscapeDataCreatedResult&, OnLandscapeDataCreatedResult);
 
 UCLASS()
@@ -60,7 +40,7 @@ public:
 	FOnLandscapeDataCreatedDelegate LandscapeCreatedDelegate;
 
 	UPROPERTY()
-	FProcMeshData WorldLandscapeData;
+	FProcMeshData WorldLandscapeProcMeshData;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Procedural Mesh")
 	class UProceduralMeshComponent* LandscapeProcMesh;
@@ -86,7 +66,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-    static void AsyncCreateLandscapeData(FOnLandscapeDataCreatedDelegate Out, const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, TWeakObjectPtr<AJetWorldSpawner> InWorldSpawner, const TMap<FVector, FProcMeshData>& InLandscapeDataMap, const TMap<FVector, FLandscapeVertexData>& InLandscapeVerticesMap, const TMap<FVector, FVector>& InLandscapeNormalMap);
+    static void AsyncCreateLandscapeData(FOnLandscapeDataCreatedDelegate Out, const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, TWeakObjectPtr<AJetWorldSpawner> InWorldSpawner, const TMap<FVector, FProcMeshData>& InLandscapeDataMap, const TMap<FVector, FLandscapeVertexData>& InLandscapeVerticesMap, const TMap<FVector, FVector>& InLandscapeNormalMap, const FOnLandscapeDataCreatedResult& InWorldLandscapeData);
 
 	UPROPERTY()
 	TArray<AJetLandscapeMesh*> PlayerEnteredLandscapeQueue;
@@ -108,6 +88,9 @@ public:
 
 	UPROPERTY(Transient)
 	bool bCreatingLandscapeData = false;
+
+	UPROPERTY()
+	FOnLandscapeDataCreatedResult WorldLandscapeData;
 
 	void WorldSpawner_OnPlayerEnteredLandscape(AJetLandscapeMesh* InLandscape, ACharacter* InPlayer, const FVector& InLandscapeSegmentVector);
 
