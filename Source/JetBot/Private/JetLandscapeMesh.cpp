@@ -9,7 +9,7 @@
 #include "Kismet/KismetArrayLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
 
-PRAGMA_DISABLE_OPTIMIZATION
+
 namespace LandscapeStatics
 {
 	FVector North = FVector(1, 0, 0);
@@ -3016,5 +3016,3 @@ TMap<FVector, int32> AJetLandscapeMesh::GetLandscapeVertexMap()
 
 	return ProcMeshData.FaceVertexMapArray[0].VertexIndexMap;
 }
-
-PRAGMA_ENABLE_OPTIMIZATION

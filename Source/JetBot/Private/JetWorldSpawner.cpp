@@ -6,7 +6,7 @@
 #include "Async/Async.h"
 #include "Kismet/GameplayStatics.h"
 
-PRAGMA_DISABLE_OPTIMIZATION
+
 // Sets default values
 AJetWorldSpawner::AJetWorldSpawner()
 {
@@ -298,7 +298,7 @@ void AJetWorldSpawner::AsyncCreateLandscapeData(FOnLandscapeDataCreatedDelegate 
 
 		OutLandscapeResult.LandscapeDataMap = InLandscapeDataMap;
 		OutLandscapeResult.LandscapeVerticesMap = InLandscapeVerticesMap;
-		OutLandscapeResult.LandscapeNormalMap = InLandscapeNormalMap;
+		/*OutLandscapeResult.LandscapeNormalMap = InLandscapeNormalMap;*/
 
 		AJetLandscapeMesh::CreateLandscapesInRadius(InLocation, InLandscapeProperties, OutLandscapeResult.LandscapeArray, OutLandscapeResult.LandscapeDataMap, OutLandscapeResult.LandscapeVerticesMap, OutLandscapeResult.LandscapeNormalMap);
 
@@ -340,7 +340,6 @@ void AJetWorldSpawner::WorldSpawner_OnPlayerEnteredLandscape(AJetLandscapeMesh* 
 	bCreatingLandscapeData = true;
 	AsyncCreateLandscapeData(LandscapeCreatedDelegate, InLandscape->GetActorLocation(), LandscapeProperties, WeakPtr, GameState->LandscapeDataMap, WorldLandscapeVertexMap, WorldLandscapeNormalMap);
 }
-PRAGMA_ENABLE_OPTIMIZATION
 
 void AJetWorldSpawner::OnLandscapesFinishedSpawning_Implementation()
 {
