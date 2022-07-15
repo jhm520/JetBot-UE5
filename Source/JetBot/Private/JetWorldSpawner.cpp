@@ -289,7 +289,7 @@ void AJetWorldSpawner::Tick(float DeltaTime)
 
 }
 
-void AJetWorldSpawner::AsyncCreateLandscapeData(FOnLandscapeDataCreatedDelegate Out, const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, TWeakObjectPtr<AJetWorldSpawner> InWorldSpawner, const TMap<FVector, FProcMeshData>& InLandscapeDataMap, const TMap<FVector, FLandscapeVertexData>& InLandscapeVerticesMap, const TMap<FVector, FVector>& InLandscapeNormalMap, const FOnLandscapeDataCreatedResult* InWorldLandscapeData)
+void AJetWorldSpawner::AsyncCreateLandscapeData(FOnLandscapeDataCreatedDelegate Out, const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, TWeakObjectPtr<AJetWorldSpawner> InWorldSpawner, const TMap<FVector, FProcMeshData>& InLandscapeDataMap, const TMap<FVector, FLandscapeVertexData>& InLandscapeVerticesMap, const TMap<FVector, FVector>& InLandscapeNormalMap, FOnLandscapeDataCreatedResult* InWorldLandscapeData)
 {
 
 	AsyncTask(ENamedThreads::AnyHiPriThreadNormalTask, [Out, InLocation, InLandscapeProperties, InWorldSpawner, InLandscapeDataMap, InLandscapeVerticesMap, InLandscapeNormalMap, InWorldLandscapeData]()
@@ -303,7 +303,7 @@ void AJetWorldSpawner::AsyncCreateLandscapeData(FOnLandscapeDataCreatedDelegate 
 		OutLandscapeResult.LandscapeVerticesMap = InLandscapeVerticesMap;
 		/*OutLandscapeResult.LandscapeNormalMap = InLandscapeNormalMap;*/
 
-		AJetLandscapeMesh::CreateLandscapesInRadius(InLocation, InLandscapeProperties, OutLandscapeResult.LandscapeArray, OutLandscapeResult.LandscapeDataMap, OutLandscapeResult.LandscapeVerticesMap, OutLandscapeResult.LandscapeNormalMap, *InWorldLandscapeData, OutNewLandscapeResult);
+		AJetLandscapeMesh::CreateLandscapesInRadius(InLocation, InLandscapeProperties, OutLandscapeResult.LandscapeArray, OutLandscapeResult.LandscapeDataMap, OutLandscapeResult.LandscapeVerticesMap, OutLandscapeResult.LandscapeNormalMap, InWorldLandscapeData, OutNewLandscapeResult);
 
 		/*FProcMeshData InOutSuperLandscapeData;
 

@@ -692,8 +692,11 @@ bool AJetLandscapeMesh::Static_GetNeighborLandscapeData(UObject* WorldContextObj
 //	//bHasSpawnedNeighborLandscapes = true;
 //}
 
-void AJetLandscapeMesh::CreateLandscapesInRadius(const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, TArray<FProcMeshData>& InOutLandscapeDataArray, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap, TMap<FVector, FLandscapeVertexData>& InOutLandscapeVerticesMap, TMap<FVector, FVector>& InOutLandscapeNormalMap, const FOnLandscapeDataCreatedResult& InWorldLandscapeData, FOnLandscapeDataCreatedResult& OutNewWorldLandscapeData)
+void AJetLandscapeMesh::CreateLandscapesInRadius(const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, TArray<FProcMeshData>& InOutLandscapeDataArray, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap, TMap<FVector, FLandscapeVertexData>& InOutLandscapeVerticesMap, TMap<FVector, FVector>& InOutLandscapeNormalMap, struct FOnLandscapeDataCreatedResult* InOutWorldLandscapeData, FOnLandscapeDataCreatedResult& OutNewWorldLandscapeData)
 {
+
+	//FOnLandscapeDataCreatedResult& WorldLandscapeDataRef = *InOutWorldLandscapeData;
+
 	int32 x = 0;
 	int32 y = 0;
 

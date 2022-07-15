@@ -256,8 +256,7 @@ public:
 	/*UFUNCTION(BlueprintCallable, meta = (WorldContext = "WorldContextObject"), Category = "Procedural Mesh")
 	static void SpawnNeighborLandscapesInRadius(UObject* WorldContextObject, const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, AJetWorldSpawner* InWorldSpawner, TMap<FVector, FProcMeshData>& InLandscapeDataMap);*/
 
-	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
-	static void CreateLandscapesInRadius(const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, TArray<FProcMeshData>& InOutLandscapeDataArray, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap, TMap<FVector, FLandscapeVertexData>& InOutLandscapeVerticesMap, TMap<FVector, FVector>& InOutLandscapeNormalMap, const FOnLandscapeDataCreatedResult& InWorldLandscapeData, FOnLandscapeDataCreatedResult& OutNewWorldLandscapeData);
+	static void CreateLandscapesInRadius(const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, TArray<FProcMeshData>& InOutLandscapeDataArray, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap, TMap<FVector, FLandscapeVertexData>& InOutLandscapeVerticesMap, TMap<FVector, FVector>& InOutLandscapeNormalMap, struct FOnLandscapeDataCreatedResult* InOutWorldLandscapeData, FOnLandscapeDataCreatedResult& OutNewWorldLandscapeData);
 
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
 	static void UpdateLandscapeNormals(TArray<FProcMeshData>& InOutProcMeshArray, TMap<FVector, FVector>& InOutNormalsMap, const FLandscapeProperties& InLandscapeProperties);
