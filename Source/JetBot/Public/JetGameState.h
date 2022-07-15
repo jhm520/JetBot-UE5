@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameState.h"
 #include "../JetBot.h"
+#include "JetWorldSpawner.h"
 
 #include "JetGameState.generated.h"
 

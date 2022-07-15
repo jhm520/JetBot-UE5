@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "../JetBot.h"
+#include "JetLandscapeMesh.h"
 #include "JetWorldSpawner.generated.h"
 
 USTRUCT(BlueprintType)

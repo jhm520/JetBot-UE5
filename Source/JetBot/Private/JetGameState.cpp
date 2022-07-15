@@ -3,8 +3,8 @@
 
 #include "JetGameState.h"
 #include "../JetBot.h"
-#include "JetLandscapeMesh.h"
 #include "JetWorldSpawner.h"
+#include "JetLandscapeMesh.h"
 
 PRAGMA_DISABLE_OPTIMIZATION
 void AJetGameState::OnLandscapeSpawned_Implementation(AJetLandscapeMesh* InLandscape, const FProcMeshData& InProcMesh)
@@ -220,7 +220,7 @@ void AJetGameState::TickSpawnLandscapeTransform()
 
 	AJetLandscapeMesh::OnLandscapeDataCreated(this, Landscape);
 
-	AJetLandscapeMesh::SpawnLandscapeWithData(this, Landscape, LandscapeSpawnProperties, nullptr);
+	//AJetLandscapeMesh::SpawnLandscapeWithData(this, Landscape, LandscapeSpawnProperties, nullptr);
 
 	LandscapeSpawnTransformQueue.RemoveAt(0);
 

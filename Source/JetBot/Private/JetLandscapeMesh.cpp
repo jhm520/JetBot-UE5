@@ -5,7 +5,6 @@
 #include "Kismet/GameplayStatics.h"
 #include "../JetBot.h"
 #include "JetGameState.h"
-#include "JetWorldSpawner.h"
 #include "Components/SphereComponent.h"
 #include "Kismet/KismetArrayLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -91,11 +90,11 @@ void AJetLandscapeMesh::OnPlayerEnteredLandscape(ACharacter* InPlayer, const FVe
 		return;
 	}
 
-	if (WorldSpawner)
+	/*if (WorldSpawner)
 	{
 		WorldSpawner->WorldSpawner_OnPlayerEnteredLandscape(this, InPlayer, InLandscapeSegmentVector);
 
-	}
+	}*/
 
 
 	//SpawnNeighborLandscapesInRadius();
@@ -607,91 +606,91 @@ bool AJetLandscapeMesh::Static_GetNeighborLandscapeData(UObject* WorldContextObj
 
 }
 
-void AJetLandscapeMesh::SpawnNeighborLandscapesInRadius(UObject* WorldContextObject, const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, AJetWorldSpawner* InWorldSpawner, TMap<FVector, FProcMeshData>& InLandscapeDataMap)
-{
-	/*if (bHasSpawnedNeighborLandscapes)
-	{
-		return;
-	}*/
-
-	int32 i = 0;
-
-	TMap<FVector, FProcMeshData> OutProcMeshData;
-
-	TArray<FProcMeshData> LocalLandscapeSpawnQueue;
-
-	int32 x = 0;
-	int32 y = 0;
-
-	int32 xDim = (InLandscapeProperties.NeighborSpawnRadius * 2) + 1;
-	int32 yDim = xDim;
-
-	int32 Modifier = xDim/2;
-
-	TArray<FTransform> LocalSpawnTransformQueue;
-
-	for (y = 0; y < yDim; y++)
-	{
-		for (x = 0; x < xDim; x++)
-		{
-
-			FProcMeshData Landscape;
-
-			FVector MapKey = FVector(InLocation + (InLandscapeProperties.GetVectorScale() * (FVector(x - Modifier, y - Modifier, 0))));
-
-			MapKey = MapKey * FVector(1, 1, 0);
-
-
-			bool bFoundLandscape = FindLandscapeData(InLandscapeDataMap, MapKey, Landscape, InLandscapeProperties);
-
-			if (bFoundLandscape)
-			{
-				if (!Landscape.bIsActive)
-				{
-					LocalLandscapeSpawnQueue.Add(Landscape);
-				}
-
-				continue;
-			}
-
-			FTransform NewTileSpawnTransform = FTransform(MapKey);
-
-			TSet<FVector> VertexSet;
-
-			Landscape = CreateLandscapeData(NewTileSpawnTransform, InLandscapeProperties, InLandscapeDataMap, InWorldSpawner->WorldLandscapeVertexMap, VertexSet);
-
-			if (x > 0)
-			{
-				ZipLandscapeDataWithNeighbor(ECardinalDirection::South, Landscape, InLandscapeProperties, InLandscapeDataMap);
-			}
-			else
-			{
-				ZipLandscapeDataWithNeighbor(ECardinalDirection::North, Landscape, InLandscapeProperties, InLandscapeDataMap);
-			}
-
-			if (y > 0)
-			{
-				ZipLandscapeDataWithNeighbor(ECardinalDirection::West, Landscape, InLandscapeProperties, InLandscapeDataMap);
-			}
-			else
-			{
-				ZipLandscapeDataWithNeighbor(ECardinalDirection::East, Landscape, InLandscapeProperties, InLandscapeDataMap);
-			}
-
-			LocalLandscapeSpawnQueue.Add(Landscape);
-		}
-	}
-
-	// Spawn all of the new neighbors
-	for (FProcMeshData& Landscape : LocalLandscapeSpawnQueue)
-	{
-		Landscape.bIsActive = true;
-		OnLandscapeDataCreated(WorldContextObject, Landscape);
-		SpawnLandscapeWithData(WorldContextObject, Landscape, InLandscapeProperties, InWorldSpawner);
-	}
-
-	//bHasSpawnedNeighborLandscapes = true;
-}
+//void AJetLandscapeMesh::SpawnNeighborLandscapesInRadius(UObject* WorldContextObject, const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, AJetWorldSpawner* InWorldSpawner, TMap<FVector, FProcMeshData>& InLandscapeDataMap)
+//{
+//	/*if (bHasSpawnedNeighborLandscapes)
+//	{
+//		return;
+//	}*/
+//
+//	int32 i = 0;
+//
+//	TMap<FVector, FProcMeshData> OutProcMeshData;
+//
+//	TArray<FProcMeshData> LocalLandscapeSpawnQueue;
+//
+//	int32 x = 0;
+//	int32 y = 0;
+//
+//	int32 xDim = (InLandscapeProperties.NeighborSpawnRadius * 2) + 1;
+//	int32 yDim = xDim;
+//
+//	int32 Modifier = xDim/2;
+//
+//	TArray<FTransform> LocalSpawnTransformQueue;
+//
+//	for (y = 0; y < yDim; y++)
+//	{
+//		for (x = 0; x < xDim; x++)
+//		{
+//
+//			FProcMeshData Landscape;
+//
+//			FVector MapKey = FVector(InLocation + (InLandscapeProperties.GetVectorScale() * (FVector(x - Modifier, y - Modifier, 0))));
+//
+//			MapKey = MapKey * FVector(1, 1, 0);
+//
+//
+//			bool bFoundLandscape = FindLandscapeData(InLandscapeDataMap, MapKey, Landscape, InLandscapeProperties);
+//
+//			if (bFoundLandscape)
+//			{
+//				if (!Landscape.bIsActive)
+//				{
+//					LocalLandscapeSpawnQueue.Add(Landscape);
+//				}
+//
+//				continue;
+//			}
+//
+//			FTransform NewTileSpawnTransform = FTransform(MapKey);
+//
+//			TSet<FVector> VertexSet;
+//
+//			Landscape = CreateLandscapeData(NewTileSpawnTransform, InLandscapeProperties, InLandscapeDataMap, InWorldSpawner->WorldLandscapeVertexMap, VertexSet);
+//
+//			if (x > 0)
+//			{
+//				ZipLandscapeDataWithNeighbor(ECardinalDirection::South, Landscape, InLandscapeProperties, InLandscapeDataMap);
+//			}
+//			else
+//			{
+//				ZipLandscapeDataWithNeighbor(ECardinalDirection::North, Landscape, InLandscapeProperties, InLandscapeDataMap);
+//			}
+//
+//			if (y > 0)
+//			{
+//				ZipLandscapeDataWithNeighbor(ECardinalDirection::West, Landscape, InLandscapeProperties, InLandscapeDataMap);
+//			}
+//			else
+//			{
+//				ZipLandscapeDataWithNeighbor(ECardinalDirection::East, Landscape, InLandscapeProperties, InLandscapeDataMap);
+//			}
+//
+//			LocalLandscapeSpawnQueue.Add(Landscape);
+//		}
+//	}
+//
+//	// Spawn all of the new neighbors
+//	for (FProcMeshData& Landscape : LocalLandscapeSpawnQueue)
+//	{
+//		Landscape.bIsActive = true;
+//		OnLandscapeDataCreated(WorldContextObject, Landscape);
+//		SpawnLandscapeWithData(WorldContextObject, Landscape, InLandscapeProperties, InWorldSpawner);
+//	}
+//
+//	//bHasSpawnedNeighborLandscapes = true;
+//}
 
 void AJetLandscapeMesh::CreateLandscapesInRadius(const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, TArray<FProcMeshData>& InOutLandscapeDataArray, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap, TMap<FVector, FLandscapeVertexData>& InOutLandscapeVerticesMap, TMap<FVector, FVector>& InOutLandscapeNormalMap)
 {
@@ -1090,7 +1089,7 @@ AJetLandscapeMesh* AJetLandscapeMesh::SpawnNeighborLandscape(ECardinalDirection 
 
 	if (DataPtr)
 	{
-		return SpawnLandscapeWithData(this, *DataPtr, LandscapeProperties, WorldSpawner);
+		return nullptr/*SpawnLandscapeWithData(this, *DataPtr, LandscapeProperties, WorldSpawner)*/;
 	}
 	TMap<FVector, FLandscapeVertexData> VectorMap;
 
@@ -1235,56 +1234,56 @@ AJetLandscapeMesh* AJetLandscapeMesh::SpawnNeighboringLandscapeWithData(const FP
 	return SpawnedActor;
 }
 
-AJetLandscapeMesh* AJetLandscapeMesh::SpawnLandscapeWithData(UObject* WorldContextObject, const FProcMeshData& InProcMeshData, const FLandscapeProperties& InLandscapeProperties, AJetWorldSpawner* InWorldSpawner)
-{
-	FActorSpawnParameters ActorSpawnParams = FActorSpawnParameters();
-	UClass* LandscapeClass = InLandscapeProperties.LandscapeClass;
-
-	//Spawn the landscape deferred
-	AJetLandscapeMesh* SpawnedActor = WorldContextObject->GetWorld()->SpawnActorDeferred<AJetLandscapeMesh>(LandscapeClass, InProcMeshData.SpawnTransform);
-
-	if (!SpawnedActor)
-	{
-		return nullptr;
-	}
-
-	if (!InWorldSpawner)
-	{
-		return nullptr;
-	}
-
-	SpawnedActor->bAutoCreateLandscape = false;
-	SpawnedActor->LandscapeSize = InLandscapeProperties.LandscapeSize;
-	SpawnedActor->TileSize = InLandscapeProperties.TileSize;
-	SpawnedActor->HeightVariation = InLandscapeProperties.HeightVariation;
-	SpawnedActor->NeighborSpawnRadius = InLandscapeProperties.NeighborSpawnRadius;
-
-	SpawnedActor->LandscapeProperties = InLandscapeProperties;
-	SpawnedActor->WorldSpawner = InWorldSpawner;
-
-
-	SpawnedActor->ProcMeshData = InProcMeshData;
-
-	UGameplayStatics::FinishSpawningActor(SpawnedActor, InProcMeshData.SpawnTransform);
-	
-	TArray<UMaterialInterface*> MatArray;
-
-	if (InWorldSpawner)
-	{
-		MatArray.Add(InWorldSpawner->WorldLandscapeMaterial);
-	}
-
-	SpawnedActor->CreateMesh(MatArray);
-
-	AJetGameState* GameState = Cast<AJetGameState>(WorldContextObject->GetWorld()->GetGameState());
-
-	if (GameState)
-	{
-		GameState->OnLandscapeSpawned(SpawnedActor, SpawnedActor->ProcMeshData);
-	}
-
-	return SpawnedActor;
-}
+//AJetLandscapeMesh* AJetLandscapeMesh::SpawnLandscapeWithData(UObject* WorldContextObject, const FProcMeshData& InProcMeshData, const FLandscapeProperties& InLandscapeProperties, AJetWorldSpawner* InWorldSpawner)
+//{
+//	FActorSpawnParameters ActorSpawnParams = FActorSpawnParameters();
+//	UClass* LandscapeClass = InLandscapeProperties.LandscapeClass;
+//
+//	//Spawn the landscape deferred
+//	AJetLandscapeMesh* SpawnedActor = WorldContextObject->GetWorld()->SpawnActorDeferred<AJetLandscapeMesh>(LandscapeClass, InProcMeshData.SpawnTransform);
+//
+//	if (!SpawnedActor)
+//	{
+//		return nullptr;
+//	}
+//
+//	if (!InWorldSpawner)
+//	{
+//		return nullptr;
+//	}
+//
+//	SpawnedActor->bAutoCreateLandscape = false;
+//	SpawnedActor->LandscapeSize = InLandscapeProperties.LandscapeSize;
+//	SpawnedActor->TileSize = InLandscapeProperties.TileSize;
+//	SpawnedActor->HeightVariation = InLandscapeProperties.HeightVariation;
+//	SpawnedActor->NeighborSpawnRadius = InLandscapeProperties.NeighborSpawnRadius;
+//
+//	SpawnedActor->LandscapeProperties = InLandscapeProperties;
+//	SpawnedActor->WorldSpawner = InWorldSpawner;
+//
+//
+//	SpawnedActor->ProcMeshData = InProcMeshData;
+//
+//	UGameplayStatics::FinishSpawningActor(SpawnedActor, InProcMeshData.SpawnTransform);
+//	
+//	TArray<UMaterialInterface*> MatArray;
+//
+//	if (InWorldSpawner)
+//	{
+//		MatArray.Add(InWorldSpawner->WorldLandscapeMaterial);
+//	}
+//
+//	SpawnedActor->CreateMesh(MatArray);
+//
+//	AJetGameState* GameState = Cast<AJetGameState>(WorldContextObject->GetWorld()->GetGameState());
+//
+//	if (GameState)
+//	{
+//		GameState->OnLandscapeSpawned(SpawnedActor, SpawnedActor->ProcMeshData);
+//	}
+//
+//	return SpawnedActor;
+//}
 
 void AJetLandscapeMesh::ZipNeighborLandscape(AJetLandscapeMesh* InZipper, AJetLandscapeMesh* InZippee)
 {
