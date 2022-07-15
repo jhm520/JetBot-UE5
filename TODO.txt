@@ -130,3 +130,5 @@ TODO: Vertex smoothing algorithm
 
 	Smooth a Single Vertex:
 		Move the vertex height closer to the vertex's AverageNeighborHeight.
+
+TODO: Pass WorldLandscapeData, and NewLandscapeData by pointers (to variables on JetWorldSpawner) into AsyncCreateLandscapeData(). Edit the WorldLandscapeData->LandscapeDataMap/VerticesMap/NormalsMap directly. Place the Newly generated landscapes into the NewLandscapeData. In OnLandscapeDataCreated, access the NewLandscapeData variable. Add the new landscapes to the Queue. Upon finishing spawning the new landscapes, clear the NewLandscapeData variable.
