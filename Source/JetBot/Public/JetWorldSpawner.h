@@ -15,9 +15,12 @@ class JETBOT_API AJetWorldSpawner : public AActor
 {
 	GENERATED_BODY()
 	
-public:	
+public:
 	// Sets default values for this actor's properties
 	AJetWorldSpawner();
+
+	UPROPERTY()
+	bool OnLandscapeDataCreatedMutex = false;
 
 	UFUNCTION(BlueprintCallable, meta = (WorldContext = "WorldContextObject"), Category = "Landscape")
 	static AJetLandscapeMesh* GetCurrentLandscapeMesh(UObject* WorldContextObject);
@@ -26,7 +29,7 @@ public:
 	AJetLandscapeMesh* CurrentLandscape = nullptr;
 
 	UFUNCTION()
-	void OnLandscapeDataCreated(const FOnLandscapeDataCreatedResult& InLandscapeData);
+	void OnLandscapeDataCreated(const FOnLandscapeDataCreatedResult& DEPInLandscapeData);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
 	int32 WorldRadius = 10;
@@ -66,7 +69,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-    static void AsyncCreateLandscapeData(FOnLandscapeDataCreatedDelegate Out, const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, TWeakObjectPtr<AJetWorldSpawner> InWorldSpawner, const TMap<FVector, FProcMeshData>& InLandscapeDataMap, const TMap<FVector, FLandscapeVertexData>& InLandscapeVerticesMap, const TMap<FVector, FVector>& InLandscapeNormalMap, FOnLandscapeDataCreatedResult* InWorldLandscapeData);
+    void AsyncCreateLandscapeData(FOnLandscapeDataCreatedDelegate Out, const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, TWeakObjectPtr<AJetWorldSpawner> InWorldSpawner, const TMap<FVector, FProcMeshData>& InLandscapeDataMap, const TMap<FVector, FLandscapeVertexData>& InLandscapeVerticesMap, const TMap<FVector, FVector>& InLandscapeNormalMap, FOnLandscapeDataCreatedResult* InOutWorldLandscapeData, FOnLandscapeDataCreatedResult* InOutNewWorldLandscapeData);
 
 	UPROPERTY()
 	TArray<AJetLandscapeMesh*> PlayerEnteredLandscapeQueue;
@@ -89,8 +92,13 @@ public:
 	UPROPERTY(Transient)
 	bool bCreatingLandscapeData = false;
 
+	//edited by AsyncCreateLandscapeData, contains global world landscape data
 	UPROPERTY()
 	FOnLandscapeDataCreatedResult WorldLandscapeData;
+
+	//edited by AsyncCreateLandscapeData, loads with new world landscape data
+	UPROPERTY()
+	FOnLandscapeDataCreatedResult NewWorldLandscapeData;
 
 	void WorldSpawner_OnPlayerEnteredLandscape(AJetLandscapeMesh* InLandscape, ACharacter* InPlayer, const FVector& InLandscapeSegmentVector);
 
@@ -102,4 +110,7 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent, Category = "WorldSpawner")
 	void OnLandscapesFinishedSpawning();
+
+	void WorldSpawner_TickSpawnLandscape();
+
 };

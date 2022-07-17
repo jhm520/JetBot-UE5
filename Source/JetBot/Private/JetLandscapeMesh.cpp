@@ -9,7 +9,7 @@
 #include "Kismet/KismetArrayLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
 
-
+PRAGMA_DISABLE_OPTIMIZATION
 namespace LandscapeStatics
 {
 	FVector North = FVector(1, 0, 0);
@@ -692,11 +692,8 @@ bool AJetLandscapeMesh::Static_GetNeighborLandscapeData(UObject* WorldContextObj
 //	//bHasSpawnedNeighborLandscapes = true;
 //}
 
-void AJetLandscapeMesh::CreateLandscapesInRadius(const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, TArray<FProcMeshData>& InOutLandscapeDataArray, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap, TMap<FVector, FLandscapeVertexData>& InOutLandscapeVerticesMap, TMap<FVector, FVector>& InOutLandscapeNormalMap, struct FOnLandscapeDataCreatedResult* InOutWorldLandscapeData, FOnLandscapeDataCreatedResult& OutNewWorldLandscapeData)
+void AJetLandscapeMesh::CreateLandscapesInRadius(const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, TArray<FProcMeshData>& InOutLandscapeDataArray, TMap<FVector, FProcMeshData>& InOutLandscapeDataMap, TMap<FVector, FLandscapeVertexData>& InOutLandscapeVerticesMap, TMap<FVector, FVector>& InOutLandscapeNormalMap)
 {
-
-	//FOnLandscapeDataCreatedResult& WorldLandscapeDataRef = *InOutWorldLandscapeData;
-
 	int32 x = 0;
 	int32 y = 0;
 
@@ -3019,3 +3016,5 @@ TMap<FVector, int32> AJetLandscapeMesh::GetLandscapeVertexMap()
 
 	return ProcMeshData.FaceVertexMapArray[0].VertexIndexMap;
 }
+
+PRAGMA_ENABLE_OPTIMIZATION

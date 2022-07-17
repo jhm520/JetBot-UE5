@@ -6,7 +6,7 @@
 #include "Async/Async.h"
 #include "Kismet/GameplayStatics.h"
 
-
+PRAGMA_DISABLE_OPTIMIZATION
 // Sets default values
 AJetWorldSpawner::AJetWorldSpawner()
 {
@@ -28,12 +28,15 @@ AJetLandscapeMesh* AJetWorldSpawner::GetCurrentLandscapeMesh(UObject* WorldConte
 	return GameState->WorldSpawner->CurrentLandscape;
 }
 
-void AJetWorldSpawner::OnLandscapeDataCreated(const FOnLandscapeDataCreatedResult& InLandscapeData)
+void AJetWorldSpawner::OnLandscapeDataCreated(const FOnLandscapeDataCreatedResult& DEPInLandscapeData)
 {
 	//bCreatingLandscapeData = false;
 
-	TArray<FVector> VectorArray;
-	InLandscapeData.LandscapeDataMap.GenerateKeyArray(VectorArray);
+	OnLandscapeDataCreatedMutex = false;
+
+	const int32 VertexNum = WorldLandscapeData.LandscapeVerticesMap.Num();
+
+	const int32 NewLandscapeNum = NewWorldLandscapeData.LandscapeArray.Num();
 
 	AJetGameState* GameState = Cast<AJetGameState>(GetWorld()->GetGameState());
 
@@ -42,10 +45,15 @@ void AJetWorldSpawner::OnLandscapeDataCreated(const FOnLandscapeDataCreatedResul
 		return;
 	}
 
-	if (InLandscapeData.LandscapeArray.Num() == 0)
+	if (NewLandscapeNum == 0)
 	{
 		OnLandscapesFinishedSpawning();
 	}
+
+	/*if (InLandscapeData.LandscapeArray.Num() == 0)
+	{
+		OnLandscapesFinishedSpawning();
+	}*/
 
 	//const FProcMeshData& ProcMesh = InLandscapeData.LandscapeArray[0];
 
@@ -62,14 +70,14 @@ void AJetWorldSpawner::OnLandscapeDataCreated(const FOnLandscapeDataCreatedResul
 
 
 
-	if (InLandscapeData.LandscapeArray.Num() > 0)
+	if (NewLandscapeNum > 0)
 	{
-		GameState->LandscapeDataMap.Append(InLandscapeData.LandscapeDataMap);
+		//GameState->LandscapeDataMap.Append(InLandscapeData.LandscapeDataMap);
 
-		GameState->AppendLandscapeSpawnQueue(InLandscapeData.LandscapeArray);
+		//GameState->AppendLandscapeSpawnQueue(NewWorldLandscapeData.LandscapeArray);
 
-		WorldLandscapeVertexMap.Append(InLandscapeData.LandscapeVerticesMap);
-		WorldLandscapeNormalMap.Append(InLandscapeData.LandscapeNormalMap);
+		//WorldLandscapeVertexMap.Append(InLandscapeData.LandscapeVerticesMap);
+		//WorldLandscapeNormalMap.Append(InLandscapeData.LandscapeNormalMap);
 	}
 	
 
@@ -244,7 +252,7 @@ void AJetWorldSpawner::OnCharacterEnteredNewLandscapeSection(ACharacter* InChara
 
 	TWeakObjectPtr<AJetWorldSpawner> WeakPtr = this;
 	bCreatingLandscapeData = true;
-	AsyncCreateLandscapeData(LandscapeCreatedDelegate, Section->ProcVertexBuffer[0].Position*FVector(1,1,0), LandscapeProperties, WeakPtr, GameState->LandscapeDataMap, WorldLandscapeVertexMap, WorldLandscapeNormalMap, &WorldLandscapeData);
+	AsyncCreateLandscapeData(LandscapeCreatedDelegate, Section->ProcVertexBuffer[0].Position*FVector(1,1,0), LandscapeProperties, WeakPtr, GameState->LandscapeDataMap, WorldLandscapeVertexMap, WorldLandscapeNormalMap, &WorldLandscapeData, &NewWorldLandscapeData);
 
 }
 
@@ -278,7 +286,7 @@ void AJetWorldSpawner::BeginPlay()
 		bCreatingLandscapeData = true;
 		int32 Mod = LandscapeProperties.GetVectorScale() / 2;
 		FVector VectorMod = FVector(Mod, Mod, 0);
-		AsyncCreateLandscapeData(LandscapeCreatedDelegate, GetActorLocation()-VectorMod, LandscapeProperties, this, GameState->LandscapeDataMap, WorldLandscapeVertexMap, WorldLandscapeNormalMap, &WorldLandscapeData);
+		AsyncCreateLandscapeData(LandscapeCreatedDelegate, GetActorLocation()-VectorMod, LandscapeProperties, this, GameState->LandscapeDataMap, WorldLandscapeVertexMap, WorldLandscapeNormalMap, &WorldLandscapeData, &NewWorldLandscapeData);
 	}
 }
 
@@ -289,30 +297,28 @@ void AJetWorldSpawner::Tick(float DeltaTime)
 
 }
 
-void AJetWorldSpawner::AsyncCreateLandscapeData(FOnLandscapeDataCreatedDelegate Out, const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, TWeakObjectPtr<AJetWorldSpawner> InWorldSpawner, const TMap<FVector, FProcMeshData>& InLandscapeDataMap, const TMap<FVector, FLandscapeVertexData>& InLandscapeVerticesMap, const TMap<FVector, FVector>& InLandscapeNormalMap, FOnLandscapeDataCreatedResult* InWorldLandscapeData)
+void AJetWorldSpawner::AsyncCreateLandscapeData(FOnLandscapeDataCreatedDelegate Out, const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, TWeakObjectPtr<AJetWorldSpawner> InWorldSpawner, const TMap<FVector, FProcMeshData>& InLandscapeDataMap, const TMap<FVector, FLandscapeVertexData>& InLandscapeVerticesMap, const TMap<FVector, FVector>& InLandscapeNormalMap, FOnLandscapeDataCreatedResult* InWorldLandscapeData, FOnLandscapeDataCreatedResult* InOutNewWorldLandscapeData)
 {
+	OnLandscapeDataCreatedMutex = true;
 
-	AsyncTask(ENamedThreads::AnyHiPriThreadNormalTask, [Out, InLocation, InLandscapeProperties, InWorldSpawner, InLandscapeDataMap, InLandscapeVerticesMap, InLandscapeNormalMap, InWorldLandscapeData]()
+	AsyncTask(ENamedThreads::AnyHiPriThreadNormalTask, [Out, InLocation, InLandscapeProperties, InWorldSpawner, InLandscapeDataMap, InLandscapeVerticesMap, InLandscapeNormalMap, InWorldLandscapeData, InOutNewWorldLandscapeData]()
 	{
-		FOnLandscapeDataCreatedResult OutLandscapeResult;
+		FOnLandscapeDataCreatedResult& WorldDataRef = *InWorldLandscapeData;
 
-		FOnLandscapeDataCreatedResult OutNewLandscapeResult;
+		FOnLandscapeDataCreatedResult& NewWorldDataRef = *InOutNewWorldLandscapeData;
 
-
-		OutLandscapeResult.LandscapeDataMap = InLandscapeDataMap;
-		OutLandscapeResult.LandscapeVerticesMap = InLandscapeVerticesMap;
-		/*OutLandscapeResult.LandscapeNormalMap = InLandscapeNormalMap;*/
-
-		AJetLandscapeMesh::CreateLandscapesInRadius(InLocation, InLandscapeProperties, OutLandscapeResult.LandscapeArray, OutLandscapeResult.LandscapeDataMap, OutLandscapeResult.LandscapeVerticesMap, OutLandscapeResult.LandscapeNormalMap, InWorldLandscapeData, OutNewLandscapeResult);
+		AJetLandscapeMesh::CreateLandscapesInRadius(InLocation, InLandscapeProperties, NewWorldDataRef.LandscapeArray, WorldDataRef.LandscapeDataMap, WorldDataRef.LandscapeVerticesMap, WorldDataRef.LandscapeNormalMap);
 
 		/*FProcMeshData InOutSuperLandscapeData;
 
 		AJetLandscapeMesh::CreateLandscapeDataInRadius(InLocation, InLandscapeProperties, OutLandscapeResult.LandscapeArray, InOutSuperLandscapeData, OutLandscapeResult.LandscapeDataMap, OutLandscapeResult.LandscapeVerticesMap);*/
 
+		/*FOnLandscapeDataCreatedResult& DataRef = *InWorldLandscapeData;
+		DataRef.LandscapeVerticesMap = OutLandscapeResult.LandscapeVerticesMap;*/
 
-		AsyncTask(ENamedThreads::GameThread, [Out, OutLandscapeResult, OutNewLandscapeResult]()
+		AsyncTask(ENamedThreads::GameThread, [Out]()
 		{
-
+			FOnLandscapeDataCreatedResult OutLandscapeResult;
 			// We execute the delegate along with the param
 			Out.Broadcast(OutLandscapeResult);
 		});
@@ -341,7 +347,34 @@ void AJetWorldSpawner::WorldSpawner_OnPlayerEnteredLandscape(AJetLandscapeMesh* 
 
 	TWeakObjectPtr<AJetWorldSpawner> WeakPtr = this;
 	bCreatingLandscapeData = true;
-	AsyncCreateLandscapeData(LandscapeCreatedDelegate, InLandscape->GetActorLocation(), LandscapeProperties, WeakPtr, GameState->LandscapeDataMap, WorldLandscapeVertexMap, WorldLandscapeNormalMap, &WorldLandscapeData);
+	AsyncCreateLandscapeData(LandscapeCreatedDelegate, InLandscape->GetActorLocation(), LandscapeProperties, WeakPtr, GameState->LandscapeDataMap, WorldLandscapeVertexMap, WorldLandscapeNormalMap, &WorldLandscapeData, &NewWorldLandscapeData);
+}
+
+void AJetWorldSpawner::WorldSpawner_TickSpawnLandscape()
+{
+	if (OnLandscapeDataCreatedMutex)
+	{
+		return;
+	}
+
+	if (NewWorldLandscapeData.LandscapeArray.Num() == 0)
+	{
+		return;
+	}
+
+	FProcMeshData& FirstLandscape = NewWorldLandscapeData.LandscapeArray[0];
+
+	CreateLandscapeMeshSectionWithData(this, FirstLandscape, LandscapeProperties, this);
+
+	//AJetLandscapeMesh::SpawnLandscapeWithData(this, FirstLandscape, WorldSpawner->LandscapeProperties, WorldSpawner);
+
+	NewWorldLandscapeData.LandscapeArray.RemoveAt(0);
+
+	if (NewWorldLandscapeData.LandscapeArray.Num() == 0)
+	{
+		OnLandscapesFinishedSpawning();
+	}
+
 }
 
 void AJetWorldSpawner::OnLandscapesFinishedSpawning_Implementation()
@@ -366,3 +399,4 @@ void AJetWorldSpawner::OnLandscapesFinishedSpawning_Implementation()
 
 	PlayerEnteredLandscapeQueue.RemoveAt(0);
 }
+PRAGMA_ENABLE_OPTIMIZATION

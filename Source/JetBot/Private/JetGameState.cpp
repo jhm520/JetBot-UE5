@@ -27,7 +27,7 @@ void AJetGameState::OnLandscapeDestroyed_Implementation(AJetLandscapeMesh* InLan
 
 }
 
-void AJetGameState::AppendLandscapeSpawnQueue(const TArray<FProcMeshData> InLandscapeQueue)
+void AJetGameState::AppendLandscapeSpawnQueue(const TArray<FProcMeshData>& InLandscapeQueue)
 {
 	LandscapeSpawnQueue.Append(InLandscapeQueue);
 }
@@ -247,26 +247,30 @@ void AJetGameState::TickSpawnLandscape()
 		return;
 	}
 
-	if (LandscapeSpawnQueue.Num() == 0)
-	{
-		return;
-	}
+	WorldSpawner->WorldSpawner_TickSpawnLandscape();
+	//WorldSpawner->CreateLandscapeMeshSectionWithData(this, FirstLandscape, WorldSpawner->LandscapeProperties, WorldSpawner);
 
-	FProcMeshData& FirstLandscape = LandscapeSpawnQueue[0];
 
-	if (WorldSpawner)
-	{
-		WorldSpawner->CreateLandscapeMeshSectionWithData(this, FirstLandscape, WorldSpawner->LandscapeProperties, WorldSpawner);
-	}
+	//if (LandscapeSpawnQueue.Num() == 0)
+	//{
+	//	return;
+	//}
 
-	//AJetLandscapeMesh::SpawnLandscapeWithData(this, FirstLandscape, WorldSpawner->LandscapeProperties, WorldSpawner);
+	//FProcMeshData& FirstLandscape = LandscapeSpawnQueue[0];
 
-	LandscapeSpawnQueue.RemoveAt(0);
+	//if (WorldSpawner)
+	//{
+	//	WorldSpawner->CreateLandscapeMeshSectionWithData(this, FirstLandscape, WorldSpawner->LandscapeProperties, WorldSpawner);
+	//}
 
-	if (LandscapeSpawnQueue.Num() == 0)
-	{
-		WorldSpawner->OnLandscapesFinishedSpawning();
-	}
+	////AJetLandscapeMesh::SpawnLandscapeWithData(this, FirstLandscape, WorldSpawner->LandscapeProperties, WorldSpawner);
+
+	//LandscapeSpawnQueue.RemoveAt(0);
+
+	//if (LandscapeSpawnQueue.Num() == 0)
+	//{
+	//	WorldSpawner->OnLandscapesFinishedSpawning();
+	//}
 
 }
 

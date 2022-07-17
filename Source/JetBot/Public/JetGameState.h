@@ -43,7 +43,7 @@ public:
 	FLandscapeProperties LandscapeSpawnProperties;
 
 	UFUNCTION()
-	void AppendLandscapeSpawnQueue(const TArray<FProcMeshData> InLandscapeQueue);
+	void AppendLandscapeSpawnQueue(const TArray<FProcMeshData>& InLandscapeQueue);
 
 	UFUNCTION()
 	void AppendLandscapeDestroyQueue(const TArray<AJetLandscapeMesh*> InLandscapeQueue);
@@ -81,4 +81,5 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, Category = "World Spawner")
 	AJetWorldSpawner* WorldSpawner = nullptr;
+
 };
