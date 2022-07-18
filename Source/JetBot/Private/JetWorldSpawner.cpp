@@ -5,6 +5,7 @@
 #include "JetGameState.h"
 #include "Async/Async.h"
 #include "Kismet/GameplayStatics.h"
+#include "JetProceduralMeshComponent.h"
 
 PRAGMA_DISABLE_OPTIMIZATION
 // Sets default values
@@ -12,7 +13,7 @@ AJetWorldSpawner::AJetWorldSpawner()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	LandscapeProcMesh = CreateDefaultSubobject<UProceduralMeshComponent>("ProcMesh");
+	LandscapeProcMesh = CreateDefaultSubobject<UJetProceduralMeshComponent>("ProcMesh");
 	RootComponent = LandscapeProcMesh;
 }
 
@@ -130,9 +131,11 @@ void AJetWorldSpawner::CreateLandscapeMeshSectionWithData(UObject* WorldContextO
 	{
 		return;
 	}
-
+	;
 	LandscapeProcMesh->CreateMeshSection(CurrentMeshSectionIndex, InProcMeshData.WorldVertices, InProcMeshData.Triangles, InProcMeshData.Normals, InProcMeshData.UVs, TArray<FColor>(), TArray<FProcMeshTangent>(), true);
 	FProcMeshSection* Section = LandscapeProcMesh->GetProcMeshSection(CurrentMeshSectionIndex);
+
+	//FOnAsyncPhysicsCookFinished::CreateUObject(this, &AJetWorldSpawner::WorldSpawner_FinishPhysicsAsyncCook, LandscapeProcMesh->AsyncBodySetupQueue.Last() != nullptr);
 
 	//TODO: USe this to get the section
 	const FProcMeshVertex& VertexZero = Section->ProcVertexBuffer[0];
@@ -374,6 +377,11 @@ void AJetWorldSpawner::WorldSpawner_TickSpawnLandscape()
 	{
 		OnLandscapesFinishedSpawning();
 	}
+
+}
+
+void AJetWorldSpawner::WorldSpawner_FinishPhysicsAsyncCook(bool bSuccess, UBodySetup* FinishedBodySetup)
+{
 
 }
 

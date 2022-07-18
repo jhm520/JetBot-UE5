@@ -10,6 +10,8 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLandscapeDataCreatedDelegate, const struct FOnLandscapeDataCreatedResult&, OnLandscapeDataCreatedResult);
 
+class UJetProceduralMeshComponent;
+
 UCLASS()
 class JETBOT_API AJetWorldSpawner : public AActor
 {
@@ -46,7 +48,7 @@ public:
 	FProcMeshData WorldLandscapeProcMeshData;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Procedural Mesh")
-	class UProceduralMeshComponent* LandscapeProcMesh;
+	class UJetProceduralMeshComponent* LandscapeProcMesh;
 
 	UFUNCTION(BlueprintCallable, meta = (WorldContext = "WorldContextObject"), Category = "Procedural Mesh")
 	void CreateLandscapeMeshSectionWithData(UObject* WorldContextObject, const FProcMeshData& InProcMeshData, const FLandscapeProperties& InLandscapeProperties, AJetWorldSpawner* InWorldSpawner);
@@ -112,5 +114,7 @@ public:
 	void OnLandscapesFinishedSpawning();
 
 	void WorldSpawner_TickSpawnLandscape();
+
+	void WorldSpawner_FinishPhysicsAsyncCook(bool bSuccess, UBodySetup* FinishedBodySetup);
 
 };
