@@ -3,7 +3,99 @@
 
 #include "JetProceduralMeshComponent.h"
 
+DEFINE_LOG_CATEGORY_STATIC(LogProceduralComponent, Log, All);
 
+DECLARE_CYCLE_STAT(TEXT("Create Mesh Section"), STAT_ProcMesh_JetCreateMeshSection, STATGROUP_JetProceduralMesh);
+
+void UJetProceduralMeshComponent::JetCreateMeshSection(int32 SectionIndex, const TArray<FVector>& Vertices, const TArray<int32>& Triangles, const TArray<FVector>& Normals, const TArray<FVector2D>& UV0, const TArray<FVector2D>& UV1, const TArray<FVector2D>& UV2, const TArray<FVector2D>& UV3, const TArray<FColor>& VertexColors, const TArray<FProcMeshTangent>& Tangents, bool bCreateCollision)
+{
+	SCOPE_CYCLE_COUNTER(STAT_ProcMesh_JetCreateMeshSection);
+
+	// Ensure sections array is long enough
+	if (SectionIndex >= JetProcMeshSections.Num())
+	{
+		JetProcMeshSections.SetNum(SectionIndex + 1, false);
+	}
+
+	// Reset this section (in case it already existed)
+	FProcMeshSection& NewSection = JetProcMeshSections[SectionIndex];
+	NewSection.Reset();
+
+	// Copy data to vertex buffer
+	const int32 NumVerts = Vertices.Num();
+	NewSection.ProcVertexBuffer.Reset();
+	NewSection.ProcVertexBuffer.AddUninitialized(NumVerts);
+	for (int32 VertIdx = 0; VertIdx < NumVerts; VertIdx++)
+	{
+		FProcMeshVertex& Vertex = NewSection.ProcVertexBuffer[VertIdx];
+
+		Vertex.Position = Vertices[VertIdx];
+		Vertex.Normal = (Normals.Num() == NumVerts) ? Normals[VertIdx] : FVector(0.f, 0.f, 1.f);
+		Vertex.UV0 = (UV0.Num() == NumVerts) ? UV0[VertIdx] : FVector2D(0.f, 0.f);
+		Vertex.UV1 = (UV1.Num() == NumVerts) ? UV1[VertIdx] : FVector2D(0.f, 0.f);
+		Vertex.UV2 = (UV2.Num() == NumVerts) ? UV2[VertIdx] : FVector2D(0.f, 0.f);
+		Vertex.UV3 = (UV3.Num() == NumVerts) ? UV3[VertIdx] : FVector2D(0.f, 0.f);
+		Vertex.Color = (VertexColors.Num() == NumVerts) ? VertexColors[VertIdx] : FColor(255, 255, 255);
+		Vertex.Tangent = (Tangents.Num() == NumVerts) ? Tangents[VertIdx] : FProcMeshTangent();
+
+		// Update bounding box
+		NewSection.SectionLocalBox += Vertex.Position;
+	}
+
+	// Get triangle indices, clamping to vertex range
+	const int32 MaxIndex = NumVerts - 1;
+	const auto GetTriIndices = [&Triangles, MaxIndex](int32 Idx)
+	{
+		return TTuple<int32, int32, int32>(FMath::Min(Triangles[Idx], MaxIndex),
+			FMath::Min(Triangles[Idx + 1], MaxIndex),
+			FMath::Min(Triangles[Idx + 2], MaxIndex));
+	};
+
+	const int32 NumTriIndices = (Triangles.Num() / 3) * 3; // Ensure number of triangle indices is multiple of three
+
+	// Detect degenerate triangles, i.e. non-unique vertex indices within the same triangle
+	int32 NumDegenerateTriangles = 0;
+	for (int32 IndexIdx = 0; IndexIdx < NumTriIndices; IndexIdx += 3)
+	{
+		int32 a, b, c;
+		Tie(a, b, c) = GetTriIndices(IndexIdx);
+		NumDegenerateTriangles += a == b || a == c || b == c;
+	}
+	if (NumDegenerateTriangles > 0)
+	{
+		UE_LOG(LogProceduralComponent, Warning, TEXT("Detected %d degenerate triangle%s with non-unique vertex indices for created mesh section in '%s'; degenerate triangles will be dropped."),
+			NumDegenerateTriangles, NumDegenerateTriangles > 1 ? "s" : "", *GetFullName());
+	}
+
+	// Copy index buffer for non-degenerate triangles
+	NewSection.ProcIndexBuffer.Reset();
+	NewSection.ProcIndexBuffer.AddUninitialized(NumTriIndices - NumDegenerateTriangles * 3);
+	int32 CopyIndexIdx = 0;
+	for (int32 IndexIdx = 0; IndexIdx < NumTriIndices; IndexIdx += 3)
+	{
+		int32 a, b, c;
+		Tie(a, b, c) = GetTriIndices(IndexIdx);
+
+		if (a != b && a != c && b != c)
+		{
+			NewSection.ProcIndexBuffer[CopyIndexIdx++] = a;
+			NewSection.ProcIndexBuffer[CopyIndexIdx++] = b;
+			NewSection.ProcIndexBuffer[CopyIndexIdx++] = c;
+		}
+		else
+		{
+			--NumDegenerateTriangles;
+		}
+	}
+	check(NumDegenerateTriangles == 0);
+	check(CopyIndexIdx == NewSection.ProcIndexBuffer.Num());
+
+	NewSection.bEnableCollision = bCreateCollision;
+
+	JetUpdateLocalBounds(); // Update overall bounds
+	JetUpdateCollision(); // Mark collision as dirty
+	MarkRenderStateDirty(); // New section requires recreating scene proxy
+}
 
 void UJetProceduralMeshComponent::JetFinishPhysicsAsyncCook(bool bSuccess, UBodySetup* FinishedBodySetup)
 {
@@ -91,6 +183,23 @@ void UJetProceduralMeshComponent::JetUpdateCollision()
 		UseBodySetup->CreatePhysicsMeshes();
 		RecreatePhysicsState();
 	}
+}
+
+void UJetProceduralMeshComponent::JetUpdateLocalBounds()
+{
+	FBox LocalBox(ForceInit);
+
+	for (const FProcMeshSection& Section : JetProcMeshSections)
+	{
+		LocalBox += Section.SectionLocalBox;
+	}
+
+	JetLocalBounds = LocalBox.IsValid ? FBoxSphereBounds(LocalBox) : FBoxSphereBounds(FVector::ZeroVector, FVector::ZeroVector, 0); // fallback to reset box sphere bounds
+
+	// Update global bounds
+	UpdateBounds();
+	// Need to send to render thread
+	MarkRenderTransformDirty();
 }
 
 UBodySetup* UJetProceduralMeshComponent::JetCreateBodySetupHelper()
