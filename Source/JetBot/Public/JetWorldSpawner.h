@@ -123,4 +123,7 @@ public:
 	/** Once async physics cook is done, create needed state */
 	void FinishPhysicsAsyncCook(bool bSuccess, UBodySetup* FinishedBodySetup);
 
+	UPROPERTY()
+	bool bIsPhysicsAsyncCook = false;
+
 };

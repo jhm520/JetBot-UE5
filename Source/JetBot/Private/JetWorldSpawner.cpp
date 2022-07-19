@@ -149,6 +149,7 @@ void AJetWorldSpawner::CreateLandscapeMeshSectionWithData(UObject* WorldContextO
 		if (NewBodySetup)
 		{
 			JetLandscapeProcMesh->OnJetProcMeshAsyncPhysicsCookFinishedDelegate = FOnJetProcMeshAsyncPhysicsCookFinished::CreateUObject(this, &AJetWorldSpawner::FinishPhysicsAsyncCook, NewBodySetup);
+			bIsPhysicsAsyncCook = true;
 		}
 
 	}
@@ -387,6 +388,12 @@ void AJetWorldSpawner::WorldSpawner_TickSpawnLandscape()
 		return;
 	}
 
+	//if a previous section's collision is being generated async at the moment, wait until its finished before queuing another one
+	if (bIsPhysicsAsyncCook)
+	{
+		return;
+	}
+
 	FProcMeshData& FirstLandscape = NewWorldLandscapeData.LandscapeArray[0];
 
 	CreateLandscapeMeshSectionWithData(this, FirstLandscape, LandscapeProperties, this);
@@ -409,7 +416,7 @@ void AJetWorldSpawner::WorldSpawner_FinishPhysicsAsyncCook(bool bSuccess, UBodyS
 
 void AJetWorldSpawner::FinishPhysicsAsyncCook(bool bSuccess, UBodySetup* FinishedBodySetup)
 {
-	int32 sixnine = 69;
+	bIsPhysicsAsyncCook = false;
 }
 
 void AJetWorldSpawner::OnLandscapesFinishedSpawning_Implementation()
