@@ -132,13 +132,13 @@ void AJetWorldSpawner::CreateLandscapeMeshSectionWithData(UObject* WorldContextO
 		return;
 	}
 	;
-	LandscapeProcMesh->CreateMeshSection(CurrentMeshSectionIndex, InProcMeshData.WorldVertices, InProcMeshData.Triangles, InProcMeshData.Normals, InProcMeshData.UVs, TArray<FColor>(), TArray<FProcMeshTangent>(), true);
-	FProcMeshSection* Section = LandscapeProcMesh->GetProcMeshSection(CurrentMeshSectionIndex);
+	LandscapeProcMesh->CreateMeshSection(CurrentMeshSectionIndex, InProcMeshData.WorldVertices, InProcMeshData.Triangles, InProcMeshData.Normals, InProcMeshData.UVs, TArray<FColor>(), TArray<FJetProcMeshTangent>(), true);
+	FJetProcMeshSection* Section = LandscapeProcMesh->GetProcMeshSection(CurrentMeshSectionIndex);
 
 	//FOnAsyncPhysicsCookFinished::CreateUObject(this, &AJetWorldSpawner::WorldSpawner_FinishPhysicsAsyncCook, LandscapeProcMesh->AsyncBodySetupQueue.Last() != nullptr);
 
 	//TODO: USe this to get the section
-	const FProcMeshVertex& VertexZero = Section->ProcVertexBuffer[0];
+	const FJetProcMeshVertex& VertexZero = Section->ProcVertexBuffer[0];
 
 	if (WorldLandscapeMaterial)
 	{
@@ -178,7 +178,7 @@ int32 AJetWorldSpawner::GetActorCurrentLandscapeSectionIndex(AActor* InActor)
 
 	for (int32 i = 0; i < CurrentMeshSectionIndex; i++)
 	{
-		FProcMeshSection* Section = LandscapeProcMesh->GetProcMeshSection(i);
+		FJetProcMeshSection* Section = LandscapeProcMesh->GetProcMeshSection(i);
 
 		if (!Section)
 		{
@@ -238,7 +238,7 @@ void AJetWorldSpawner::OnCharacterEnteredNewLandscapeSection(ACharacter* InChara
 	}
 
 
-	FProcMeshSection* Section = LandscapeProcMesh->GetProcMeshSection(InLandscapeSectionIndex);
+	FJetProcMeshSection* Section = LandscapeProcMesh->GetProcMeshSection(InLandscapeSectionIndex);
 
 	if (!Section)
 	{
