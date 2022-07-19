@@ -42,13 +42,16 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Landscape")
 	bool bSpawnWorldAtBeginPlay = false;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Landscape")
+	bool bUseJetProceduralMesh = false;
+
 	FOnLandscapeDataCreatedDelegate LandscapeCreatedDelegate;
 
 	UPROPERTY()
 	FProcMeshData WorldLandscapeProcMeshData;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Procedural Mesh")
-	class UJetProceduralMeshComponent* LandscapeProcMesh;
+	class UJetProceduralMeshComponent* JetLandscapeProcMesh;
 
 	UFUNCTION(BlueprintCallable, meta = (WorldContext = "WorldContextObject"), Category = "Procedural Mesh")
 	void CreateLandscapeMeshSectionWithData(UObject* WorldContextObject, const FProcMeshData& InProcMeshData, const FLandscapeProperties& InLandscapeProperties, AJetWorldSpawner* InWorldSpawner);

@@ -11,10 +11,10 @@ PRAGMA_DISABLE_OPTIMIZATION
 // Sets default values
 AJetWorldSpawner::AJetWorldSpawner()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	LandscapeProcMesh = CreateDefaultSubobject<UJetProceduralMeshComponent>("ProcMesh");
-	RootComponent = LandscapeProcMesh;
+	JetLandscapeProcMesh = CreateDefaultSubobject<UJetProceduralMeshComponent>("JetProcMesh");
+	RootComponent = JetLandscapeProcMesh;
 }
 
 AJetLandscapeMesh* AJetWorldSpawner::GetCurrentLandscapeMesh(UObject* WorldContextObject)
@@ -127,22 +127,25 @@ void AJetWorldSpawner::OnLandscapeDataCreated(const FOnLandscapeDataCreatedResul
 
 void AJetWorldSpawner::CreateLandscapeMeshSectionWithData(UObject* WorldContextObject, const FProcMeshData& InProcMeshData, const FLandscapeProperties& InLandscapeProperties, AJetWorldSpawner* InWorldSpawner)
 {
-	if (!LandscapeProcMesh)
+	if (!JetLandscapeProcMesh)
 	{
 		return;
 	}
-	;
-	LandscapeProcMesh->CreateMeshSection(CurrentMeshSectionIndex, InProcMeshData.WorldVertices, InProcMeshData.Triangles, InProcMeshData.Normals, InProcMeshData.UVs, TArray<FColor>(), TArray<FJetProcMeshTangent>(), true);
-	FJetProcMeshSection* Section = LandscapeProcMesh->GetProcMeshSection(CurrentMeshSectionIndex);
+
+
+	JetLandscapeProcMesh->CreateMeshSection(CurrentMeshSectionIndex, InProcMeshData.WorldVertices, InProcMeshData.Triangles, InProcMeshData.Normals, InProcMeshData.UVs, TArray<FColor>(), TArray<FJetProcMeshTangent>(), true);
+	
+	//FJetProcMeshSection* Section = JetLandscapeProcMesh->GetProcMeshSection(CurrentMeshSectionIndex);
 
 	//FOnAsyncPhysicsCookFinished::CreateUObject(this, &AJetWorldSpawner::WorldSpawner_FinishPhysicsAsyncCook, LandscapeProcMesh->AsyncBodySetupQueue.Last() != nullptr);
 
 	//TODO: USe this to get the section
-	const FJetProcMeshVertex& VertexZero = Section->ProcVertexBuffer[0];
+	//const FJetProcMeshVertex& VertexZero = Section->ProcVertexBuffer[0];
 
 	if (WorldLandscapeMaterial)
 	{
-		LandscapeProcMesh->SetMaterial(CurrentMeshSectionIndex, WorldLandscapeMaterial);
+		JetLandscapeProcMesh->SetMaterial(CurrentMeshSectionIndex, WorldLandscapeMaterial);
+
 		CurrentMeshSectionIndex++;
 		return;
 	}
@@ -151,7 +154,7 @@ void AJetWorldSpawner::CreateLandscapeMeshSectionWithData(UObject* WorldContextO
 
 	for (UMaterialInterface* Mat : InProcMeshData.Materials)
 	{
-		LandscapeProcMesh->SetMaterial(i, Mat);
+		JetLandscapeProcMesh->SetMaterial(i, Mat);
 
 		i++;
 	}
@@ -169,7 +172,7 @@ int32 AJetWorldSpawner::GetActorCurrentLandscapeSectionIndex(AActor* InActor)
 		return -1;
 	}
 
-	if (!LandscapeProcMesh)
+	if (!JetLandscapeProcMesh)
 	{
 		return -1;
 	}
@@ -178,7 +181,7 @@ int32 AJetWorldSpawner::GetActorCurrentLandscapeSectionIndex(AActor* InActor)
 
 	for (int32 i = 0; i < CurrentMeshSectionIndex; i++)
 	{
-		FJetProcMeshSection* Section = LandscapeProcMesh->GetProcMeshSection(i);
+		FJetProcMeshSection* Section = JetLandscapeProcMesh->GetProcMeshSection(i);
 
 		if (!Section)
 		{
@@ -226,7 +229,7 @@ void AJetWorldSpawner::OnCharacterEnteredNewLandscapeSection(ACharacter* InChara
 		return;
 	}
 
-	if (!LandscapeProcMesh)
+	if (!JetLandscapeProcMesh)
 	{
 		return;
 	}
@@ -238,7 +241,7 @@ void AJetWorldSpawner::OnCharacterEnteredNewLandscapeSection(ACharacter* InChara
 	}
 
 
-	FJetProcMeshSection* Section = LandscapeProcMesh->GetProcMeshSection(InLandscapeSectionIndex);
+	FJetProcMeshSection* Section = JetLandscapeProcMesh->GetProcMeshSection(InLandscapeSectionIndex);
 
 	if (!Section)
 	{
