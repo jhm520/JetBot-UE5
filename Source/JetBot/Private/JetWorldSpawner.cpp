@@ -135,6 +135,25 @@ void AJetWorldSpawner::CreateLandscapeMeshSectionWithData(UObject* WorldContextO
 
 	JetLandscapeProcMesh->CreateMeshSection(CurrentMeshSectionIndex, InProcMeshData.WorldVertices, InProcMeshData.Triangles, InProcMeshData.Normals, InProcMeshData.UVs, TArray<FColor>(), TArray<FJetProcMeshTangent>(), true);
 	
+	FJetProcMeshSection* NewProcMeshSection = JetLandscapeProcMesh->GetProcMeshSection(CurrentMeshSectionIndex);
+
+	if (NewProcMeshSection)
+	{
+		UBodySetup* NewBodySetup = nullptr;
+
+		if (JetLandscapeProcMesh->AsyncBodySetupQueue.Num() > 0)
+		{
+			NewBodySetup = JetLandscapeProcMesh->AsyncBodySetupQueue.Last();
+		}
+
+		if (NewBodySetup)
+		{
+			JetLandscapeProcMesh->OnJetProcMeshAsyncPhysicsCookFinishedDelegate = FOnJetProcMeshAsyncPhysicsCookFinished::CreateUObject(this, &AJetWorldSpawner::FinishPhysicsAsyncCook, NewBodySetup);
+		}
+
+	}
+
+
 	//FJetProcMeshSection* Section = JetLandscapeProcMesh->GetProcMeshSection(CurrentMeshSectionIndex);
 
 	//FOnAsyncPhysicsCookFinished::CreateUObject(this, &AJetWorldSpawner::WorldSpawner_FinishPhysicsAsyncCook, LandscapeProcMesh->AsyncBodySetupQueue.Last() != nullptr);
@@ -386,6 +405,11 @@ void AJetWorldSpawner::WorldSpawner_TickSpawnLandscape()
 void AJetWorldSpawner::WorldSpawner_FinishPhysicsAsyncCook(bool bSuccess, UBodySetup* FinishedBodySetup)
 {
 
+}
+
+void AJetWorldSpawner::FinishPhysicsAsyncCook(bool bSuccess, UBodySetup* FinishedBodySetup)
+{
+	int32 sixnine = 69;
 }
 
 void AJetWorldSpawner::OnLandscapesFinishedSpawning_Implementation()

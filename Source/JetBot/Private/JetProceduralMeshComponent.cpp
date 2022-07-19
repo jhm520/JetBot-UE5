@@ -1121,6 +1121,8 @@ void UJetProceduralMeshComponent::FinishPhysicsAsyncCook(bool bSuccess, UBodySet
 			AsyncBodySetupQueue.RemoveAt(FoundIdx);
 		}
 	}
+
+	OnJetProcMeshAsyncPhysicsCookFinishedDelegate.ExecuteIfBound(bSuccess);
 }
 
 UBodySetup* UJetProceduralMeshComponent::GetBodySetup()

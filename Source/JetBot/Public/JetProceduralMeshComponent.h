@@ -13,6 +13,9 @@ class FPrimitiveSceneProxy;
 
 DECLARE_STATS_GROUP(TEXT("ProceduralMesh"), STATGROUP_JetProceduralMesh, STATCAT_Advanced);
 
+DECLARE_DELEGATE_OneParam(FOnJetProcMeshAsyncPhysicsCookFinished, bool);
+
+
 /**
 *	Struct used to specify a tangent vector for a vertex
 *	The Y tangent is computed from the cross product of the vertex normal (Tangent Z) and the TangentX member.
@@ -340,9 +343,14 @@ private:
 	UPROPERTY()
 		FBoxSphereBounds LocalBounds;
 
+public:
 	/** Queue for async body setups that are being cooked */
 	UPROPERTY(transient)
-		TArray<TObjectPtr<UBodySetup>> AsyncBodySetupQueue;
+	TArray<TObjectPtr<UBodySetup>> AsyncBodySetupQueue;
+
+	FOnJetProcMeshAsyncPhysicsCookFinished OnJetProcMeshAsyncPhysicsCookFinishedDelegate;
+
+private:
 
 	friend class FProceduralMeshSceneProxy;
 	
