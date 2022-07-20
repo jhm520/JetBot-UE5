@@ -457,6 +457,7 @@ void AJetWorldSpawner::WorldSpawner_TickSpawnLandscape()
 		return;
 	}
 
+
 	FProcMeshData& FirstLandscape = NewWorldLandscapeData.LandscapeArray[0];
 
 	CreateLandscapeMeshSectionWithData(this, FirstLandscape, LandscapeProperties, this);
@@ -518,6 +519,7 @@ void AJetWorldSpawner::WorldSpawner_FinishPhysicsAsyncCook(bool bSuccess, UBodyS
 void AJetWorldSpawner::FinishPhysicsAsyncCook(bool bSuccess, UBodySetup* FinishedBodySetup)
 {
 	bIsPhysicsAsyncCook = false;
+
 }
 
 void AJetWorldSpawner::OnLandscapesFinishedSpawning_Implementation()
