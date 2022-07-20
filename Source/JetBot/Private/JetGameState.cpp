@@ -281,6 +281,13 @@ void AJetGameState::TickDestroyLandscape()
 		return;
 	}
 
+	WorldSpawner->WorldSpawner_TickDestroyLandscape();
+
+	/*if (!WorldSpawner)
+	{
+		return;
+	}
+
 	if (LandscapeDestroyQueue.Num() == 0)
 	{
 		return;
@@ -293,7 +300,7 @@ void AJetGameState::TickDestroyLandscape()
 	if (FirstLandscape)
 	{
 		FirstLandscape->Destroy();
-	}
+	}*/
 
 
 	/*if (LandscapeDestroyQueue.Num() == 0)

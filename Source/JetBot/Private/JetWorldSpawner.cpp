@@ -154,6 +154,12 @@ void AJetWorldSpawner::CreateLandscapeMeshSectionWithData(UObject* WorldContextO
 
 	}
 
+	FProcMeshData* DataPtr = WorldLandscapeData.LandscapeDataMap.Find(InProcMeshData.SpawnTransform.GetLocation() * FVector(1, 1, 0));
+
+	if (DataPtr)
+	{
+		DataPtr->bIsActive = true;
+	}
 
 	//FJetProcMeshSection* Section = JetLandscapeProcMesh->GetProcMeshSection(CurrentMeshSectionIndex);
 
@@ -166,6 +172,7 @@ void AJetWorldSpawner::CreateLandscapeMeshSectionWithData(UObject* WorldContextO
 	{
 		JetLandscapeProcMesh->SetMaterial(CurrentMeshSectionIndex, WorldLandscapeMaterial);
 
+		LandscapeProcMeshSectionIndexArray.AddUnique(CurrentMeshSectionIndex);
 		CurrentMeshSectionIndex++;
 		return;
 	}
@@ -179,6 +186,7 @@ void AJetWorldSpawner::CreateLandscapeMeshSectionWithData(UObject* WorldContextO
 		i++;
 	}
 
+	LandscapeProcMeshSectionIndexArray.AddUnique(CurrentMeshSectionIndex);
 	CurrentMeshSectionIndex++;
 	return;
 }
@@ -254,6 +262,11 @@ void AJetWorldSpawner::OnCharacterEnteredNewLandscapeSection(ACharacter* InChara
 		return;
 	}
 
+	if (InLandscapeSectionIndex < 0)
+	{
+		return;
+	}
+
 	if (bCreatingLandscapeData)
 	{
 		PlayerEnteredLandscapeIndexQueue.Add(InLandscapeSectionIndex);
@@ -276,10 +289,60 @@ void AJetWorldSpawner::OnCharacterEnteredNewLandscapeSection(ACharacter* InChara
 		return;
 	}
 
+	if (Section->ProcVertexBuffer.Num() == 0)
+	{
+		return;
+	}
+
 	TWeakObjectPtr<AJetWorldSpawner> WeakPtr = this;
 	bCreatingLandscapeData = true;
 	AsyncCreateLandscapeData(LandscapeCreatedDelegate, Section->ProcVertexBuffer[0].Position*FVector(1,1,0), LandscapeProperties, WeakPtr, GameState->LandscapeDataMap, WorldLandscapeVertexMap, WorldLandscapeNormalMap, &WorldLandscapeData, &NewWorldLandscapeData);
 
+}
+
+void AJetWorldSpawner::OnCharacterExitedLandscapeSection(ACharacter* InCharacter, int32 InExitedLandscapeSectionIndex, int32 InNewLandscapeSectionIndex)
+{
+	if (!InCharacter || !InCharacter->IsLocallyControlled())
+	{
+		return;
+	}
+
+	if (!(InNewLandscapeSectionIndex > -1) || !(InExitedLandscapeSectionIndex > -1))
+	{
+		return;
+	}
+
+	TArray<int32> DestroySectionIndices;
+
+	FVector CharLoc = InCharacter->GetActorLocation();
+
+	int32 MaxDist = LandscapeProperties.NeighborSpawnRadius * LandscapeProperties.GetVectorScale();
+	for (int32 LandscapeMeshSectionIndex : LandscapeProcMeshSectionIndexArray)
+	{
+		FJetProcMeshSection* NewLandscapeSection = JetLandscapeProcMesh->GetProcMeshSection(InNewLandscapeSectionIndex);
+		FJetProcMeshSection* LandscapeSection = JetLandscapeProcMesh->GetProcMeshSection(LandscapeMeshSectionIndex);
+
+		if (!NewLandscapeSection || !LandscapeSection)
+		{
+			continue;
+		}
+
+		FVector NewLoc = NewLandscapeSection->ProcVertexBuffer[0].Position;
+		FVector LandscapeLoc = LandscapeSection->ProcVertexBuffer[0].Position;
+
+		FVector Dist = NewLoc - LandscapeLoc;
+
+		if (FMath::Abs(Dist.X) > MaxDist)
+		{
+			DestroySectionIndices.Add(LandscapeMeshSectionIndex);
+		}
+		else if (FMath::Abs(Dist.Y) > MaxDist)
+		{
+			DestroySectionIndices.Add(LandscapeMeshSectionIndex);
+		}
+	}
+
+	LandscapeProcMeshSectionIndexDestroyQueue.Append(DestroySectionIndices);
 }
 
 // Called when the game starts or when spawned
@@ -407,6 +470,44 @@ void AJetWorldSpawner::WorldSpawner_TickSpawnLandscape()
 		OnLandscapesFinishedSpawning();
 	}
 
+}
+
+void AJetWorldSpawner::WorldSpawner_TickDestroyLandscape()
+{
+	if (LandscapeProcMeshSectionIndexDestroyQueue.Num() == 0)
+	{
+		return;
+	}
+
+	int32 FirstIndex = LandscapeProcMeshSectionIndexDestroyQueue[0];
+
+	FJetProcMeshSection* SectionPtr = JetLandscapeProcMesh->GetProcMeshSection(FirstIndex);
+
+	if (SectionPtr)
+	{
+		if (SectionPtr->ProcVertexBuffer.Num() > 0)
+		{
+			FVector MapKey = SectionPtr->ProcVertexBuffer[0].Position;
+
+			MapKey.Z = 0;
+
+			FProcMeshData* DataPtr = WorldLandscapeData.LandscapeDataMap.Find(MapKey);
+
+			if (DataPtr)
+			{
+				DataPtr->bIsActive = false;
+			}
+		}
+	}
+
+	LandscapeProcMeshSectionIndexDestroyQueue.RemoveAt(0);
+
+	if (JetLandscapeProcMesh)
+	{
+		JetLandscapeProcMesh->ClearMeshSection(FirstIndex);
+	}
+
+	LandscapeProcMeshSectionIndexArray.Remove(FirstIndex);
 }
 
 void AJetWorldSpawner::WorldSpawner_FinishPhysicsAsyncCook(bool bSuccess, UBodySetup* FinishedBodySetup)

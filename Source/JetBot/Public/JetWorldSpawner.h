@@ -63,6 +63,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
 	void OnCharacterEnteredNewLandscapeSection(ACharacter* InCharacter, int32 InLandscapeSectionIndex);
 
+	UFUNCTION(BlueprintCallable, Category = "Procedural Mesh")
+	void OnCharacterExitedLandscapeSection(ACharacter* InCharacter, int32 InExitedLandscapeSectionIndex, int32 InNewLandscapeSectionIndex);
+
 	UPROPERTY()
 	int32 CurrentMeshSectionIndex = 0;
 
@@ -118,6 +121,9 @@ public:
 
 	void WorldSpawner_TickSpawnLandscape();
 
+	void WorldSpawner_TickDestroyLandscape();
+
+
 	void WorldSpawner_FinishPhysicsAsyncCook(bool bSuccess, UBodySetup* FinishedBodySetup);
 
 	/** Once async physics cook is done, create needed state */
@@ -125,5 +131,12 @@ public:
 
 	UPROPERTY()
 	bool bIsPhysicsAsyncCook = false;
+
+
+	UPROPERTY()
+	TArray<int32> LandscapeProcMeshSectionIndexArray;
+
+	UPROPERTY()
+	TArray<int32> LandscapeProcMeshSectionIndexDestroyQueue;
 
 };

@@ -744,7 +744,7 @@ void AJetLandscapeMesh::CreateLandscapesInRadius(const FVector& InLocation, cons
 					{
 						if (!Landscape.bIsActive)
 						{
-							//InOutLandscapeDataArray.Add(Landscape);
+							InOutLandscapeDataArray.Add(Landscape);
 						}
 
 						continue;
