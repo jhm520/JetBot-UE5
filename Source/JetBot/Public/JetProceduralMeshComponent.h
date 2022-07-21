@@ -317,13 +317,18 @@ private:
 	virtual FBoxSphereBounds CalcBounds(const FTransform& LocalToWorld) const override;
 	//~ Begin USceneComponent Interface.
 
-
+	public:
 	/** Update LocalBounds member from the local box of each section */
 	void UpdateLocalBounds();
+	private:
 	/** Ensure ProcMeshBodySetup is allocated and configured */
 	void CreateProcMeshBodySetup();
+
+	public:
 	/** Mark collision data as dirty, and re-create on instance if necessary */
 	void UpdateCollision();
+
+	private:
 	/** Once async physics cook is done, create needed state */
 	void FinishPhysicsAsyncCook(bool bSuccess, UBodySetup* FinishedBodySetup);
 

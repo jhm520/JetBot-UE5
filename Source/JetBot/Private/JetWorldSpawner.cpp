@@ -95,29 +95,29 @@ void AJetWorldSpawner::OnLandscapeDataCreated(const FOnLandscapeDataCreatedResul
 		return;
 	}*/
 
-	if (PlayerEnteredLandscapeIndexQueue.Num() == 0)
-	{
-		return;
-	}
+	//if (PlayerEnteredLandscapeIndexQueue.Num() == 0)
+	//{
+	//	return;
+	//}
 
-	int32 EnteredLandscapeIndex = PlayerEnteredLandscapeIndexQueue[0];
+	//int32 EnteredLandscapeIndex = PlayerEnteredLandscapeIndexQueue[0];
 
-	if (EnteredLandscapeIndex < 0)
-	{
-		return;
-	}
+	//if (EnteredLandscapeIndex < 0)
+	//{
+	//	return;
+	//}
 
-	/*JetLandscapeMesh* EnteredLandscape = PlayerEnteredLandscapeQueue[0];
+	///*JetLandscapeMesh* EnteredLandscape = PlayerEnteredLandscapeQueue[0];
 
-	if (!EnteredLandscape)
-	{
-		return;
-	}*/
+	//if (!EnteredLandscape)
+	//{
+	//	return;
+	//}*/
 
 
-	OnCharacterEnteredNewLandscapeSection(UGameplayStatics::GetPlayerCharacter(this, 0), EnteredLandscapeIndex);
+	//OnCharacterEnteredNewLandscapeSection(UGameplayStatics::GetPlayerCharacter(this, 0), EnteredLandscapeIndex);
 
-	PlayerEnteredLandscapeIndexQueue.RemoveAt(0);
+	//PlayerEnteredLandscapeIndexQueue.RemoveAt(0);
 
 	/*WorldSpawner_OnPlayerEnteredLandscape(EnteredLandscape, nullptr, EnteredLandscape->GetActorLocation());
 
@@ -132,8 +132,52 @@ void AJetWorldSpawner::CreateLandscapeMeshSectionWithData(UObject* WorldContextO
 		return;
 	}
 
+	bool bFoundExistingMeshSection = false;
+	int32 ExistingMeshSectionIndex = -1;
+	for (int32 i = 0; i < CurrentMeshSectionIndex; i++)
+	{
+		FJetProcMeshSection* ExistingProcMeshSection = JetLandscapeProcMesh->GetProcMeshSection(i);
 
-	JetLandscapeProcMesh->CreateMeshSection(CurrentMeshSectionIndex, InProcMeshData.WorldVertices, InProcMeshData.Triangles, InProcMeshData.Normals, InProcMeshData.UVs, TArray<FColor>(), TArray<FJetProcMeshTangent>(), true);
+		//ExistingProcMeshSection->bEnableCollision
+		if (!ExistingProcMeshSection)
+		{
+			continue;
+		}
+
+		if (ExistingProcMeshSection->ProcVertexBuffer.Num() == 0)
+		{
+			continue;
+		}
+
+		FVector MapKey = InProcMeshData.SpawnTransform.GetLocation();
+
+		MapKey.Z = 0.0f;
+
+		FVector ExistingMapKey = ExistingProcMeshSection->ProcVertexBuffer[0].Position;
+
+		ExistingMapKey.Z = 0.0f;
+
+		if (MapKey == ExistingMapKey)
+		{
+			bFoundExistingMeshSection = true;
+			ExistingMeshSectionIndex = i;
+		}
+	}
+
+	if (bFoundExistingMeshSection)
+	{
+		JetLandscapeProcMesh->SetMeshSectionVisible(ExistingMeshSectionIndex, true);
+
+		FJetProcMeshSection* ExistingProcMeshSection = JetLandscapeProcMesh->GetProcMeshSection(ExistingMeshSectionIndex);
+
+		/*if (ExistingProcMeshSection)
+		{
+			ExistingProcMeshSection->bEnableCollision = true;
+		}*/
+		return;
+	}
+
+	JetLandscapeProcMesh->CreateMeshSection(CurrentMeshSectionIndex, InProcMeshData.WorldVertices, InProcMeshData.Triangles, InProcMeshData.Normals, InProcMeshData.UVs, TArray<FColor>(), TArray<FJetProcMeshTangent>(), false);
 	
 	FJetProcMeshSection* NewProcMeshSection = JetLandscapeProcMesh->GetProcMeshSection(CurrentMeshSectionIndex);
 
@@ -267,13 +311,6 @@ void AJetWorldSpawner::OnCharacterEnteredNewLandscapeSection(ACharacter* InChara
 		return;
 	}
 
-	if (bCreatingLandscapeData)
-	{
-		PlayerEnteredLandscapeIndexQueue.Add(InLandscapeSectionIndex);
-		return;
-	}
-
-
 	FJetProcMeshSection* Section = JetLandscapeProcMesh->GetProcMeshSection(InLandscapeSectionIndex);
 
 	if (!Section)
@@ -281,6 +318,15 @@ void AJetWorldSpawner::OnCharacterEnteredNewLandscapeSection(ACharacter* InChara
 		return;
 	}
 
+	Section->bEnableCollision = true;
+
+	JetLandscapeProcMesh->UpdateCollision();
+
+	if (bCreatingLandscapeData)
+	{
+		PlayerEnteredLandscapeIndexQueue.Add(InLandscapeSectionIndex);
+		return;
+	}
 
 	AJetGameState* GameState = Cast<AJetGameState>(GetWorld()->GetGameState());
 
@@ -307,9 +353,23 @@ void AJetWorldSpawner::OnCharacterExitedLandscapeSection(ACharacter* InCharacter
 		return;
 	}
 
+	if (!JetLandscapeProcMesh)
+	{
+		return;
+	}
+
 	if (!(InNewLandscapeSectionIndex > -1) || !(InExitedLandscapeSectionIndex > -1))
 	{
 		return;
+	}
+
+	FJetProcMeshSection* ExitedLandscapeSection = JetLandscapeProcMesh->GetProcMeshSection(InExitedLandscapeSectionIndex);
+
+
+	if (ExitedLandscapeSection)
+	{
+		ExitedLandscapeSection->bEnableCollision = false;
+		JetLandscapeProcMesh->UpdateCollision();
 	}
 
 	TArray<int32> DestroySectionIndices;
@@ -323,6 +383,11 @@ void AJetWorldSpawner::OnCharacterExitedLandscapeSection(ACharacter* InCharacter
 		FJetProcMeshSection* LandscapeSection = JetLandscapeProcMesh->GetProcMeshSection(LandscapeMeshSectionIndex);
 
 		if (!NewLandscapeSection || !LandscapeSection)
+		{
+			continue;
+		}
+
+		if (!LandscapeSection->bSectionVisible)
 		{
 			continue;
 		}
@@ -469,6 +534,10 @@ void AJetWorldSpawner::WorldSpawner_TickSpawnLandscape()
 	if (NewWorldLandscapeData.LandscapeArray.Num() == 0)
 	{
 		OnLandscapesFinishedSpawning();
+
+		//JetLandscapeProcMesh->UpdateLocalBounds(); // Update overall bounds
+		//JetLandscapeProcMesh->UpdateCollision(); // Mark collision as dirty
+		//JetLandscapeProcMesh->MarkRenderStateDirty(); // New section requires recreating scene proxy
 	}
 
 }
@@ -505,10 +574,21 @@ void AJetWorldSpawner::WorldSpawner_TickDestroyLandscape()
 
 	if (JetLandscapeProcMesh)
 	{
-		JetLandscapeProcMesh->ClearMeshSection(FirstIndex);
+		JetLandscapeProcMesh->SetMeshSectionVisible(FirstIndex, false);
+
+		//SectionPtr->bEnableCollision = false;
+		//JetLandscapeProcMesh->ClearMeshSection(FirstIndex);
+
+		if (LandscapeProcMeshSectionIndexDestroyQueue.Num() == 0)
+		{
+			//JetLandscapeProcMesh->UpdateLocalBounds(); // Update overall bounds
+			//JetLandscapeProcMesh->UpdateCollision(); // Mark collision as dirty
+			//JetLandscapeProcMesh->MarkRenderStateDirty(); // New section requires recreating scene proxy
+		}
 	}
 
-	LandscapeProcMeshSectionIndexArray.Remove(FirstIndex);
+
+	//LandscapeProcMeshSectionIndexArray.Remove(FirstIndex);
 }
 
 void AJetWorldSpawner::WorldSpawner_FinishPhysicsAsyncCook(bool bSuccess, UBodySetup* FinishedBodySetup)
