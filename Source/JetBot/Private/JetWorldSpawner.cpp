@@ -470,6 +470,26 @@ void AJetWorldSpawner::AsyncCreateLandscapeData(FOnLandscapeDataCreatedDelegate 
 		/*FOnLandscapeDataCreatedResult& DataRef = *InWorldLandscapeData;
 		DataRef.LandscapeVerticesMap = OutLandscapeResult.LandscapeVerticesMap;*/
 
+		/*FProcMeshData SuperLandscape;
+		SuperLandscape.FaceVertexMapArray.AddZeroed(1);
+
+		for (const FProcMeshData& Landscape : NewWorldDataRef.LandscapeArray)
+		{
+			SuperLandscape.Vertices.Append(Landscape.Vertices);
+			SuperLandscape.WorldVertices.Append(Landscape.WorldVertices);
+			SuperLandscape.Triangles.Append(Landscape.Triangles);
+			SuperLandscape.TriangleData.Append(Landscape.TriangleData);
+			SuperLandscape.UVs.Append(Landscape.UVs);
+			SuperLandscape.Normals.Append(Landscape.Normals);
+			SuperLandscape.FaceVertexMapArray[0].VertexIndexMap.Append(Landscape.FaceVertexMapArray[0].VertexIndexMap);
+		}
+
+		SuperLandscape.Materials.Add(NewWorldDataRef.LandscapeArray[0].Materials[0]);
+
+		NewWorldDataRef.LandscapeArray.Empty();
+		NewWorldDataRef.LandscapeArray.Add(SuperLandscape);*/
+
+
 		AsyncTask(ENamedThreads::GameThread, [Out]()
 		{
 			FOnLandscapeDataCreatedResult OutLandscapeResult;
