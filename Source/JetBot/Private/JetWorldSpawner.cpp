@@ -340,9 +340,9 @@ void AJetWorldSpawner::OnCharacterEnteredNewLandscapeSection(ACharacter* InChara
 		return;
 	}
 
-	TWeakObjectPtr<AJetWorldSpawner> WeakPtr = this;
+	/*TWeakObjectPtr<AJetWorldSpawner> WeakPtr = this;
 	bCreatingLandscapeData = true;
-	AsyncCreateLandscapeData(LandscapeCreatedDelegate, Section->ProcVertexBuffer[0].Position*FVector(1,1,0), LandscapeProperties, WeakPtr, GameState->LandscapeDataMap, WorldLandscapeVertexMap, WorldLandscapeNormalMap, &WorldLandscapeData, &NewWorldLandscapeData);
+	AsyncCreateLandscapeData(LandscapeCreatedDelegate, Section->ProcVertexBuffer[0].Position*FVector(1,1,0), LandscapeProperties, WeakPtr, GameState->LandscapeDataMap, WorldLandscapeVertexMap, WorldLandscapeNormalMap, &WorldLandscapeData, &NewWorldLandscapeData);*/
 
 }
 
@@ -457,37 +457,43 @@ void AJetWorldSpawner::AsyncCreateLandscapeData(FOnLandscapeDataCreatedDelegate 
 
 	AsyncTask(ENamedThreads::AnyHiPriThreadNormalTask, [Out, InLocation, InLandscapeProperties, InWorldSpawner, InLandscapeDataMap, InLandscapeVerticesMap, InLandscapeNormalMap, InWorldLandscapeData, InOutNewWorldLandscapeData]()
 	{
-		FOnLandscapeDataCreatedResult& WorldDataRef = *InWorldLandscapeData;
+			FOnLandscapeDataCreatedResult& WorldDataRef = *InWorldLandscapeData;
 
-		FOnLandscapeDataCreatedResult& NewWorldDataRef = *InOutNewWorldLandscapeData;
+			FOnLandscapeDataCreatedResult& NewWorldDataRef = *InOutNewWorldLandscapeData;
 
-		AJetLandscapeMesh::CreateLandscapesInRadius(InLocation, InLandscapeProperties, NewWorldDataRef.LandscapeArray, WorldDataRef.LandscapeDataMap, WorldDataRef.LandscapeVerticesMap, WorldDataRef.LandscapeNormalMap);
+			AJetLandscapeMesh::CreateLandscapesInRadius(InLocation, InLandscapeProperties, NewWorldDataRef.LandscapeArray, WorldDataRef.LandscapeDataMap, WorldDataRef.LandscapeVerticesMap, WorldDataRef.LandscapeNormalMap);
 
-		/*FProcMeshData InOutSuperLandscapeData;
+			FProcMeshData SuperLandscape;
+			SuperLandscape.FaceVertexMapArray.AddZeroed(1);
 
-		AJetLandscapeMesh::CreateLandscapeDataInRadius(InLocation, InLandscapeProperties, OutLandscapeResult.LandscapeArray, InOutSuperLandscapeData, OutLandscapeResult.LandscapeDataMap, OutLandscapeResult.LandscapeVerticesMap);*/
+			int32 Dim = InLandscapeProperties.LandscapeSize + 1;
 
-		/*FOnLandscapeDataCreatedResult& DataRef = *InWorldLandscapeData;
-		DataRef.LandscapeVerticesMap = OutLandscapeResult.LandscapeVerticesMap;*/
-
-		/*FProcMeshData SuperLandscape;
-		SuperLandscape.FaceVertexMapArray.AddZeroed(1);
+			int32 NumVertices = Dim * Dim;
+			int32 li = 0;
 
 		for (const FProcMeshData& Landscape : NewWorldDataRef.LandscapeArray)
 		{
 			SuperLandscape.Vertices.Append(Landscape.Vertices);
 			SuperLandscape.WorldVertices.Append(Landscape.WorldVertices);
-			SuperLandscape.Triangles.Append(Landscape.Triangles);
-			SuperLandscape.TriangleData.Append(Landscape.TriangleData);
+
+			for (int32 tri : Landscape.Triangles)
+			{
+				SuperLandscape.Triangles.Add(tri + (li * NumVertices));
+			}
+
+			/*SuperLandscape.Triangles.Append(Landscape.Triangles);
+			SuperLandscape.TriangleData.Append(Landscape.TriangleData);*/
 			SuperLandscape.UVs.Append(Landscape.UVs);
 			SuperLandscape.Normals.Append(Landscape.Normals);
 			SuperLandscape.FaceVertexMapArray[0].VertexIndexMap.Append(Landscape.FaceVertexMapArray[0].VertexIndexMap);
+
+			li++;
 		}
 
 		SuperLandscape.Materials.Add(NewWorldDataRef.LandscapeArray[0].Materials[0]);
 
 		NewWorldDataRef.LandscapeArray.Empty();
-		NewWorldDataRef.LandscapeArray.Add(SuperLandscape);*/
+		NewWorldDataRef.LandscapeArray.Add(SuperLandscape);
 
 
 		AsyncTask(ENamedThreads::GameThread, [Out]()
