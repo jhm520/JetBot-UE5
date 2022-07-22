@@ -8,7 +8,7 @@
 #include "JetLandscapeMesh.h"
 #include "JetWorldSpawner.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLandscapeDataCreatedDelegate, const struct FOnLandscapeDataCreatedResult&, OnLandscapeDataCreatedResult);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLandscapeDataCreatedDelegate);
 
 class UJetProceduralMeshComponent;
 
@@ -31,7 +31,7 @@ public:
 	AJetLandscapeMesh* CurrentLandscape = nullptr;
 
 	UFUNCTION()
-	void OnLandscapeDataCreated(const FOnLandscapeDataCreatedResult& DEPInLandscapeData);
+	void OnLandscapeDataCreated();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
 	int32 WorldRadius = 10;

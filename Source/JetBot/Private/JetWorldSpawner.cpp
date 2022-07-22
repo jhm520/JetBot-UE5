@@ -29,7 +29,7 @@ AJetLandscapeMesh* AJetWorldSpawner::GetCurrentLandscapeMesh(UObject* WorldConte
 	return GameState->WorldSpawner->CurrentLandscape;
 }
 
-void AJetWorldSpawner::OnLandscapeDataCreated(const FOnLandscapeDataCreatedResult& DEPInLandscapeData)
+void AJetWorldSpawner::OnLandscapeDataCreated()
 {
 	//bCreatingLandscapeData = false;
 
@@ -207,6 +207,14 @@ void AJetWorldSpawner::CreateLandscapeMeshSectionWithData(UObject* WorldContextO
 	{
 		JetLandscapeProcMesh->CreateMeshSection(0, InProcMeshData.WorldVertices, InProcMeshData.Triangles, InProcMeshData.Normals, InProcMeshData.UVs, TArray<FColor>(), TArray<FJetProcMeshTangent>(), true);
 
+		if (WorldLandscapeMaterial)
+		{
+			JetLandscapeProcMesh->SetMaterial(CurrentMeshSectionIndex, WorldLandscapeMaterial);
+
+			LandscapeProcMeshSectionIndexArray.AddUnique(CurrentMeshSectionIndex);
+			CurrentMeshSectionIndex++;
+			return;
+		}
 	}
 
 
@@ -244,14 +252,9 @@ void AJetWorldSpawner::CreateLandscapeMeshSectionWithData(UObject* WorldContextO
 	//TODO: USe this to get the section
 	//const FJetProcMeshVertex& VertexZero = Section->ProcVertexBuffer[0];
 
-	if (WorldLandscapeMaterial)
-	{
-		JetLandscapeProcMesh->SetMaterial(CurrentMeshSectionIndex, WorldLandscapeMaterial);
+	
+	return;
 
-		LandscapeProcMeshSectionIndexArray.AddUnique(CurrentMeshSectionIndex);
-		CurrentMeshSectionIndex++;
-		return;
-	}
 
 	int32 i = 0;
 
@@ -557,9 +560,8 @@ void AJetWorldSpawner::AsyncCreateLandscapeData(FOnLandscapeDataCreatedDelegate 
 
 		AsyncTask(ENamedThreads::GameThread, [Out]()
 		{
-			FOnLandscapeDataCreatedResult OutLandscapeResult;
-			// We execute the delegate along with the param
-			Out.Broadcast(OutLandscapeResult);
+			// We execute the delegate
+			Out.Broadcast();
 		});
 	});
 }
