@@ -132,54 +132,86 @@ void AJetWorldSpawner::CreateLandscapeMeshSectionWithData(UObject* WorldContextO
 		return;
 	}
 
-	bool bFoundExistingMeshSection = false;
-	int32 ExistingMeshSectionIndex = -1;
-	for (int32 i = 0; i < CurrentMeshSectionIndex; i++)
+	/*if (CurrentMeshSectionIndex > 0)
 	{
-		FJetProcMeshSection* ExistingProcMeshSection = JetLandscapeProcMesh->GetProcMeshSection(i);
+		DeleteOldMeshSections.Add(CurrentMeshSectionIndex-1);
+	}*/
 
-		//ExistingProcMeshSection->bEnableCollision
-		if (!ExistingProcMeshSection)
+	//bool bFoundExistingMeshSection = false;
+	//int32 ExistingMeshSectionIndex = -1;
+	//for (int32 i = 0; i < CurrentMeshSectionIndex; i++)
+	//{
+	//	FJetProcMeshSection* ExistingProcMeshSection = JetLandscapeProcMesh->GetProcMeshSection(i);
+
+	//	//ExistingProcMeshSection->bEnableCollision
+	//	if (!ExistingProcMeshSection)
+	//	{
+	//		continue;
+	//	}
+
+	//	//JetLandscapeProcMesh->SetMeshSectionVisible(i, false);
+	//	JetLandscapeProcMesh->ClearMeshSection(i);
+
+
+	//	/*if (ExistingProcMeshSection->ProcVertexBuffer.Num() == 0)
+	//	{
+	//		continue;
+	//	}
+
+	//	FVector MapKey = InProcMeshData.SpawnTransform.GetLocation();
+
+	//	MapKey.Z = 0.0f;
+
+	//	FVector ExistingMapKey = ExistingProcMeshSection->ProcVertexBuffer[0].Position;
+
+	//	ExistingMapKey.Z = 0.0f;
+
+	//	if (MapKey == ExistingMapKey)
+	//	{
+	//		bFoundExistingMeshSection = true;
+	//		ExistingMeshSectionIndex = i;
+	//	}*/
+	//}
+
+	//if (bFoundExistingMeshSection)
+	//{
+	//	JetLandscapeProcMesh->SetMeshSectionVisible(ExistingMeshSectionIndex, true);
+
+	//	FJetProcMeshSection* ExistingProcMeshSection = JetLandscapeProcMesh->GetProcMeshSection(ExistingMeshSectionIndex);
+
+	//	/*if (ExistingProcMeshSection)
+	//	{
+	//		ExistingProcMeshSection->bEnableCollision = true;
+	//	}*/
+	//	return;
+	//}
+
+	FJetProcMeshSection* HasMeshSection = JetLandscapeProcMesh->GetProcMeshSection(0);
+
+	if (HasMeshSection)
+	{
+		JetLandscapeProcMesh->UpdateMeshSection(0, InProcMeshData.WorldVertices, InProcMeshData.Normals, InProcMeshData.UVs, TArray<FColor>(), TArray<FJetProcMeshTangent>());
+
+		FJetProcMeshSection* Section = JetLandscapeProcMesh->GetProcMeshSection(0);
+
+		if (!Section)
 		{
-			continue;
+			return;
 		}
 
-		if (ExistingProcMeshSection->ProcVertexBuffer.Num() == 0)
-		{
-			continue;
-		}
+		Section->bEnableCollision = true;
 
-		FVector MapKey = InProcMeshData.SpawnTransform.GetLocation();
+		JetLandscapeProcMesh->UpdateCollision();
+	}
+	else
+	{
+		JetLandscapeProcMesh->CreateMeshSection(0, InProcMeshData.WorldVertices, InProcMeshData.Triangles, InProcMeshData.Normals, InProcMeshData.UVs, TArray<FColor>(), TArray<FJetProcMeshTangent>(), true);
 
-		MapKey.Z = 0.0f;
-
-		FVector ExistingMapKey = ExistingProcMeshSection->ProcVertexBuffer[0].Position;
-
-		ExistingMapKey.Z = 0.0f;
-
-		if (MapKey == ExistingMapKey)
-		{
-			bFoundExistingMeshSection = true;
-			ExistingMeshSectionIndex = i;
-		}
 	}
 
-	if (bFoundExistingMeshSection)
-	{
-		JetLandscapeProcMesh->SetMeshSectionVisible(ExistingMeshSectionIndex, true);
 
-		FJetProcMeshSection* ExistingProcMeshSection = JetLandscapeProcMesh->GetProcMeshSection(ExistingMeshSectionIndex);
-
-		/*if (ExistingProcMeshSection)
-		{
-			ExistingProcMeshSection->bEnableCollision = true;
-		}*/
-		return;
-	}
-
-	JetLandscapeProcMesh->CreateMeshSection(CurrentMeshSectionIndex, InProcMeshData.WorldVertices, InProcMeshData.Triangles, InProcMeshData.Normals, InProcMeshData.UVs, TArray<FColor>(), TArray<FJetProcMeshTangent>(), false);
 	
-	FJetProcMeshSection* NewProcMeshSection = JetLandscapeProcMesh->GetProcMeshSection(CurrentMeshSectionIndex);
+	/*FJetProcMeshSection* NewProcMeshSection = JetLandscapeProcMesh->GetProcMeshSection(0);
 
 	if (NewProcMeshSection)
 	{
@@ -196,7 +228,7 @@ void AJetWorldSpawner::CreateLandscapeMeshSectionWithData(UObject* WorldContextO
 			bIsPhysicsAsyncCook = true;
 		}
 
-	}
+	}*/
 
 	FProcMeshData* DataPtr = WorldLandscapeData.LandscapeDataMap.Find(InProcMeshData.SpawnTransform.GetLocation() * FVector(1, 1, 0));
 
@@ -311,6 +343,8 @@ void AJetWorldSpawner::OnCharacterEnteredNewLandscapeSection(ACharacter* InChara
 		return;
 	}
 
+	return;
+
 	FJetProcMeshSection* Section = JetLandscapeProcMesh->GetProcMeshSection(InLandscapeSectionIndex);
 
 	if (!Section)
@@ -348,6 +382,9 @@ void AJetWorldSpawner::OnCharacterEnteredNewLandscapeSection(ACharacter* InChara
 
 void AJetWorldSpawner::OnCharacterExitedLandscapeSection(ACharacter* InCharacter, int32 InExitedLandscapeSectionIndex, int32 InNewLandscapeSectionIndex)
 {
+
+	return;
+
 	if (!InCharacter || !InCharacter->IsLocallyControlled())
 	{
 		return;
@@ -448,6 +485,29 @@ void AJetWorldSpawner::BeginPlay()
 void AJetWorldSpawner::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	/*if (JetLandscapeProcMesh)
+	{
+		if (!bIsPhysicsAsyncCook)
+		{
+			if (DeleteOldMeshSections.Num() > 0)
+			{
+				for (int32 index : DeleteOldMeshSections)
+				{
+					FJetProcMeshSection* ProcMeshSection = JetLandscapeProcMesh->GetProcMeshSection(index);
+
+					if (ProcMeshSection)
+					{
+						JetLandscapeProcMesh->ClearMeshSection(index);
+					}
+
+				}
+
+				DeleteOldMeshSections.Empty();
+			}
+		}
+	}*/
+	
 
 }
 
@@ -662,6 +722,14 @@ void AJetWorldSpawner::FinishPhysicsAsyncCook(bool bSuccess, UBodySetup* Finishe
 {
 	bIsPhysicsAsyncCook = false;
 
+	//FJetProcMeshSection* ExistingProcMeshSection = JetLandscapeProcMesh->GetProcMeshSection(OldLandscapeMeshSection);
+
+	/*if (!JetLandscapeProcMesh)
+	{
+		return;
+	}
+
+	JetLandscapeProcMesh->ClearMeshSection(OldLandscapeMeshSection);*/
 }
 
 void AJetWorldSpawner::OnLandscapesFinishedSpawning_Implementation()

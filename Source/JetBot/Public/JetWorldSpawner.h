@@ -100,6 +100,9 @@ public:
 	UPROPERTY(Transient)
 	bool bCreatingLandscapeData = false;
 
+	UPROPERTY(Transient)
+	TArray<int32> DeleteOldMeshSections;
+
 	//edited by AsyncCreateLandscapeData, contains global world landscape data
 	UPROPERTY()
 	FOnLandscapeDataCreatedResult WorldLandscapeData;
