@@ -113,6 +113,9 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "World Spawner")
 	void OnWorldSpawned();
 
+	UFUNCTION(BlueprintCallable, Category = "World Spawner")
+	void UpdateLandscape();
+
 	UPROPERTY(BlueprintReadWrite, Category = "WorldSpawner")
 	bool bHasWorldSpawned = false;
 

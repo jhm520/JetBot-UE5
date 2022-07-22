@@ -454,7 +454,6 @@ void AJetWorldSpawner::Tick(float DeltaTime)
 void AJetWorldSpawner::AsyncCreateLandscapeData(FOnLandscapeDataCreatedDelegate Out, const FVector& InLocation, const FLandscapeProperties& InLandscapeProperties, TWeakObjectPtr<AJetWorldSpawner> InWorldSpawner, const TMap<FVector, FProcMeshData>& InLandscapeDataMap, const TMap<FVector, FLandscapeVertexData>& InLandscapeVerticesMap, const TMap<FVector, FVector>& InLandscapeNormalMap, FOnLandscapeDataCreatedResult* InWorldLandscapeData, FOnLandscapeDataCreatedResult* InOutNewWorldLandscapeData)
 {
 	OnLandscapeDataCreatedMutex = true;
-
 	AsyncTask(ENamedThreads::AnyHiPriThreadNormalTask, [Out, InLocation, InLandscapeProperties, InWorldSpawner, InLandscapeDataMap, InLandscapeVerticesMap, InLandscapeNormalMap, InWorldLandscapeData, InOutNewWorldLandscapeData]()
 	{
 			FOnLandscapeDataCreatedResult& WorldDataRef = *InWorldLandscapeData;
@@ -528,6 +527,43 @@ void AJetWorldSpawner::WorldSpawner_OnPlayerEnteredLandscape(AJetLandscapeMesh* 
 	TWeakObjectPtr<AJetWorldSpawner> WeakPtr = this;
 	bCreatingLandscapeData = true;
 	AsyncCreateLandscapeData(LandscapeCreatedDelegate, InLandscape->GetActorLocation(), LandscapeProperties, WeakPtr, GameState->LandscapeDataMap, WorldLandscapeVertexMap, WorldLandscapeNormalMap, &WorldLandscapeData, &NewWorldLandscapeData);
+}
+
+void AJetWorldSpawner::UpdateLandscape()
+{
+	ACharacter* LocalCharacter = UGameplayStatics::GetPlayerCharacter(this, 0);
+
+	if (!LocalCharacter)
+	{
+		return;
+	}
+
+	const FVector CharLoc = LocalCharacter->GetActorLocation();
+
+	int32 Dim = LandscapeProperties.LandscapeSize * LandscapeProperties.TileSize;
+
+	int32 xPos = CharLoc.X;
+	int32 yPos = CharLoc.Y;
+
+	int32 xDiv = xPos / Dim;
+	int32 yDiv = yPos / Dim;
+
+
+
+	const FVector NewLandscapePos = FVector(xDiv * Dim, yDiv * Dim, 0);
+
+
+	int32 sixnine = 69;
+
+	AJetGameState* GameState = Cast<AJetGameState>(GetWorld()->GetGameState());
+
+	if (!GameState || !GameState->WorldSpawner)
+	{
+		return;
+	}
+
+	AsyncCreateLandscapeData(LandscapeCreatedDelegate, NewLandscapePos, LandscapeProperties, this, GameState->LandscapeDataMap, WorldLandscapeVertexMap, WorldLandscapeNormalMap, &WorldLandscapeData, &NewWorldLandscapeData);
+
 }
 
 void AJetWorldSpawner::WorldSpawner_TickSpawnLandscape()
