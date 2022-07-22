@@ -714,23 +714,23 @@ void AJetLandscapeMesh::CreateLandscapesInRadius(const FVector& InLocation, cons
 
 	static int32 Selector = 0;
 
-	/*for (yEven = 0; yEven < 2; yEven++)
-	{*/
+	for (yEven = 0; yEven < 2; yEven++)
+	{
 		for (y = 0; y < yDim; y++)
 		{
-			/*if ((y % 2 == Selector) != (yEven == 0))
+			if ((y % 2 == Selector) != (yEven == 0))
 			{
 				continue;
-			}*/
+			}
 
-			/*for (xEven = 0; xEven < 2; xEven++)
-			{*/
+			for (xEven = 0; xEven < 2; xEven++)
+			{
 				for (x = 0; x < xDim; x++)
 				{
-					/*if ((x % 2 == Selector) != (xEven == 0))
+					if ((x % 2 == Selector) != (xEven == 0))
 					{
 						continue;
-					}*/
+					}
 					FProcMeshData Landscape;
 
 					FVector MapKey = FVector(InLocation + (InLandscapeProperties.GetVectorScale() * (FVector(x - Modifier, y - Modifier, 0))));
@@ -758,9 +758,9 @@ void AJetLandscapeMesh::CreateLandscapesInRadius(const FVector& InLocation, cons
 					InOutLandscapeDataArray.Add(Landscape);
 					InOutLandscapeDataMap.Add(Landscape.SpawnTransform.GetLocation() * FVector(1, 1, 0), Landscape);
 				}
-			/*}*/
+			}
 		}
-	/*}*/
+	}
 
 	//for each new landscape data, smooth the landscape
 
