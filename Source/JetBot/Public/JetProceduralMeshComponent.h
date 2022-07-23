@@ -15,6 +15,8 @@ DECLARE_STATS_GROUP(TEXT("ProceduralMesh"), STATGROUP_JetProceduralMesh, STATCAT
 
 DECLARE_DELEGATE_OneParam(FOnJetProcMeshAsyncPhysicsCookFinished, bool);
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAsyncUpdateMeshSectionCompleteDelegate);
+
 
 /**
 *	Struct used to specify a tangent vector for a vertex
@@ -219,6 +221,18 @@ public:
 
 	//TODO: Create UpdateMeshSectionAsync, which does the UpdateMeshSection, but the data Update is done asyncronously
 
+	UFUNCTION(BlueprintCallable, Category = "Components|ProceduralMesh", meta = (DeprecatedFunction, DeprecationMessage = "This function is deprecated for Blueprints because it uses the unsupported 'Color' type. Use new 'Update Mesh Section' function which uses LinearColor instead.", DisplayName = "Update Mesh Section FColor", AutoCreateRefTerm = "Normals,UV0,VertexColors,Tangents"))
+		void AsyncUpdateMeshSection(int32 SectionIndex, const TArray<FVector>& Vertices, const TArray<FVector>& Normals, const TArray<FVector2D>& UV0, const TArray<FColor>& VertexColors, const TArray<FJetProcMeshTangent>& Tangents)
+	{
+		TArray<FVector2D> EmptyArray;
+		AsyncUpdateMeshSection(SectionIndex, Vertices, Normals, UV0, EmptyArray, EmptyArray, EmptyArray, VertexColors, Tangents);
+	}
+
+	void AsyncUpdateMeshSection(int32 SectionIndex, const TArray<FVector>& Vertices, const TArray<FVector>& Normals, const TArray<FVector2D>& UV0, const TArray<FVector2D>& UV1, const TArray<FVector2D>& UV2, const TArray<FVector2D>& UV3, const TArray<FColor>& VertexColors, const TArray<FJetProcMeshTangent>& Tangents);
+
+	FOnAsyncUpdateMeshSectionCompleteDelegate OnAsyncUpdateMeshSectionCompleteDelegate;
+
+	void OnAsyncUpdateMeshSectionComplete();
 
 	/**
 	 *	Updates a section of this procedural mesh component. This is faster than CreateMeshSection, but does not let you change topology. Collision info is also updated.

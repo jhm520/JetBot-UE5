@@ -664,6 +664,134 @@ void UJetProceduralMeshComponent::CreateMeshSection(int32 SectionIndex, const TA
 	MarkRenderStateDirty(); // New section requires recreating scene proxy
 }
 
+void UJetProceduralMeshComponent::AsyncUpdateMeshSection(int32 SectionIndex, const TArray<FVector>& Vertices, const TArray<FVector>& Normals, const TArray<FVector2D>& UV0, const TArray<FVector2D>& UV1, const TArray<FVector2D>& UV2, const TArray<FVector2D>& UV3, const TArray<FColor>& VertexColors, const TArray<FJetProcMeshTangent>& Tangents)
+{
+	if (!OnAsyncUpdateMeshSectionCompleteDelegate.IsBound())
+	{
+		OnAsyncUpdateMeshSectionCompleteDelegate.AddDynamic(this, &UJetProceduralMeshComponent::OnAsyncUpdateMeshSectionComplete);
+	}
+
+	if (SectionIndex < ProcMeshSections.Num())
+	{
+
+		FJetProcMeshSection& Section = ProcMeshSections[SectionIndex];
+
+		/*AsyncTask(ENamedThreads::AnyHiPriThreadNormalTask, [Out ]()
+			{
+			}*/
+		const int32 NumVerts = Vertices.Num();
+		const int32 PreviousNumVerts = Section.ProcVertexBuffer.Num();
+
+		// See if positions are changing
+		const bool bSameVertexCount = PreviousNumVerts == NumVerts;
+
+		// Update bounds, if we are getting new position data
+		if (bSameVertexCount)
+		{
+			Section.SectionLocalBox = FBox(Vertices);
+
+			// Iterate through vertex data, copying in new info
+			for (int32 VertIdx = 0; VertIdx < NumVerts; VertIdx++)
+			{
+				FJetProcMeshVertex& ModifyVert = Section.ProcVertexBuffer[VertIdx];
+
+				// Position data
+				if (Vertices.Num() == NumVerts)
+				{
+					ModifyVert.Position = Vertices[VertIdx];
+				}
+
+				// Normal data
+				if (Normals.Num() == NumVerts)
+				{
+					ModifyVert.Normal = Normals[VertIdx];
+				}
+
+				// Tangent data
+				if (Tangents.Num() == NumVerts)
+				{
+					ModifyVert.Tangent = Tangents[VertIdx];
+				}
+
+				// UV0 data
+				if (UV0.Num() == NumVerts)
+				{
+					ModifyVert.UV0 = UV0[VertIdx];
+				}
+				// UV1 data
+				if (UV1.Num() == NumVerts)
+				{
+					ModifyVert.UV1 = UV1[VertIdx];
+				}
+				// UV2 data
+				if (UV2.Num() == NumVerts)
+				{
+					ModifyVert.UV2 = UV2[VertIdx];
+				}
+				// UV3 data
+				if (UV3.Num() == NumVerts)
+				{
+					ModifyVert.UV3 = UV3[VertIdx];
+				}
+
+				// Color data
+				if (VertexColors.Num() == NumVerts)
+				{
+					ModifyVert.Color = VertexColors[VertIdx];
+				}
+			}
+
+			// If we have collision enabled on this section, update that too
+			if (Section.bEnableCollision)
+			{
+				TArray<FVector> CollisionPositions;
+
+				// We have one collision mesh for all sections, so need to build array of _all_ positions
+				for (const FJetProcMeshSection& CollisionSection : ProcMeshSections)
+				{
+					// If section has collision, copy it
+					if (CollisionSection.bEnableCollision)
+					{
+						for (int32 VertIdx = 0; VertIdx < CollisionSection.ProcVertexBuffer.Num(); VertIdx++)
+						{
+							CollisionPositions.Add(CollisionSection.ProcVertexBuffer[VertIdx].Position);
+						}
+					}
+				}
+
+				// Pass new positions to trimesh
+				BodyInstance.UpdateTriMeshVertices(CollisionPositions);
+			}
+
+			// If we have a valid proxy and it is not pending recreation
+			if (SceneProxy && !IsRenderStateDirty())
+			{
+				// Create data to update section
+				FProcMeshSectionUpdateData* SectionData = new FProcMeshSectionUpdateData;
+				SectionData->TargetSection = SectionIndex;
+				SectionData->NewVertexBuffer = Section.ProcVertexBuffer;
+
+				// Enqueue command to send to render thread
+				FProceduralMeshSceneProxy* ProcMeshSceneProxy = (FProceduralMeshSceneProxy*)SceneProxy;
+				ENQUEUE_RENDER_COMMAND(FProcMeshSectionUpdate)
+					([ProcMeshSceneProxy, SectionData](FRHICommandListImmediate& RHICmdList) { ProcMeshSceneProxy->UpdateSection_RenderThread(SectionData); });
+			}
+
+			UpdateLocalBounds();		 // Update overall bounds
+			MarkRenderTransformDirty();  // Need to send new bounds to render thread
+		}
+		else
+		{
+			UE_LOG(LogProceduralComponent, Error, TEXT("Trying to update a procedural mesh component section with a different number of vertices [Previous: %i, New: %i] (clear and recreate mesh section instead)"), PreviousNumVerts, NumVerts);
+		}
+	}
+}
+
+void UJetProceduralMeshComponent::OnAsyncUpdateMeshSectionComplete()
+{
+
+}
+
 void UJetProceduralMeshComponent::UpdateMeshSection_LinearColor(int32 SectionIndex, const TArray<FVector>& Vertices, const TArray<FVector>& Normals, const TArray<FVector2D>& UV0, const TArray<FVector2D>& UV1, const TArray<FVector2D>& UV2, const TArray<FVector2D>& UV3, const TArray<FLinearColor>& VertexColors, const TArray<FJetProcMeshTangent>& Tangents)
 {
 	// Convert FLinearColors to FColors
