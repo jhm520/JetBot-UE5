@@ -217,6 +217,9 @@ public:
 
 	void UpdateMeshSection(int32 SectionIndex, const TArray<FVector>& Vertices, const TArray<FVector>& Normals, const TArray<FVector2D>& UV0, const TArray<FVector2D>& UV1, const TArray<FVector2D>& UV2, const TArray<FVector2D>& UV3, const TArray<FColor>& VertexColors, const TArray<FJetProcMeshTangent>& Tangents);
 
+	//TODO: Create UpdateMeshSectionAsync, which does the UpdateMeshSection, but the data Update is done asyncronously
+
+
 	/**
 	 *	Updates a section of this procedural mesh component. This is faster than CreateMeshSection, but does not let you change topology. Collision info is also updated.
 	 *	@param	Vertices			Vertex buffer of all vertex positions to use for this mesh section.
