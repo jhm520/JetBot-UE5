@@ -134,7 +134,12 @@ void AJetWorldSpawner::CreateLandscapeMeshSectionWithData(UObject* WorldContextO
 
 	/*if (CurrentMeshSectionIndex > 0)
 	{
-		DeleteOldMeshSections.Add(CurrentMeshSectionIndex-1);
+		int32 DeleteMeshIndex = CurrentMeshSectionIndex - 1;
+
+		if (DeleteMeshIndex)
+		{
+			DeleteOldMeshSections.Add(DeleteMeshIndex);
+		}
 	}*/
 
 	//bool bFoundExistingMeshSection = false;
@@ -186,7 +191,7 @@ void AJetWorldSpawner::CreateLandscapeMeshSectionWithData(UObject* WorldContextO
 	//	return;
 	//}
 
-	FJetProcMeshSection* HasMeshSection = JetLandscapeProcMesh->GetProcMeshSection(0);
+	/*FJetProcMeshSection* HasMeshSection = JetLandscapeProcMesh->GetProcMeshSection(0);
 
 	if (HasMeshSection)
 	{
@@ -204,8 +209,8 @@ void AJetWorldSpawner::CreateLandscapeMeshSectionWithData(UObject* WorldContextO
 		JetLandscapeProcMesh->UpdateCollision();
 	}
 	else
-	{
-		JetLandscapeProcMesh->CreateMeshSection(0, InProcMeshData.WorldVertices, InProcMeshData.Triangles, InProcMeshData.Normals, InProcMeshData.UVs, TArray<FColor>(), TArray<FJetProcMeshTangent>(), true);
+	{*/
+		JetLandscapeProcMesh->CreateMeshSection(CurrentMeshSectionIndex, InProcMeshData.WorldVertices, InProcMeshData.Triangles, InProcMeshData.Normals, InProcMeshData.UVs, TArray<FColor>(), TArray<FJetProcMeshTangent>(), true);
 
 		if (WorldLandscapeMaterial)
 		{
@@ -215,7 +220,7 @@ void AJetWorldSpawner::CreateLandscapeMeshSectionWithData(UObject* WorldContextO
 			CurrentMeshSectionIndex++;
 			return;
 		}
-	}
+	/*}*/
 
 
 	
