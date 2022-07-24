@@ -190,7 +190,7 @@ void AJetWorldSpawner::CreateLandscapeMeshSectionWithData(UObject* WorldContextO
 
 	if (HasMeshSection)
 	{
-		JetLandscapeProcMesh->UpdateMeshSection(0, InProcMeshData.WorldVertices, InProcMeshData.Normals, InProcMeshData.UVs, TArray<FColor>(), TArray<FJetProcMeshTangent>());
+		JetLandscapeProcMesh->AsyncUpdateMeshSection(0, InProcMeshData.WorldVertices, InProcMeshData.Normals, InProcMeshData.UVs, TArray<FColor>(), TArray<FJetProcMeshTangent>());
 
 		FJetProcMeshSection* Section = JetLandscapeProcMesh->GetProcMeshSection(0);
 

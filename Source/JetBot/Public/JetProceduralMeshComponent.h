@@ -15,7 +15,7 @@ DECLARE_STATS_GROUP(TEXT("ProceduralMesh"), STATGROUP_JetProceduralMesh, STATCAT
 
 DECLARE_DELEGATE_OneParam(FOnJetProcMeshAsyncPhysicsCookFinished, bool);
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAsyncUpdateMeshSectionCompleteDelegate);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAsyncUpdateMeshSectionCompleteDelegate, int32, InMeshSectionIndex);
 
 
 /**
@@ -232,7 +232,10 @@ public:
 
 	FOnAsyncUpdateMeshSectionCompleteDelegate OnAsyncUpdateMeshSectionCompleteDelegate;
 
-	void OnAsyncUpdateMeshSectionComplete();
+	TArray<FVector> AsyncCollisionPositions;
+
+	UFUNCTION()
+	void OnAsyncUpdateMeshSectionComplete(int32 InMeshSectionIndex);
 
 	/**
 	 *	Updates a section of this procedural mesh component. This is faster than CreateMeshSection, but does not let you change topology. Collision info is also updated.
