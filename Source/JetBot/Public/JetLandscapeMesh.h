@@ -91,7 +91,7 @@ struct FLandscapeProperties
 	float MaximumSlopeInterpolationDifference = 1.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
-	int32 LandscapeSubdivisions = 3;
+	int32 LandscapesPerSection = 3;
 
 	/*UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape")
 	int32 MaximumHeightDifference = 50.0f;*/
