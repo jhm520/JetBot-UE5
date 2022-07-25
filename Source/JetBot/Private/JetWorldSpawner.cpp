@@ -142,54 +142,54 @@ void AJetWorldSpawner::CreateLandscapeMeshSectionWithData(UObject* WorldContextO
 		}
 	}*/
 
-	//bool bFoundExistingMeshSection = false;
-	//int32 ExistingMeshSectionIndex = -1;
-	//for (int32 i = 0; i < CurrentMeshSectionIndex; i++)
-	//{
-	//	FJetProcMeshSection* ExistingProcMeshSection = JetLandscapeProcMesh->GetProcMeshSection(i);
+	bool bFoundExistingMeshSection = false;
+	int32 ExistingMeshSectionIndex = -1;
+	for (int32 i = 0; i < CurrentMeshSectionIndex; i++)
+	{
+		FJetProcMeshSection* ExistingProcMeshSection = JetLandscapeProcMesh->GetProcMeshSection(i);
 
-	//	//ExistingProcMeshSection->bEnableCollision
-	//	if (!ExistingProcMeshSection)
-	//	{
-	//		continue;
-	//	}
+		//ExistingProcMeshSection->bEnableCollision
+		if (!ExistingProcMeshSection)
+		{
+			continue;
+		}
 
-	//	//JetLandscapeProcMesh->SetMeshSectionVisible(i, false);
-	//	JetLandscapeProcMesh->ClearMeshSection(i);
+		//JetLandscapeProcMesh->SetMeshSectionVisible(i, false);
+		//JetLandscapeProcMesh->ClearMeshSection(i);
 
 
-	//	/*if (ExistingProcMeshSection->ProcVertexBuffer.Num() == 0)
-	//	{
-	//		continue;
-	//	}
+		if (ExistingProcMeshSection->ProcVertexBuffer.Num() == 0)
+		{
+			continue;
+		}
 
-	//	FVector MapKey = InProcMeshData.SpawnTransform.GetLocation();
+		FVector MapKey = InProcMeshData.SpawnTransform.GetLocation();
 
-	//	MapKey.Z = 0.0f;
+		MapKey.Z = 0.0f;
 
-	//	FVector ExistingMapKey = ExistingProcMeshSection->ProcVertexBuffer[0].Position;
+		FVector ExistingMapKey = ExistingProcMeshSection->ProcVertexBuffer[0].Position;
 
-	//	ExistingMapKey.Z = 0.0f;
+		ExistingMapKey.Z = 0.0f;
 
-	//	if (MapKey == ExistingMapKey)
-	//	{
-	//		bFoundExistingMeshSection = true;
-	//		ExistingMeshSectionIndex = i;
-	//	}*/
-	//}
+		if (MapKey == ExistingMapKey)
+		{
+			bFoundExistingMeshSection = true;
+			ExistingMeshSectionIndex = i;
+		}
+	}
 
-	//if (bFoundExistingMeshSection)
-	//{
-	//	JetLandscapeProcMesh->SetMeshSectionVisible(ExistingMeshSectionIndex, true);
+	if (bFoundExistingMeshSection)
+	{
+		JetLandscapeProcMesh->SetMeshSectionVisible(ExistingMeshSectionIndex, true);
 
-	//	FJetProcMeshSection* ExistingProcMeshSection = JetLandscapeProcMesh->GetProcMeshSection(ExistingMeshSectionIndex);
+		//FJetProcMeshSection* ExistingProcMeshSection = JetLandscapeProcMesh->GetProcMeshSection(ExistingMeshSectionIndex);
 
-	//	/*if (ExistingProcMeshSection)
-	//	{
-	//		ExistingProcMeshSection->bEnableCollision = true;
-	//	}*/
-	//	return;
-	//}
+		///*if (ExistingProcMeshSection)
+		//{
+		//	ExistingProcMeshSection->bEnableCollision = true;
+		//}*/
+		return;
+	}
 
 	/*FJetProcMeshSection* HasMeshSection = JetLandscapeProcMesh->GetProcMeshSection(0);
 
@@ -351,7 +351,6 @@ void AJetWorldSpawner::OnCharacterEnteredNewLandscapeSection(ACharacter* InChara
 		return;
 	}
 
-	return;
 
 	FJetProcMeshSection* Section = JetLandscapeProcMesh->GetProcMeshSection(InLandscapeSectionIndex);
 
@@ -363,6 +362,8 @@ void AJetWorldSpawner::OnCharacterEnteredNewLandscapeSection(ACharacter* InChara
 	Section->bEnableCollision = true;
 
 	JetLandscapeProcMesh->UpdateCollision();
+
+	//return;
 
 	if (bCreatingLandscapeData)
 	{
@@ -382,6 +383,8 @@ void AJetWorldSpawner::OnCharacterEnteredNewLandscapeSection(ACharacter* InChara
 		return;
 	}
 
+	//UpdateLandscape();
+
 	/*TWeakObjectPtr<AJetWorldSpawner> WeakPtr = this;
 	bCreatingLandscapeData = true;
 	AsyncCreateLandscapeData(LandscapeCreatedDelegate, Section->ProcVertexBuffer[0].Position*FVector(1,1,0), LandscapeProperties, WeakPtr, GameState->LandscapeDataMap, WorldLandscapeVertexMap, WorldLandscapeNormalMap, &WorldLandscapeData, &NewWorldLandscapeData);*/
@@ -391,7 +394,6 @@ void AJetWorldSpawner::OnCharacterEnteredNewLandscapeSection(ACharacter* InChara
 void AJetWorldSpawner::OnCharacterExitedLandscapeSection(ACharacter* InCharacter, int32 InExitedLandscapeSectionIndex, int32 InNewLandscapeSectionIndex)
 {
 
-	return;
 
 	if (!InCharacter || !InCharacter->IsLocallyControlled())
 	{
@@ -416,6 +418,8 @@ void AJetWorldSpawner::OnCharacterExitedLandscapeSection(ACharacter* InCharacter
 		ExitedLandscapeSection->bEnableCollision = false;
 		JetLandscapeProcMesh->UpdateCollision();
 	}
+
+	return;
 
 	TArray<int32> DestroySectionIndices;
 
